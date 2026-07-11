@@ -10,6 +10,7 @@
   --mint:#c3c6d0; --mint-hi:#dcdee4; --gold:#b8b8be; --iris:#a8acb8; --amber:#E8964A;
   --vfg:#fff; --vmuted:rgba(255,255,255,.5); --vborder:rgba(255,255,255,.08);
   --serif:var(--font-serif),'Times New Roman',Georgia,serif;
+  --rounded:var(--font-rounded),'Nunito',ui-rounded,system-ui,sans-serif;
   --mono:var(--font-mono),ui-monospace,monospace;
   --hanken:var(--font-hanken),system-ui,-apple-system,sans-serif;
   --vease:cubic-bezier(.16,1,.3,1);
@@ -87,7 +88,7 @@
 .veeTiles .glyph svg{width:100%;height:100%;display:block}
 @keyframes veeGlyphBreathe{0%,100%{opacity:.32;transform:scale(.94) rotate(-2deg)}50%{opacity:.55;transform:scale(1.05) rotate(2deg)}}
 @media (prefers-reduced-motion:reduce){.veeTiles .glyph{animation:none}}
-.veeTiles .label{position:absolute;left:20px;bottom:16px;z-index:6;font-family:var(--serif);font-style:italic;font-size:22px;color:var(--vfg)}
+.veeTiles .label{position:absolute;left:20px;bottom:16px;z-index:6;font-family:var(--rounded);font-weight:700;text-transform:lowercase;font-size:22px;color:var(--vfg)}
 .veeTiles .arrow{position:absolute;right:18px;bottom:17px;z-index:6;color:var(--vfg);opacity:.4;font-size:14px}
 /* live stat — one glanceable metric per tile */
 .veeTiles .stat{position:absolute;left:20px;bottom:46px;z-index:6;font-family:var(--mono);font-size:16px;font-weight:500;letter-spacing:.01em;color:var(--mint)}
@@ -137,7 +138,7 @@
 @keyframes veeDisc{0%,100%{opacity:.75;transform:translate(-50%,-50%) scale(.97)}50%{opacity:1;transform:translate(-50%,-50%) scale(1.03)}}
 .veeTiles .vee .scrim{position:absolute;inset:0;z-index:4;pointer-events:none;background:linear-gradient(105deg,rgba(4,6,10,.78) 0%,rgba(4,6,10,.18) 36%,transparent 54%)}
 .veeTiles .vee .label{bottom:44px;font-size:32px}
-.veeTiles .vee .kicker{position:absolute;left:22px;bottom:24px;z-index:6;font-family:var(--mono);font-size:11px;font-weight:500;letter-spacing:.18em;text-transform:uppercase;color:var(--mint);opacity:.9}
+.veeTiles .vee .kicker{position:absolute;left:22px;bottom:24px;z-index:6;font-family:var(--mono);font-size:11px;font-weight:500;letter-spacing:.18em;text-transform:lowercase;color:var(--mint);opacity:.9}
 .veeTiles .chip{fill:rgba(195,198,208,.035);stroke:rgba(220,222,228,.4);stroke-width:1.6}
 .veeTiles .wire{fill:none;stroke-width:1.4;stroke-linecap:round;stroke-linejoin:round}
 .veeTiles .feed{fill:none;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:5 195;opacity:0;will-change:stroke-dashoffset,opacity}
@@ -156,11 +157,11 @@
    reads as one typographic voice (the old Hanken sans looked like a HUD digit).
    Tabular figures keep every digit equal-width so any score sits dead-centre and
    the count-up reveal doesn't jitter sideways. */
-.veeTiles .vscore .vnum{font-family:var(--serif);font-style:italic;font-weight:400;letter-spacing:0;
+.veeTiles .vscore .vnum{font-family:var(--rounded);font-weight:700;letter-spacing:0;
   font-variant-numeric:tabular-nums;font-feature-settings:'tnum' 1;
   fill:var(--mint);font-size:56px;opacity:0;transform-box:fill-box;transform-origin:center;will-change:opacity,transform;
   filter:drop-shadow(0 0 2px rgba(236,236,238,.9)) drop-shadow(0 0 9px rgba(195,198,208,.55)) drop-shadow(0 0 20px rgba(195,198,208,.28))}
-.veeTiles .vscore .vgh{font-family:var(--serif);font-style:italic;font-weight:400;letter-spacing:0;
+.veeTiles .vscore .vgh{font-family:var(--rounded);font-weight:700;letter-spacing:0;
   font-variant-numeric:tabular-nums;font-feature-settings:'tnum' 1;font-size:56px;
   opacity:0;transform-box:fill-box;transform-origin:center;will-change:opacity,transform}
 .veeTiles .vscore .vgi{fill:#a8acb8;filter:drop-shadow(0 0 6px rgba(168,172,184,.5))}
@@ -356,7 +357,7 @@
   animation:openRise .3s var(--vease) both}
 .veeTiles .openTop{display:flex;align-items:center;justify-content:space-between;gap:12px;
   padding:14px 16px;border-bottom:1px solid rgba(255,255,255,.07);flex:none}
-.veeTiles .openTitle{font-family:var(--serif);font-style:italic;font-size:20px;letter-spacing:.3px;
+.veeTiles .openTitle{font-family:var(--rounded);font-weight:700;text-transform:lowercase;font-size:20px;letter-spacing:.3px;
   color:rgba(255,255,255,.92);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .veeTiles .openClose{flex:none;width:34px;height:34px;display:grid;place-items:center;
   border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.03);color:rgba(255,255,255,.7);

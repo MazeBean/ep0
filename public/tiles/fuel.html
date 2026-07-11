@@ -11,7 +11,7 @@
     --brand-soft:rgba(255,255,255,.05);--brand-line:rgba(255,255,255,.18);
     --muted:#8a8a90;--muted-strong:#a8a8b0;--fg:#ededf0;--neg:#ff6b6b;--neg-line:rgba(255,107,107,.4);
     --track:#17171b;--radius-md:12px;--radius-pill:999px;
-    --font-display:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,sans-serif;
+    --font-display:ui-rounded,-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,sans-serif;
     --font-mono:ui-monospace,SFMono-Regular,Menlo,"JetBrains Mono",monospace;
     --space-3:10px;--space-4:14px;--space-5:18px;--space-8:28px;--duration:.2s;--ease:cubic-bezier(.4,0,.2,1);
   }
@@ -53,20 +53,20 @@
     animation:sway 7s ease-in-out infinite}
   @keyframes sway{0%,100%{transform:rotate(-3deg) translateY(0)}50%{transform:rotate(3deg) translateY(-2px)}}
   .mark svg{width:22px;height:22px}
-  .title{font-size:24px;font-weight:600;letter-spacing:-.01em;margin:0}
-  .subtitle{color:var(--muted);font-family:var(--font-mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;margin:6px 0 0}
+  .title{font-size:24px;font-weight:700;letter-spacing:-.01em;margin:0;text-transform:lowercase}
+  .subtitle{color:var(--muted);font-family:var(--font-mono);font-size:11px;letter-spacing:.12em;text-transform:lowercase;margin:6px 0 0}
   .card{position:relative;border:1px solid var(--border);border-radius:16px;background:var(--surface);padding:18px;
     -webkit-backdrop-filter:blur(20px) saturate(120%);backdrop-filter:blur(20px) saturate(120%);
     overflow:hidden;transform-style:preserve-3d;transition:transform .15s ease-out}
   .card::after{content:'';position:absolute;inset:0;border-radius:inherit;pointer-events:none;
     background:radial-gradient(circle at var(--mx,50%) var(--my,20%),rgba(255,255,255,.14),transparent 46%);
     mix-blend-mode:overlay;opacity:.9}
-  .cardName{font-family:var(--font-mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:14px}
+  .cardName{font-family:var(--font-mono);font-size:10px;letter-spacing:.14em;text-transform:lowercase;color:var(--muted);display:block;margin-bottom:14px}
   .calHead{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;margin-bottom:14px}
   .calMath{display:flex;align-items:flex-end;gap:16px;flex-wrap:wrap}
   .calCell{display:flex;flex-direction:column;gap:2px}
   .calCell .n{font-weight:600;font-size:30px;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
-  .calCell .l{font-family:var(--font-mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+  .calCell .l{font-family:var(--font-mono);font-size:10px;letter-spacing:.12em;text-transform:lowercase;color:var(--muted)}
   .calOp{font-size:22px;color:var(--muted)}
   .calCell.remain .n{color:var(--brand)}
   .calCell.remain.over .n{color:var(--neg)}
@@ -82,8 +82,8 @@
   .macroBox{display:flex;flex-direction:column;gap:4px;padding:14px;border:1px solid var(--border);border-radius:var(--radius-md);background:var(--bg)}
   .macroBox[data-accent="cal"]{border-color:var(--brand-line);background:var(--brand-soft)}
   .macroVal{font-weight:600;font-size:22px;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
-  .macroLabel{font-family:var(--font-mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
-  .sectionTitle{font-weight:600;font-size:17px;margin:28px 0 0}
+  .macroLabel{font-family:var(--font-mono);font-size:10px;letter-spacing:.12em;text-transform:lowercase;color:var(--muted)}
+  .sectionTitle{font-weight:700;font-size:17px;margin:28px 0 0;text-transform:lowercase}
   .search{margin:18px 0 10px}
   .search .fieldInput{width:100%}
   .results,.logList{display:flex;flex-direction:column;gap:6px;margin-top:10px}

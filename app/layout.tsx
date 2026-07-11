@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from 'next'
-import { Inter, Instrument_Serif, Hanken_Grotesk, JetBrains_Mono } from 'next/font/google'
+import { Inter, Instrument_Serif, Hanken_Grotesk, JetBrains_Mono, Nunito } from 'next/font/google'
 import './globals.css'
 
 const inter = Inter({
@@ -13,6 +13,17 @@ const instrumentSerif = Instrument_Serif({
   weight: '400',
   style: ['normal', 'italic'],
   variable: '--font-serif',
+  display: 'swap',
+})
+
+// Rounded, friendly display face for the greeting + tile titles — replaces the
+// serif italic voice on the dashboard (kept elsewhere for anything that still
+// wants it). Lowercase + non-italic by design, so a soft rounded letterform
+// carries the personality instead.
+const nunito = Nunito({
+  subsets: ['latin'],
+  weight: ['500', '600', '700', '800'],
+  variable: '--font-rounded',
   display: 'swap',
 })
 
@@ -72,7 +83,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${inter.variable} ${instrumentSerif.variable} ${hankenGrotesk.variable} ${jetBrainsMono.variable}`}
+      className={`${inter.variable} ${instrumentSerif.variable} ${hankenGrotesk.variable} ${jetBrainsMono.variable} ${nunito.variable}`}
     >
       <body>{children}</body>
     </html>

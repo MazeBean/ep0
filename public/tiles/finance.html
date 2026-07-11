@@ -33,8 +33,8 @@
     --text-xl:1.375rem;--text-2xl:1.75rem;--text-3xl:2.5rem;
     --ease:cubic-bezier(0.2,0.8,0.2,1); --ease-premium:cubic-bezier(0.16,1,0.3,1);
     --duration-fast:120ms; --duration:200ms;
-    --font-display:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,sans-serif;
-    --font-ui:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,sans-serif;
+    --font-display:ui-rounded,-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,sans-serif;
+    --font-ui:ui-rounded,-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,sans-serif;
     --font-mono:ui-monospace,SFMono-Regular,Menlo,"JetBrains Mono",monospace;
   }
   * { box-sizing: border-box; }
@@ -89,8 +89,8 @@
   @keyframes sway{0%,100%{transform:rotate(-3deg) translateY(0)}50%{transform:rotate(3deg) translateY(-2px)}}
   .mark svg{width:22px;height:22px}
   .headerRight { display:flex; flex-direction:column; align-items:flex-end; gap: var(--space-2); }
-  .title { font-family: var(--font-display); font-weight: 700; font-size: var(--text-3xl); line-height: 1.0; letter-spacing: -0.03em; color: var(--fg); margin: 0; }
-  .subtitle { font-family: var(--font-mono); font-size: 11px; text-transform: uppercase; letter-spacing: 0.18em; color: var(--muted); margin: 0; }
+  .title { font-family: var(--font-display); font-weight: 700; font-size: var(--text-3xl); line-height: 1.0; letter-spacing: -0.03em; color: var(--fg); margin: 0; text-transform: lowercase; }
+  .subtitle { font-family: var(--font-mono); font-size: 11px; text-transform: lowercase; letter-spacing: 0.18em; color: var(--muted); margin: 0; }
   .currencySeg { display:inline-flex; align-items:center; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-pill); padding: 3px; gap: 2px; }
   .currencyBtn { appearance:none; background: transparent; border:0; color: var(--muted); font-family: var(--font-mono); font-size: 11px; font-weight: 500; letter-spacing: 0.04em; padding: 5px 11px; border-radius: var(--radius-pill); cursor: pointer; transition: background var(--duration) var(--ease-premium), color var(--duration) var(--ease-premium); }
   .currencyBtn:hover { color: var(--muted-strong); }
@@ -98,15 +98,15 @@
 
   /* Section */
   .section { margin-bottom: var(--space-10); }
-  .sectionEyebrow { font-family: var(--font-display); font-weight: 700; font-size: var(--text-xl); letter-spacing: -0.02em; color: var(--fg); margin-bottom: var(--space-4); display:flex; align-items:baseline; justify-content:space-between; gap: var(--space-3); }
+  .sectionEyebrow { font-family: var(--font-display); font-weight: 700; font-size: var(--text-xl); letter-spacing: -0.02em; color: var(--fg); margin-bottom: var(--space-4); display:flex; align-items:baseline; justify-content:space-between; gap: var(--space-3); text-transform: lowercase; }
   .sectionEyebrow > span:first-child { display:inline-flex; align-items:center; gap: 10px; }
   .sectionEyebrow > span:first-child::before { content:''; width: 7px; height: 18px; border-radius: 3px; background: var(--brand); box-shadow: 0 0 12px -2px var(--brand-glow); }
-  .sectionCount { font-family: var(--font-mono); font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); }
+  .sectionCount { font-family: var(--font-mono); font-size: 11px; text-transform: lowercase; letter-spacing: 0.08em; color: var(--muted); }
   .sectionCountSep { color: var(--brand); font-weight: 600; }
 
   /* NW hero */
   .nwHero { display:flex; justify-content:space-between; align-items:flex-end; flex-wrap:wrap; gap: var(--space-4); margin-bottom: var(--space-5); }
-  .nwHeroLabel { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--muted); font-weight: 500; }
+  .nwHeroLabel { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.16em; text-transform: lowercase; color: var(--muted); font-weight: 500; }
   .nwHeroNum { font-family: var(--font-display); font-size: 46px; font-weight: 700; line-height: 1.0; letter-spacing: -0.03em; margin-top: 6px; font-variant-numeric: tabular-nums; }
   .nwHeroBreakdown { font-family: var(--font-mono); font-size: 11px; color: var(--muted); margin-top: 8px; font-variant-numeric: tabular-nums; letter-spacing: 0.02em; }
   .nwHeroMain { flex: 1; min-width: 0; }
@@ -117,7 +117,7 @@
   .dailyDelta.down { background: var(--neg-soft); border-color: var(--neg-line); color: var(--neg); }
   .dailyDelta.flat { color: var(--muted); font-style: italic; }
   .dailyDeltaPct { font-weight: 500; opacity: 0.8; }
-  .dailyDeltaWindow { font-family: var(--font-mono); font-size: 9px; font-weight: 400; letter-spacing: 0.08em; text-transform: uppercase; color: inherit; opacity: 0.6; }
+  .dailyDeltaWindow { font-family: var(--font-mono); font-size: 9px; font-weight: 400; letter-spacing: 0.08em; text-transform: lowercase; color: inherit; opacity: 0.6; }
 
   /* Overview grid */
   .overviewGrid { display:grid; grid-template-columns: 1.6fr 1fr; gap: var(--space-4); margin-bottom: var(--space-4); }
@@ -125,7 +125,7 @@
   .chartWrap, .donutWrap { position: relative; padding: var(--space-5); background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); box-shadow: var(--card-shadow); }
   .chartHead { display:flex; justify-content:space-between; align-items:baseline; margin-bottom: var(--space-4); gap: var(--space-3); flex-wrap: wrap; }
   .chartHeadLeft { display:inline-flex; align-items:baseline; gap: var(--space-3); }
-  .chartLabel { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); font-weight: 500; }
+  .chartLabel { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.14em; text-transform: lowercase; color: var(--muted); font-weight: 500; }
   .chartDelta { font-family: var(--font-mono); font-size: 11px; color: var(--muted); font-variant-numeric: tabular-nums; }
   .chartDelta.up { color: var(--pos); } .chartDelta.down { color: var(--neg); }
   .periodSeg { display:inline-flex; align-items:center; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-pill); padding: 2px; gap: 1px; }
@@ -138,7 +138,7 @@
   .chartEmpty { text-align:center; color: var(--muted); font-size: var(--text-sm); padding: var(--space-6) 0; }
   .chartStatsRow { display:grid; grid-template-columns: repeat(4,1fr); gap: var(--space-3); margin-top: var(--space-4); padding-top: var(--space-4); border-top: 1px solid var(--border); }
   .chartStat { display:flex; flex-direction:column; gap: 3px; }
-  .chartStatLabel { font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); }
+  .chartStatLabel { font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.12em; text-transform: lowercase; color: var(--muted); }
   .chartStatVal { font-size: 13px; font-weight: 600; font-variant-numeric: tabular-nums; color: var(--fg); }
 
   /* Donut */
@@ -146,7 +146,7 @@
   .donutSvg { width: 162px; height: 162px; }
   .donutCenter { position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; pointer-events:none; }
   .donutNum { font-family: var(--font-display); font-size: 19px; font-weight: 700; font-variant-numeric: tabular-nums; letter-spacing: -0.02em; }
-  .donutSub { font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); margin-top: 4px; }
+  .donutSub { font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.12em; text-transform: lowercase; color: var(--muted); margin-top: 4px; }
   .donutEmpty { text-align:center; color: var(--muted); font-size: var(--text-sm); padding: var(--space-3) 0; }
   .donutLegend { display:flex; flex-direction:column; gap: 8px; margin-top: var(--space-3); }
   .donutLeg { display:grid; grid-template-columns: 12px 1fr auto; align-items:center; gap: 9px; font-size: 12px; color: var(--muted-strong); }
@@ -158,7 +158,7 @@
   @media (max-width: 720px) { .accountsGrid { grid-template-columns: 1fr; } }
   .accountCard { display:flex; flex-direction:column; gap: var(--space-3); padding: var(--space-5); background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); box-shadow: var(--card-shadow); }
   .accountHead { display:flex; align-items:baseline; justify-content:space-between; }
-  .accountLabel { font-family: var(--font-display); font-weight: 700; font-size: var(--text-base); letter-spacing: -0.01em; color: var(--fg); }
+  .accountLabel { font-family: var(--font-display); font-weight: 700; font-size: var(--text-base); letter-spacing: -0.01em; color: var(--fg); text-transform: lowercase; }
   .accountTotal { font-family: var(--font-mono); font-size: 13px; font-weight: 600; font-variant-numeric: tabular-nums; }
   .accountTotalPct { font-size: 10px; font-weight: 400; letter-spacing: 0.02em; color: var(--muted); margin-left: 6px; font-variant-numeric: tabular-nums; }
   .accountList { display:flex; flex-direction:column; gap: 2px; }
@@ -188,13 +188,13 @@
   .activityList { display:flex; flex-direction:column; gap:0; }
   .activityBucket { display:flex; flex-direction:column; }
   .activityBucket + .activityBucket { margin-top: var(--space-3); }
-  .activityBucketLabel { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); font-weight: 500; padding: 4px 0 2px; }
+  .activityBucketLabel { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.12em; text-transform: lowercase; color: var(--muted); font-weight: 500; padding: 4px 0 2px; }
   .activityRow { display:grid; grid-template-columns: 4px 1fr auto auto; align-items:center; gap: var(--space-3); padding: 11px 0; border-bottom: 1px solid var(--border); }
   .activityRow:last-child { border-bottom:0; }
   .activityBar { width: 3px; height: 26px; border-radius: 2px; }
   .activityInfo { min-width:0; }
   .activityName { font-size: 13px; color: var(--fg); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-  .activityMeta { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); margin-top: 3px; }
+  .activityMeta { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.06em; text-transform: lowercase; color: var(--muted); margin-top: 3px; }
   .activityAmt { font-family: var(--font-mono); font-size: 12px; font-weight: 600; font-variant-numeric: tabular-nums; }
   .activityAmt.up { color: var(--pos); } .activityAmt.down { color: var(--neg); }
   .activityDate { font-family: var(--font-mono); font-size: 11px; color: var(--muted); min-width: 50px; text-align:right; }
@@ -203,14 +203,14 @@
   /* Ticker */
   .ticker { display:flex; align-items:center; gap: var(--space-3); padding: 9px 15px; background: var(--brand-soft); border: 1px solid var(--brand-line); border-radius: var(--radius-pill); margin-bottom: var(--space-5); overflow:hidden; }
   .ticker.urgent { background: var(--warn-soft); border-color: var(--warn-line); }
-  .tickerTag { font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--brand); font-weight: 600; flex-shrink:0; }
+  .tickerTag { font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.16em; text-transform: lowercase; color: var(--brand); font-weight: 600; flex-shrink:0; }
   .ticker.urgent .tickerTag { color: var(--warn); }
   .tickerStream { position: relative; flex:1; height: 18px; overflow:hidden; }
   .tickerItem { position:absolute; inset:0; display:flex; align-items:center; gap: var(--space-3); opacity:0; transform: translateY(8px); transition: opacity 400ms var(--ease-premium), transform 400ms var(--ease-premium); font-size: 12px; }
   .tickerItem.active { opacity:1; transform: translateY(0); }
   .tickerItemName { color: var(--fg); font-weight: 500; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width: 50%; }
   .tickerItemAmt { font-family: var(--font-mono); color: var(--muted-strong); font-variant-numeric: tabular-nums; }
-  .tickerItemDays { margin-left:auto; font-family: var(--font-mono); color: var(--muted); font-size: 10px; letter-spacing: 0.06em; text-transform: uppercase; }
+  .tickerItemDays { margin-left:auto; font-family: var(--font-mono); color: var(--muted); font-size: 10px; letter-spacing: 0.06em; text-transform: lowercase; }
   .ticker.urgent .tickerItemDays { color: var(--warn); }
   .tickerDots { display:flex; gap: 4px; flex-shrink:0; }
   .tickerDot { width: 4px; height: 4px; border-radius: 50%; background: var(--border-strong); }
@@ -244,7 +244,7 @@
   /* Add card */
   .addCard { padding: var(--space-5); background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); margin-bottom: var(--space-4); box-shadow: var(--card-shadow); }
   .addCardHead { display:flex; align-items:center; justify-content:space-between; gap: var(--space-3); margin-bottom: var(--space-4); flex-wrap: wrap; }
-  .addEyebrow { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); }
+  .addEyebrow { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.14em; text-transform: lowercase; color: var(--muted); }
   .modeSeg { display:inline-flex; align-items:center; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-pill); padding: 3px; gap: 2px; }
   .modeBtn { appearance:none; background: transparent; border:0; color: var(--muted); font-family: var(--font-ui); font-size: 12px; font-weight: 500; letter-spacing: 0.01em; padding: 6px 15px; border-radius: var(--radius-pill); cursor: pointer; transition: background var(--duration) var(--ease-premium), color var(--duration) var(--ease-premium); }
   .modeBtn:hover { color: var(--muted-strong); }
@@ -302,7 +302,7 @@
 
   /* Empty states */
   .emptyState { padding: var(--space-8) var(--space-5); text-align:center; background: var(--surface); border: 1px dashed var(--border-strong); border-radius: var(--radius-lg); margin-bottom: var(--space-4); }
-  .emptyTitle { font-family: var(--font-display); font-weight: 700; font-size: var(--text-lg); color: var(--muted-strong); margin-bottom: var(--space-2); }
+  .emptyTitle { font-family: var(--font-display); font-weight: 700; font-size: var(--text-lg); color: var(--muted-strong); margin-bottom: var(--space-2); text-transform: lowercase; }
   .emptyBody { font-size: 12px; color: var(--muted); max-width: 38ch; margin: 0 auto; line-height: 1.55; }
 
   /* Pointer-reactive holographic tilt + sheen on the main surfaces */

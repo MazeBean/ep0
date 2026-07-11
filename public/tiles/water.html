@@ -10,7 +10,7 @@
     --brand-soft:rgba(255,255,255,.05);--brand-line:rgba(255,255,255,.18);
     --muted:#8a8a90;--muted-strong:#a8a8b0;--fg:#ededf0;--neg:#ff6b6b;--neg-line:rgba(255,107,107,.4);
     --track:#17171b;--radius-md:12px;--radius-pill:999px;
-    --font-display:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,sans-serif;
+    --font-display:ui-rounded,-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,sans-serif;
     --font-mono:ui-monospace,SFMono-Regular,Menlo,"JetBrains Mono",monospace;
     --ease:cubic-bezier(.4,0,.2,1);
   }
@@ -52,8 +52,8 @@
     animation:sway 7s ease-in-out infinite}
   @keyframes sway{0%,100%{transform:rotate(-3deg) translateY(0)}50%{transform:rotate(3deg) translateY(-2px)}}
   .mark svg{width:22px;height:22px}
-  .title{font-size:24px;font-weight:600;letter-spacing:-.01em;margin:0}
-  .subtitle{color:var(--muted);font-family:var(--font-mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;margin:5px 0 0}
+  .title{font-size:24px;font-weight:700;letter-spacing:-.01em;margin:0;text-transform:lowercase}
+  .subtitle{color:var(--muted);font-family:var(--font-mono);font-size:11px;letter-spacing:.12em;text-transform:lowercase;margin:5px 0 0}
   .progressWrap{position:relative;border:1px solid var(--border);border-radius:16px;background:var(--surface);padding:18px;margin-bottom:18px;
     -webkit-backdrop-filter:blur(20px) saturate(120%);backdrop-filter:blur(20px) saturate(120%);
     overflow:hidden;transform-style:preserve-3d;transition:transform .15s ease-out}
@@ -63,7 +63,7 @@
   .progressTop{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin-bottom:12px}
   .progressNum{font-size:26px;font-weight:600;letter-spacing:-.01em}
   .progressNum .unit{font-size:14px;color:var(--muted-strong);font-weight:400;margin-left:4px}
-  .progressGoal{font-family:var(--font-mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+  .progressGoal{font-family:var(--font-mono);font-size:11px;letter-spacing:.08em;text-transform:lowercase;color:var(--muted)}
   .track{width:100%;height:10px;border-radius:var(--radius-pill);background:var(--track);overflow:hidden}
   .fill{height:100%;border-radius:var(--radius-pill);background:var(--brand);transition:width .25s ease}
   .stats{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:18px}
@@ -71,11 +71,11 @@
     -webkit-backdrop-filter:blur(18px);backdrop-filter:blur(18px);overflow:hidden;transform-style:preserve-3d;transition:transform .15s ease-out}
   .statNum{font-size:22px;font-weight:600;letter-spacing:-.01em}
   .statNum.brand{color:var(--brand)}
-  .statLbl{color:var(--muted);font-family:var(--font-mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;margin-top:4px}
+  .statLbl{color:var(--muted);font-family:var(--font-mono);font-size:10px;letter-spacing:.1em;text-transform:lowercase;margin-top:4px}
   .card{position:relative;border:1px solid var(--border);border-radius:16px;background:var(--surface);padding:18px;margin-bottom:22px;
     -webkit-backdrop-filter:blur(20px) saturate(120%);backdrop-filter:blur(20px) saturate(120%);
     overflow:hidden;transform-style:preserve-3d;transition:transform .15s ease-out}
-  .cardName{font-family:var(--font-mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:14px}
+  .cardName{font-family:var(--font-mono);font-size:10px;letter-spacing:.14em;text-transform:lowercase;color:var(--muted);display:block;margin-bottom:14px}
   .quickRow{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
   .quickBtn{border:1px solid var(--border);background:var(--bg);color:var(--fg);border-radius:var(--radius-pill);
     padding:9px 16px;font:inherit;font-size:13.5px;cursor:pointer;transition:border-color .2s,color .2s}
@@ -90,13 +90,13 @@
   .btn-primary{background:var(--brand);color:#04140d;border:none;font-weight:600;border-radius:10px;padding:10px 16px;font:inherit;cursor:pointer;white-space:nowrap}
   .hint{color:var(--neg);font-size:12px;font-family:var(--font-mono);min-height:14px;margin:8px 2px 0}
   .logHead{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin:0 0 12px}
-  .sectionTitle{font-weight:600;font-size:17px;margin:0}
-  .count{font-family:var(--font-mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+  .sectionTitle{font-weight:700;font-size:17px;margin:0;text-transform:lowercase}
+  .count{font-family:var(--font-mono);font-size:10px;letter-spacing:.12em;text-transform:lowercase;color:var(--muted)}
   .log{display:flex;flex-direction:column;gap:8px}
   .entry{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 15px;border:1px solid var(--border);
     border-left:3px solid var(--brand-line);border-radius:var(--radius-md);background:var(--surface)}
   .entryAmt{font-size:14.5px;font-weight:600}
-  .entryMeta{font-family:var(--font-mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-left:10px}
+  .entryMeta{font-family:var(--font-mono);font-size:10px;letter-spacing:.1em;text-transform:lowercase;color:var(--muted);margin-left:10px}
   .xBtn{background:transparent;border:1px solid var(--border);color:var(--muted);width:26px;height:26px;border-radius:50%;cursor:pointer;flex-shrink:0;line-height:1}
   .xBtn:hover{color:var(--neg);border-color:var(--neg-line)}
   .empty{color:var(--muted);font-size:13px;padding:14px 0}

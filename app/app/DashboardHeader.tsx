@@ -115,7 +115,7 @@ export default function DashboardHeader({ firstName, greeting, date }: Dashboard
             <span className={styles.heroDot} aria-hidden>·</span>
             <span className={styles.heroStat}>{weather.tempF}°F</span>
             <span className={styles.heroDot} aria-hidden>·</span>
-            <span className={styles.heroStat}>{weather.humidity}% humidity</span>
+            <span className={styles.heroStat}>{weather.humidity}% Humidity</span>
             {sunsetText && (
               <>
                 <span className={styles.heroDot} aria-hidden>·</span>

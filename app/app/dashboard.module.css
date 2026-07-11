@@ -171,19 +171,19 @@
 }
 
 .greeting {
-  font-family: var(--font-serif), 'Times New Roman', Georgia, serif;
-  font-style: italic;
-  font-weight: 400;
-  /* --greet-scale (default 1) lets the user size their greeting; the font stays
-     Instrument Serif italic, the unified voice. */
+  font-family: var(--font-rounded), 'Nunito', ui-rounded, system-ui, sans-serif;
+  font-weight: 700;
+  text-transform: lowercase;
+  /* --greet-scale (default 1) lets the user size their greeting; the font is a
+     soft rounded sans, lowercase, no italics — the personality lives in the
+     letterform's roundness, not a display flourish. */
   font-size: calc(clamp(2.25rem, 4.5vw, 3.25rem) * var(--greet-scale, 1));
   line-height: 1;
-  letter-spacing: -0.02em;
+  letter-spacing: -0.01em;
   color: var(--fg);
 }
 
 .greetingName {
-  font-style: italic;
   /* the accented name follows the chosen wallpaper accent (mint by default) */
   color: var(--wall-accent, var(--mint));
 }
@@ -193,7 +193,7 @@
   font-weight: 500;
   color: var(--muted);
   letter-spacing: 0.12em;
-  text-transform: uppercase;
+  text-transform: lowercase;
 }
 
 @keyframes fadeUp {
