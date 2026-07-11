@@ -12,18 +12,18 @@
      — stocks + everything else stay as manual entry. */
   :root{
     color-scheme: dark;
-    --bg:#050506; --bg-elevated:#121216;
-    --surface:#0e0e11; --surface-2:#16161b;
-    --fg:#ededf0; --muted:#84848c; --muted-strong:#a8a8b0;
-    --border:#1d1d22; --border-strong:#2c2c33;
-    --brand:#6EE7B7; --brand-2:#9df3cf; --brand-ink:#04140d;
-    --brand-soft:rgba(110,231,183,0.08); --brand-line:rgba(110,231,183,0.35); --brand-glow:rgba(110,231,183,0.42);
-    --pos:#6EE7B7; --pos-soft:rgba(110,231,183,0.10); --pos-line:rgba(110,231,183,0.30);
+    --bg:#0a0a0c; --bg-elevated:#141417;
+    --surface:rgba(255,255,255,.045); --surface-2:rgba(255,255,255,.07);
+    --fg:#ededf0; --muted:#8a8a90; --muted-strong:#a8a8b0;
+    --border:rgba(255,255,255,.11); --border-strong:rgba(255,255,255,.18);
+    --brand:#c3c6d0; --brand-2:#e4e5ea; --brand-ink:#0a0a0c;
+    --brand-soft:rgba(255,255,255,0.05); --brand-line:rgba(255,255,255,0.18); --brand-glow:rgba(255,255,255,0.28);
+    --pos:#c3c6d0; --pos-soft:rgba(255,255,255,0.06); --pos-line:rgba(255,255,255,0.2);
     --neg:#ff6b6b; --neg-soft:rgba(255,107,107,0.10); --neg-line:rgba(255,107,107,0.40);
-    --warn:#FBBF24; --warn-soft:rgba(251,191,36,0.10); --warn-line:rgba(251,191,36,0.28);
+    --warn:#b8b8be; --warn-soft:rgba(255,255,255,0.06); --warn-line:rgba(255,255,255,0.2);
     --track:#17171b;
     --card-shadow:0 1px 0 rgba(255,255,255,0.02) inset, 0 18px 44px -30px rgba(0,0,0,0.85);
-    --glow-1:rgba(110,231,183,0.10); --glow-2:rgba(110,231,183,0.04);
+    --glow-1:rgba(255,255,255,0.06); --glow-2:rgba(255,255,255,0.03);
     --tabbar-grad:linear-gradient(to top, rgba(5,5,6,0.94) 55%, transparent);
     --tabbar-pill:rgba(16,16,20,0.92);
     --space-1:.25rem;--space-2:.5rem;--space-3:.75rem;--space-4:1rem;--space-5:1.25rem;
@@ -41,20 +41,53 @@
   html, body { margin:0; padding:0; }
   html { -webkit-text-size-adjust:100%; text-size-adjust:100%; }
   body {
-    background: var(--bg); color: var(--fg);
+    background: radial-gradient(120% 60% at 50% 0%,#17171b 0%,#101013 42%,#0a0a0c 70%,#08080a 100%); color: var(--fg);
     font-family: var(--font-ui); font-size: var(--text-base);
     -webkit-font-smoothing: antialiased; overflow-x:hidden; -webkit-tap-highlight-color:transparent;
+    position: relative;
   }
+  body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
+    background:repeating-linear-gradient(0deg,rgba(255,255,255,.03) 0 1px,transparent 1px 3px);mix-blend-mode:overlay}
+  .bgWarp{position:fixed;inset:0;z-index:0;pointer-events:none;filter:url(#distort)}
+  .stars{position:absolute;inset:0}
+  .star{position:absolute;width:2px;height:2px;background:#cfd0d6;border-radius:50%;opacity:.4;animation:twinkle 8s ease-in-out infinite}
+  .sun{position:absolute;bottom:30vh;left:50%;transform:translateX(-50%);width:230px;height:230px;border-radius:50%;opacity:.4;
+    background:linear-gradient(180deg,#d9d9dd 0%,#b7b7bd 26%,#96969d 55%,#7a7a80 82%,#5c5c62 100%);box-shadow:0 0 100px rgba(200,200,210,.15);
+    animation:sunPulse 14s ease-in-out infinite}
+  .sun::after{content:'';position:absolute;inset:0;border-radius:50%;background:repeating-linear-gradient(0deg,transparent 0 7px,#0a0a0c 7px 12px);
+    -webkit-mask-image:linear-gradient(to bottom,transparent 0%,black 46%);mask-image:linear-gradient(to bottom,transparent 0%,black 46%)}
+  @keyframes sunPulse{0%,100%{filter:brightness(1)}50%{filter:brightness(1.06)}}
+  .groundWrap{position:absolute;left:0;right:0;bottom:0;height:44vh;overflow:hidden;
+    -webkit-mask-image:linear-gradient(to top,black 55%,transparent 100%);mask-image:linear-gradient(to top,black 55%,transparent 100%)}
+  .ground{position:absolute;inset:-30% -60% 0 -60%;
+    background-image:linear-gradient(rgba(180,180,190,.22) 1px,transparent 1px),linear-gradient(90deg,rgba(160,160,170,.16) 1px,transparent 1px);
+    background-size:64px 64px;transform:perspective(260px) rotateX(63deg);transform-origin:bottom;animation:gridMove 20s linear infinite}
+  @keyframes gridMove{from{background-position:0 0,0 0}to{background-position:0 64px,64px 0}}
+  .horizonLine{position:absolute;left:0;right:0;bottom:calc(44vh - 1px);height:2px;
+    background:linear-gradient(90deg,transparent,rgba(190,190,198,.35) 30%,rgba(190,190,198,.45) 50%,rgba(190,190,198,.35) 70%,transparent);
+    box-shadow:0 0 16px rgba(190,190,198,.25)}
+  @keyframes twinkle{0%,100%{opacity:.15}50%{opacity:.5}}
+  @media(prefers-reduced-motion:reduce){.ground,.sun,.star,.markOrb,.markGlow{animation:none!important}
+    .chartWrap,.donutWrap,.accountCard,.subRow,.ordCard,.wishRow,.addCard,.emptyState{transition:none}}
   img { max-width:100%; height:auto; }
   @media (max-width:480px){ input,select,textarea{ font-size:16px !important; } }
 
-  .page { position: relative; min-height: 100dvh; background: var(--bg); color: var(--fg); padding: var(--space-8) var(--space-5) var(--space-16); isolation: isolate; }
+  .page { position: relative; z-index: 1; min-height: 100dvh; background: transparent; color: var(--fg); padding: var(--space-8) var(--space-5) var(--space-16); isolation: isolate; }
   .page::before { content:''; position: absolute; inset:0; pointer-events:none; z-index:-1; background: radial-gradient(58% 42% at 82% 6%, var(--glow-1), transparent 70%), radial-gradient(48% 38% at 12% 92%, var(--glow-2), transparent 72%); }
   .shell { max-width: 1000px; margin: 0 auto; padding-bottom: 96px; }
 
   /* Header */
   .header { display:flex; align-items:flex-end; justify-content:space-between; gap: var(--space-4); margin-bottom: var(--space-8); flex-wrap: wrap; }
   .headerLeft { display:flex; flex-direction:column; gap: var(--space-3); }
+  .markWrap{position:relative;width:44px;height:44px;flex-shrink:0}
+  .markGlow{position:absolute;inset:-10px;border-radius:50%;background:var(--brand);filter:blur(14px);opacity:.4;
+    animation:glowBreathe 4.5s ease-in-out infinite}
+  @keyframes glowBreathe{0%,100%{opacity:.28;transform:scale(.92)}50%{opacity:.5;transform:scale(1.06)}}
+  .mark{position:relative;width:44px;height:44px;flex-shrink:0;border-radius:50%;display:flex;align-items:center;justify-content:center;
+    background:radial-gradient(circle at 35% 30%,#e4e5ea,var(--brand) 46%,#6d6f76 100%);box-shadow:0 0 26px rgba(0,0,0,.5);
+    animation:sway 7s ease-in-out infinite}
+  @keyframes sway{0%,100%{transform:rotate(-3deg) translateY(0)}50%{transform:rotate(3deg) translateY(-2px)}}
+  .mark svg{width:22px;height:22px}
   .headerRight { display:flex; flex-direction:column; align-items:flex-end; gap: var(--space-2); }
   .title { font-family: var(--font-display); font-weight: 700; font-size: var(--text-3xl); line-height: 1.0; letter-spacing: -0.03em; color: var(--fg); margin: 0; }
   .subtitle { font-family: var(--font-mono); font-size: 11px; text-transform: uppercase; letter-spacing: 0.18em; color: var(--muted); margin: 0; }
@@ -272,6 +305,18 @@
   .emptyTitle { font-family: var(--font-display); font-weight: 700; font-size: var(--text-lg); color: var(--muted-strong); margin-bottom: var(--space-2); }
   .emptyBody { font-size: 12px; color: var(--muted); max-width: 38ch; margin: 0 auto; line-height: 1.55; }
 
+  /* Pointer-reactive holographic tilt + sheen on the main surfaces */
+  .chartWrap, .donutWrap, .accountCard, .subRow, .ordCard, .wishHero, .wishRow, .addCard, .emptyState {
+    position: relative; overflow: hidden; transform-style: preserve-3d; transition: transform .15s var(--ease-premium);
+    -webkit-backdrop-filter: blur(20px) saturate(120%); backdrop-filter: blur(20px) saturate(120%);
+  }
+  .chartWrap::after, .donutWrap::after, .accountCard::after, .subRow::after, .ordCard::after,
+  .wishHero::after, .wishRow::after, .addCard::after, .emptyState::after {
+    content: ''; position: absolute; inset: 0; border-radius: inherit; pointer-events: none;
+    background: radial-gradient(circle at var(--mx,50%) var(--my,20%), rgba(255,255,255,.14), transparent 46%);
+    mix-blend-mode: overlay; opacity: .9;
+  }
+
   /* Tab bar */
   .tabBar { position: fixed; bottom:0; left:0; right:0; z-index: 30; display:flex; justify-content:center; padding: var(--space-3) var(--space-4) calc(var(--space-3) + env(safe-area-inset-bottom)); background: var(--tabbar-grad); pointer-events:none; }
   .tabBarInner { display:flex; gap: 4px; padding: 5px; background: var(--tabbar-pill); border: 1px solid var(--border); border-radius: var(--radius-pill); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); box-shadow: 0 14px 44px rgba(0,0,0,0.45); pointer-events:auto; }
@@ -285,6 +330,20 @@
 </style>
 </head>
 <body>
+<svg width="0" height="0" style="position:absolute">
+  <filter id="distort" x="-20%" y="-20%" width="140%" height="140%">
+    <feTurbulence type="fractalNoise" baseFrequency="0.006 0.012" numOctaves="2" seed="7" result="noise">
+      <animate attributeName="seed" values="0;9;3;11;0" dur="46s" repeatCount="indefinite"/>
+    </feTurbulence>
+    <feDisplacementMap in="SourceGraphic" in2="noise" scale="16" xChannelSelector="R" yChannelSelector="G"/>
+  </filter>
+</svg>
+<div class="bgWarp">
+  <div class="sun"></div>
+  <div class="groundWrap"><div class="ground"></div></div>
+  <div class="horizonLine"></div>
+  <div class="stars" id="stars"></div>
+</div>
 <main class="page">
   <div class="shell" id="app"></div>
 </main>
@@ -516,8 +575,8 @@ const actions = {
 /* ============================================================
  * Constants for views
  * ============================================================ */
-const TYPE_COLORS = { bank: '#6EE7B7', stocks: '#5EC8F2', crypto: '#B39DFF', other: 'rgba(237,237,240,0.38)' };
-const SUBS_COLOR = '#FBBF24';
+const TYPE_COLORS = { bank: '#c3c6d0', stocks: '#8f95a3', crypto: '#6b6f7a', other: 'rgba(237,237,240,0.38)' };
+const SUBS_COLOR = '#b8b8be';
 const TYPE_LABELS = { bank: 'Bank', stocks: 'Stocks', crypto: 'Crypto', other: 'Other' };
 const CATEGORY_ORDER = [
   { key: 'bank', label: 'Bank accounts', ph1: 'Account name', ph2: 'Amount' },
@@ -533,7 +592,12 @@ const CHART_PERIODS = [ { key:'1D',label:'1D',days:1 }, { key:'1W',label:'1W',da
 function headerHtml() {
   const segs = CURRENCIES.map(c => '<button type="button" class="currencyBtn ' + (c === state.currency ? 'currencyBtnActive' : '') + '" data-act="currency" data-c="' + c + '">' + c + '</button>').join('');
   return '<header class="header"><div class="headerLeft">'
-    + '<h1 class="title">Finance</h1><p class="subtitle">Net worth · subs · orders · wishlist</p>'
+    + '<div style="display:flex;align-items:center;gap:14px">'
+    + '<div class="markWrap"><div class="markGlow"></div><div class="mark" aria-hidden="true">'
+    + '<svg viewBox="-12 -12 24 24" fill="none" stroke="#0a0a0c" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">'
+    + '<path d="M-9 6 L-3 0 L2 5 L9 -4"/><path d="M4 -4 L9 -4 L9 1"/></svg></div></div>'
+    + '<div><h1 class="title">Finance</h1><p class="subtitle">Net worth · subs · orders · wishlist</p></div>'
+    + '</div>'
     + '</div>'
     + '<div class="headerRight"><div class="currencySeg" role="radiogroup" aria-label="Display currency">' + segs + '</div></div></header>';
 }
@@ -1070,6 +1134,36 @@ document.addEventListener('click', e => {
 });
 
 /* ============================================================
+ * Background layer helpers — stars + pointer-reactive tilt on the
+ * main surfaces (chart/donut/account/sub/order/wish/add cards).
+ * ============================================================ */
+const REDUCED = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+function spawnStars() {
+  const wrap = document.getElementById('stars'); if (!wrap) return;
+  let html = '';
+  for (let i = 0; i < 40; i++) {
+    const left = Math.random() * 100, top = Math.random() * 55, delay = -Math.random() * 8;
+    html += '<div class="star" style="left:' + left + '%;top:' + top + '%;animation-delay:' + delay + 's"></div>';
+  }
+  wrap.innerHTML = html;
+}
+function initTilt() {
+  if (REDUCED) return;
+  document.addEventListener('mousemove', e => {
+    document.querySelectorAll('.chartWrap, .donutWrap, .accountCard, .subRow, .ordCard, .wishHero, .wishRow, .addCard, .emptyState').forEach(el => {
+      const r = el.getBoundingClientRect();
+      let mx = (e.clientX - r.left) / r.width, my = (e.clientY - r.top) / r.height;
+      mx = Math.min(1.4, Math.max(-0.4, mx)); my = Math.min(1.4, Math.max(-0.4, my));
+      const rx = (Math.min(1, Math.max(0, my)) - 0.5) * -6;
+      const ry = (Math.min(1, Math.max(0, mx)) - 0.5) * 8;
+      el.style.setProperty('--mx', (mx * 100) + '%');
+      el.style.setProperty('--my', (my * 100) + '%');
+      el.style.transform = 'perspective(900px) rotateX(' + rx.toFixed(2) + 'deg) rotateY(' + ry.toFixed(2) + 'deg)';
+    });
+  });
+}
+
+/* ============================================================
  * Boot — load through the bridge, snapshot NW, render.
  * ============================================================ */
 (async () => {
@@ -1081,6 +1175,8 @@ document.addEventListener('click', e => {
   if (CURRENCIES.indexOf(state.currency) < 0) state.currency = 'CHF';
   if (TAB_KEYS.indexOf(state.activeTab) < 0) state.activeTab = 'net';
   maybeSnapshotNw(); save();
+  spawnStars();
+  initTilt();
   render();
 })();
 </script>
