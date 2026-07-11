@@ -21,6 +21,7 @@ interface WeatherState {
   tempF: number
   humidity: number
   sunset: string
+  code: number
 }
 
 /** Open-Meteo needs no API key and allows unauthenticated browser calls, so
@@ -28,7 +29,7 @@ interface WeatherState {
 async function fetchWeather(lat: number, lon: number): Promise<WeatherState> {
   const url =
     `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}` +
-    `&current=temperature_2m,relative_humidity_2m&daily=sunset` +
+    `&current=temperature_2m,relative_humidity_2m,weather_code&daily=sunset` +
     `&temperature_unit=fahrenheit&timezone=auto`
   const res = await fetch(url)
   if (!res.ok) throw new Error('weather fetch failed')
@@ -37,7 +38,69 @@ async function fetchWeather(lat: number, lon: number): Promise<WeatherState> {
     tempF: Math.round(data.current.temperature_2m),
     humidity: Math.round(data.current.relative_humidity_2m),
     sunset: data.daily.sunset[0],
+    code: data.current.weather_code,
   }
+}
+
+/** Open-Meteo/WMO weather codes collapsed into a handful of icon families. */
+function weatherKind(code: number): 'clear' | 'cloudy' | 'fog' | 'rain' | 'snow' | 'storm' {
+  if (code === 0) return 'clear'
+  if (code === 1 || code === 2 || code === 3) return 'cloudy'
+  if (code === 45 || code === 48) return 'fog'
+  if ((code >= 51 && code <= 67) || (code >= 80 && code <= 82)) return 'rain'
+  if ((code >= 71 && code <= 77) || code === 85 || code === 86) return 'snow'
+  if (code === 95 || code === 96 || code === 99) return 'storm'
+  return 'cloudy'
+}
+
+function WeatherIcon({ code }: { code: number }) {
+  const kind = weatherKind(code)
+  const common = { viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', strokeWidth: 1.8, strokeLinecap: 'round' as const, strokeLinejoin: 'round' as const }
+  if (kind === 'clear') {
+    return (
+      <svg {...common}>
+        <circle cx="12" cy="12" r="4.2" />
+        <path d="M12 2.5v2.4M12 19.1v2.4M21.5 12h-2.4M4.9 12H2.5M18.4 5.6l-1.7 1.7M7.3 16.7l-1.7 1.7M18.4 18.4l-1.7-1.7M7.3 7.3 5.6 5.6" />
+      </svg>
+    )
+  }
+  if (kind === 'rain') {
+    return (
+      <svg {...common}>
+        <path d="M7 15.5a4.2 4.2 0 0 1 .8-8.3 5.3 5.3 0 0 1 10.2 1.4A3.7 3.7 0 0 1 17.3 16H7Z" />
+        <path d="M9 18.5 8 21M13 18.5 12 21M17 18.5 16 21" />
+      </svg>
+    )
+  }
+  if (kind === 'snow') {
+    return (
+      <svg {...common}>
+        <path d="M7 14.8a4.2 4.2 0 0 1 .8-8.3 5.3 5.3 0 0 1 10.2 1.4A3.7 3.7 0 0 1 17.3 15.3H7Z" />
+        <path d="M9 18v3.2M9 19.6 7.3 21M9 19.6l1.7 1.4M15 18v3.2M15 19.6l-1.7 1.4M15 19.6l1.7 1.4" />
+      </svg>
+    )
+  }
+  if (kind === 'storm') {
+    return (
+      <svg {...common}>
+        <path d="M7 13.8a4.2 4.2 0 0 1 .8-8.3 5.3 5.3 0 0 1 10.2 1.4A3.7 3.7 0 0 1 17.3 14.3H7Z" />
+        <path d="M13 15.5 10.5 19h3L11 22.5" />
+      </svg>
+    )
+  }
+  if (kind === 'fog') {
+    return (
+      <svg {...common}>
+        <path d="M6 10.5a4.2 4.2 0 0 1 .8-8.1M20 10.5H6" />
+        <path d="M4 14.5h16M4 18.5h16" />
+      </svg>
+    )
+  }
+  return (
+    <svg {...common}>
+      <path d="M7 16a4.2 4.2 0 0 1 .8-8.3 5.3 5.3 0 0 1 10.2 1.4A3.7 3.7 0 0 1 17.3 16.5H7Z" />
+    </svg>
+  )
 }
 
 export default function DashboardHeader({ firstName, greeting, date }: DashboardHeaderProps) {
@@ -113,13 +176,14 @@ export default function DashboardHeader({ firstName, greeting, date }: Dashboard
         {weatherStatus === 'ok' && weather && (
           <>
             <span className={styles.heroDot} aria-hidden>·</span>
-            <span className={styles.heroStat}>{weather.tempF}°F</span>
+            <span className={styles.heroWeatherIcon} aria-hidden><WeatherIcon code={weather.code} /></span>
+            <span className={styles.heroWeatherStat}>{weather.tempF}°F</span>
             <span className={styles.heroDot} aria-hidden>·</span>
-            <span className={styles.heroStat}>{weather.humidity}% Humidity</span>
+            <span className={styles.heroWeatherStat}>{weather.humidity}% Humidity</span>
             {sunsetText && (
               <>
                 <span className={styles.heroDot} aria-hidden>·</span>
-                <span className={styles.heroStat}>Sunset {sunsetText}</span>
+                <span className={styles.heroWeatherStat}>Sunset {sunsetText}</span>
               </>
             )}
           </>
