@@ -15,7 +15,10 @@ import { NextResponse } from 'next/server'
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
 
-const API = 'https://api.todoist.com/rest/v2'
+// Todoist retired the old REST v2 endpoints in favor of a unified v1 API
+// (same auth, same shape for what we use, but GET /tasks now returns
+// { results: [...] } instead of a bare array).
+const API = 'https://api.todoist.com/api/v1'
 
 function token(): string | null {
   return process.env.TODOIST_TOKEN || null
@@ -31,8 +34,9 @@ export async function GET() {
   })
   if (!res.ok) return NextResponse.json({ error: 'todoist_fetch_failed' }, { status: 502 })
 
-  const tasks = await res.json()
-  const trimmed = (Array.isArray(tasks) ? tasks : []).map((task: Record<string, unknown>) => ({
+  const body = await res.json()
+  const tasks = Array.isArray(body) ? body : Array.isArray(body?.results) ? body.results : []
+  const trimmed = tasks.map((task: Record<string, unknown>) => ({
     id: task.id,
     content: task.content,
     due: (task.due as { date?: string; datetime?: string } | null)?.datetime

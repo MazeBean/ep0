@@ -3,7 +3,7 @@ import { NextResponse } from 'next/server'
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
 
-const API = 'https://api.todoist.com/rest/v2'
+const API = 'https://api.todoist.com/api/v1'
 
 function token(): string | null {
   return process.env.TODOIST_TOKEN || null
