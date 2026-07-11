@@ -41,7 +41,7 @@
     box-shadow:0 0 16px rgba(190,190,198,.25)}
   @keyframes twinkle{0%,100%{opacity:.15}50%{opacity:.5}}
   @media(prefers-reduced-motion:reduce){.ground,.sun,.star,.markOrb,.markGlow{animation:none!important}.progressWrap,.stat,.card{transition:none}}
-  .shell{position:relative;z-index:1;width:100%;max-width:620px}
+  .shell{position:relative;z-index:1;width:100%;max-width:920px}
   .header{display:flex;align-items:center;gap:14px;margin-bottom:22px}
   .markWrap{position:relative;width:44px;height:44px;flex-shrink:0}
   .markGlow{position:absolute;inset:-10px;border-radius:50%;background:var(--brand);filter:blur(14px);opacity:.4;
@@ -95,21 +95,21 @@
   .notConnected{color:var(--muted-strong);font-size:13.5px;line-height:1.6}
   .notConnected code{font-family:var(--font-mono);background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:2px 6px;color:var(--fg)}
 
-  .weekGrid{display:grid;grid-template-columns:repeat(7,1fr);gap:6px}
-  .dayCol{display:flex;flex-direction:column;gap:6px;min-width:0}
-  .dayHead{text-align:center;padding-bottom:6px;border-bottom:1px solid var(--border)}
-  .dayHead .wd{font-family:var(--font-mono);font-size:9px;letter-spacing:.06em;color:var(--muted);text-transform:lowercase;display:block}
-  .dayHead .dn{font-size:14px;font-weight:600;margin-top:2px}
+  .weekGrid{display:grid;grid-template-columns:repeat(7,1fr);gap:10px}
+  .dayCol{display:flex;flex-direction:column;gap:8px;min-width:0}
+  .dayHead{text-align:center;padding-bottom:9px;border-bottom:1px solid var(--border)}
+  .dayHead .wd{font-family:var(--font-mono);font-size:10.5px;letter-spacing:.06em;color:var(--muted);text-transform:lowercase;display:block}
+  .dayHead .dn{font-size:19px;font-weight:700;margin-top:3px}
   .dayCol.today .dayHead{border-bottom-color:var(--brand)}
   .dayCol.today .dn{color:var(--brand)}
-  .dayChips{display:flex;flex-direction:column;gap:5px;min-height:20px}
-  .chip{position:relative;background:var(--bg);border:1px solid var(--border);border-radius:8px;
-    padding:6px 16px 6px 7px;font-size:11px;line-height:1.35;cursor:pointer;transition:border-color .15s,background .15s}
+  .dayChips{display:flex;flex-direction:column;gap:7px;min-height:160px}
+  .chip{position:relative;background:var(--bg);border:1px solid var(--border);border-radius:9px;
+    padding:9px 20px 9px 10px;font-size:13px;line-height:1.4;cursor:pointer;transition:border-color .15s,background .15s}
   .chip:hover{border-color:var(--brand-line);background:var(--brand-soft)}
-  .chip .chipText{display:block;overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical}
-  .chip .chipDel{position:absolute;top:1px;right:2px;background:none;border:none;color:var(--muted);cursor:pointer;font-size:12px;line-height:1;padding:3px}
+  .chip .chipText{display:block;overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical}
+  .chip .chipDel{position:absolute;top:2px;right:4px;background:none;border:none;color:var(--muted);cursor:pointer;font-size:14px;line-height:1;padding:4px}
   .chip .chipDel:hover{color:var(--neg)}
-  .dayEmpty{color:#4a4a50;font-size:16px;text-align:center;padding:4px 0}
+  .dayEmpty{color:#4a4a50;font-size:19px;text-align:center;padding:8px 0}
   .bucketRow{display:flex;flex-direction:column;gap:6px;margin-top:14px}
   .bucketRow:first-of-type{margin-top:0}
   .bucketLbl{font-family:var(--font-mono);font-size:10px;letter-spacing:.1em;text-transform:lowercase;color:var(--muted)}

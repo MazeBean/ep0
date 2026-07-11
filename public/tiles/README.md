@@ -21,6 +21,7 @@ shows the "how to build this" panel instead.
 | `brand`  | Brand    | `public/tiles/brand.html`  |
 | `water`  | Water    | `public/tiles/water.html`  |
 | `todoist`| Todoist  | `public/tiles/todoist.html`|
+| `goals`  | Goals    | `public/tiles/goals.html`  |
 | `peak`   | Peak     | `public/tiles/peak.html`   |
 | `finance`| Finance  | `public/tiles/finance.html`|
 
