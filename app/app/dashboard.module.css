@@ -154,16 +154,19 @@
   animation: fadeUp 700ms var(--ease-premium) forwards;
 }
 
-/* The AppSidebar's fixed 216px (see .page's matching padding-left) shifts
-   .shell's own centred box right of the true viewport centre by exactly half
-   that width (the --space-6 gutter cancels out: it's added on the left and
-   already present on the right). The fadeUp animation above already owns
-   `transform` (translateY), so the compensating shift uses the independent
-   `translate` property instead of `transform` — the two compose without
-   either one clobbering the other. */
+/* .header sits inside .shell, whose OWN centred box is offset right of the
+   true viewport centre by however much padding-left the sidebar consumes
+   (see .page above). Calc-ing the exact compensating offset back is fragile
+   (it broke once already). Instead, break .header out of that constrained
+   box entirely: give it the true viewport's full width, so its centered
+   children (align-items:center/text-align:center) land on the actual screen
+   centre no matter what any ancestor's padding or a sidebar's width is. This
+   stays in normal flow (unlike position:fixed), so vertical spacing and the
+   fadeUp entrance animation are untouched. */
 @media (min-width: 981px) {
   .header {
-    translate: -108px 0;
+    width: 100vw;
+    margin-left: calc(50% - 50vw);
   }
 }
 
