@@ -142,7 +142,6 @@
   align-items: center;
   text-align: center;
   gap: var(--space-2);
-  flex: 1 1 auto;
   opacity: 0;
   animation: fadeUp 700ms var(--ease-premium) forwards;
 }
@@ -595,11 +594,19 @@
 /* Header row: gem on the left, greeting + date on the right. The gem
    anchors the "Vitality character" presence on the dashboard without
    cluttering the tiles. */
+/* Grid, not flex: a 3-column row (gem | header | balancing spacer) where the
+   two outer tracks are the SAME width. That makes the centre column
+   mathematically centred on the row's full width no matter what's in the
+   side columns — unlike flex, where centering .header "within remaining
+   space next to the gem" visibly pushed it right of true centre. The third
+   column has nothing placed in it (the avatar is position:absolute,
+   pulled out of grid flow entirely) — it exists purely to balance the gem's
+   180px on the other side. */
 .headerRow {
-  display: flex;
+  display: grid;
+  grid-template-columns: 180px 1fr 180px;
   align-items: center;
   gap: var(--space-6);
-  position: relative;
 }
 
 .headerGem {
@@ -609,31 +616,20 @@
 }
 
 @media (max-width: 980px) {
+  .headerRow {
+    grid-template-columns: 140px 1fr 140px;
+  }
   .headerGem {
     width: 140px;
     height: 140px;
   }
 }
 
-/* True horizontal centering: on phone the gem/header/gear already collapse
-   into a single tuned flow (below), but on tablet+ up, centering .header
-   within its own flex space (next to a 180px gem) puts it visibly off-centre
-   from the actual page. Taking it out of flow and centering it on the
-   headerRow's own width — which spans the full shell — centers it on the
-   real horizontal axis instead. */
-@media (min-width: 761px) {
-  .header {
-    position: absolute;
-    left: 50%;
-    top: 50%;
-    transform: translate(-50%, -50%);
-    width: max-content;
-    max-width: min(560px, 60%);
-  }
-}
-
 @media (max-width: 560px) {
+  /* Phone reverts to a plain flex row — gem, header, gear, avatar inline
+     left-to-right, not centred (the grid centring is a desktop/tablet thing). */
   .headerRow {
+    display: flex;
     gap: var(--space-4);
   }
   .headerGem {
