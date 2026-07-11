@@ -9,7 +9,7 @@
     --bg:#0a0a0c;--surface:rgba(255,255,255,.045);--border:rgba(255,255,255,.11);--brand:#c3c6d0;
     --brand-soft:rgba(255,255,255,.05);--brand-line:rgba(255,255,255,.18);
     --muted:#8a8a90;--muted-strong:#a8a8b0;--fg:#ededf0;--neg:#ff6b6b;--neg-line:rgba(255,107,107,.4);
-    --gold:#e8c878;--track:#17171b;--radius-md:12px;--radius-pill:999px;
+    --gold:#e8c878;--lift:#7fa8e0;--lift-soft:rgba(127,168,224,.22);--track:#17171b;--radius-md:12px;--radius-pill:999px;
     --font-display:ui-rounded,-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,sans-serif;
     --font-mono:ui-monospace,SFMono-Regular,Menlo,"JetBrains Mono",monospace;
     --ease:cubic-bezier(.4,0,.2,1);
@@ -83,9 +83,9 @@
   .prLbl{font-family:var(--font-mono);font-size:10px;letter-spacing:.1em;color:var(--muted);text-transform:lowercase;margin-top:2px}
   .chart{width:100%;height:auto;display:block;margin-top:4px}
   .chart .grid{stroke:var(--border);stroke-width:1}
-  .chart .eline{fill:none;stroke:var(--brand);stroke-width:2;stroke-linejoin:round;stroke-linecap:round}
+  .chart .eline{fill:none;stroke:var(--lift);stroke-width:2;stroke-linejoin:round;stroke-linecap:round}
   .chart .area{opacity:.6}
-  .chart .dot{fill:var(--brand)}
+  .chart .dot{fill:var(--lift)}
   .chart .prdot{fill:var(--gold);stroke:var(--bg);stroke-width:1.5}
   .chart .axl{fill:var(--muted);font-family:var(--font-mono);font-size:9px;letter-spacing:.06em}
   .logHead{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin:0 0 12px}
@@ -230,7 +230,7 @@ function chartHtml(exercise){
     +'<text x="'+CX1+'" y="'+(CY1+15)+'" class="axl" text-anchor="end">'+fmt(last.ts)+'</text>';
   return '<svg viewBox="0 0 '+CW+' '+(CY1+22)+'" class="chart" role="img" aria-label="Weight progress for '+esc(exercise)+'">'
     +'<defs><linearGradient id="wfill" x1="0" y1="0" x2="0" y2="1">'
-    +'<stop offset="0" stop-color="#c3c6d0" stop-opacity=".22"/><stop offset="1" stop-color="#c3c6d0" stop-opacity="0"/></linearGradient></defs>'
+    +'<stop offset="0" stop-color="#7fa8e0" stop-opacity=".24"/><stop offset="1" stop-color="#7fa8e0" stop-opacity="0"/></linearGradient></defs>'
     +grid+'<path d="'+area+'" fill="url(#wfill)" class="area"/><path d="'+eline+'" class="eline"/>'+dots+labels+'</svg>';
 }
 

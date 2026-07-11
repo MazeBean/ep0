@@ -9,6 +9,9 @@
   :root{
     --bg:#0a0a0c;--surface:rgba(255,255,255,.045);--border:rgba(255,255,255,.11);--brand:#c3c6d0;
     --brand-soft:rgba(255,255,255,.05);--brand-line:rgba(255,255,255,.18);
+    --p:#5fc98a;--p-soft:rgba(95,201,138,.09);--p-line:rgba(95,201,138,.3);
+    --c:#e8a15f;--c-soft:rgba(232,161,95,.09);--c-line:rgba(232,161,95,.3);
+    --f:#7fa8e0;--f-soft:rgba(127,168,224,.09);--f-line:rgba(127,168,224,.3);
     --muted:#8a8a90;--muted-strong:#a8a8b0;--fg:#ededf0;--neg:#ff6b6b;--neg-line:rgba(255,107,107,.4);
     --track:#17171b;--radius-md:12px;--radius-pill:999px;
     --font-display:ui-rounded,-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,sans-serif;
@@ -76,7 +79,7 @@
   .fieldInput:focus{outline:none;border-color:var(--brand)}
   .goalEdit .fieldInput{width:92px}
   .macroBar{height:4px;border-radius:var(--radius-pill);background:var(--track);overflow:hidden;margin-top:8px}
-  .macroBarFill{height:100%;border-radius:var(--radius-pill);background:var(--brand);transition:width var(--duration) ease}
+  .macroBarFill{height:100%;border-radius:var(--radius-pill);background:var(--p);transition:width var(--duration) ease}
   .bar{height:10px;border-radius:var(--radius-pill);background:var(--track);overflow:hidden}
   .barFill{height:100%;border-radius:var(--radius-pill);background:var(--brand);transition:width var(--duration) ease}
   .barFill.over{background:var(--neg)}
@@ -84,6 +87,12 @@
   @media(max-width:560px){.macroGrid{grid-template-columns:repeat(2,1fr)}}
   .macroBox{display:flex;flex-direction:column;gap:4px;padding:14px;border:1px solid var(--border);border-radius:var(--radius-md);background:var(--bg)}
   .macroBox[data-accent="cal"]{border-color:var(--brand-line);background:var(--brand-soft)}
+  .macroBox[data-accent="p"]{border-color:var(--p-line);background:var(--p-soft)}
+  .macroBox[data-accent="p"] .macroVal{color:var(--p)}
+  .macroBox[data-accent="c"]{border-color:var(--c-line);background:var(--c-soft)}
+  .macroBox[data-accent="c"] .macroVal{color:var(--c)}
+  .macroBox[data-accent="f"]{border-color:var(--f-line);background:var(--f-soft)}
+  .macroBox[data-accent="f"] .macroVal{color:var(--f)}
   .macroVal{font-weight:600;font-size:22px;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
   .macroLabel{font-family:var(--font-mono);font-size:10px;letter-spacing:.12em;text-transform:lowercase;color:var(--muted)}
   .sectionTitle{font-weight:700;font-size:17px;margin:28px 0 0;text-transform:lowercase}

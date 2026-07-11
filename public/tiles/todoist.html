@@ -9,7 +9,7 @@
     --bg:#0a0a0c;--surface:rgba(255,255,255,.045);--border:rgba(255,255,255,.11);--brand:#c3c6d0;
     --brand-soft:rgba(255,255,255,.05);--brand-line:rgba(255,255,255,.18);
     --muted:#8a8a90;--muted-strong:#a8a8b0;--fg:#ededf0;--neg:#ff6b6b;--neg-line:rgba(255,107,107,.4);
-    --track:#17171b;--radius-md:12px;--radius-pill:999px;
+    --today:#e8a15f;--track:#17171b;--radius-md:12px;--radius-pill:999px;
     --font-display:ui-rounded,-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,sans-serif;
     --font-mono:ui-monospace,SFMono-Regular,Menlo,"JetBrains Mono",monospace;
     --ease:cubic-bezier(.4,0,.2,1);
@@ -61,7 +61,7 @@
     background:radial-gradient(circle at var(--mx,50%) var(--my,20%),rgba(255,255,255,.14),transparent 46%);
     mix-blend-mode:overlay;opacity:.9}
   .statNum{font-size:22px;font-weight:600;letter-spacing:-.01em}
-  .statNum.brand{color:var(--brand)}
+  .statNum.brand{color:var(--today)}
   .statLbl{color:var(--muted);font-family:var(--font-mono);font-size:10px;letter-spacing:.1em;text-transform:lowercase;margin-top:4px}
   .card{position:relative;border:1px solid var(--border);border-radius:16px;background:var(--surface);padding:18px;margin-bottom:22px;
     -webkit-backdrop-filter:blur(20px) saturate(120%);backdrop-filter:blur(20px) saturate(120%);
@@ -100,8 +100,8 @@
   .dayHead{text-align:center;padding-bottom:9px;border-bottom:1px solid var(--border)}
   .dayHead .wd{font-family:var(--font-mono);font-size:10.5px;letter-spacing:.06em;color:var(--muted);text-transform:lowercase;display:block}
   .dayHead .dn{font-size:19px;font-weight:700;margin-top:3px}
-  .dayCol.today .dayHead{border-bottom-color:var(--brand)}
-  .dayCol.today .dn{color:var(--brand)}
+  .dayCol.today .dayHead{border-bottom-color:var(--today)}
+  .dayCol.today .dn{color:var(--today)}
   .dayChips{display:flex;flex-direction:column;gap:7px;min-height:160px}
   .chip{position:relative;background:var(--bg);border:1px solid var(--border);border-radius:9px;
     padding:9px 20px 9px 10px;font-size:13px;line-height:1.4;cursor:pointer;transition:border-color .15s,background .15s}
