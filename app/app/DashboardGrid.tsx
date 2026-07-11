@@ -483,9 +483,13 @@ interface DashboardGridProps {
    *  nav can open the same docked tile view a grid-tile click would. */
   openId: string | null
   onOpenIdChange: (id: string | null) => void
+  /** The sidebar nav now owns tile navigation, so the poster grid (and its
+   *  "see the vision" empty state) would just duplicate it — suppress the
+   *  visual board while keeping overlay/connector/new-tile handling intact. */
+  hidePosterGrid?: boolean
 }
 
-export default function DashboardGrid({ userId, openId, onOpenIdChange }: DashboardGridProps) {
+export default function DashboardGrid({ userId, openId, onOpenIdChange, hidePosterGrid }: DashboardGridProps) {
   const ref = useRef<HTMLDivElement>(null)
   const [mounted, setMounted] = useState(false)
   const [cols, setCols] = useState(4)
@@ -600,7 +604,7 @@ export default function DashboardGrid({ userId, openId, onOpenIdChange }: Dashbo
 
   return (
     <div className="veeTiles" ref={ref}>
-      {!loaded ? null : isEmpty ? (
+      {hidePosterGrid ? null : !loaded ? null : isEmpty ? (
         // A fresh board shows the onboarding vision; a deliberately-scratched board
         // stays clean — just header + background, nothing in the middle.
         scratched ? null : <VisionEmptyState onNewTile={() => setNewOpen(true)} />

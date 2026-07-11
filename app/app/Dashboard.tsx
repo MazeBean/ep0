@@ -7,7 +7,7 @@ import WelcomeBackdrop from '@/components/WelcomeBackdrop'
 import DashboardHeaderGem from './DashboardHeaderGem'
 import DashboardGrid from './DashboardGrid'
 import AppSidebar from './AppSidebar'
-import TopStatRow from './TopStatRow'
+import OverviewWidgets from './OverviewWidgets'
 import '@/components/veeTiles.css'
 import { dashboardChrome, backgroundAccent, DEFAULT_CHROME, type DashboardChrome } from '@/lib/tiles/dashboardChrome'
 import { syncWipe } from '@/lib/sync'
@@ -222,13 +222,14 @@ export default function Dashboard({ firstName, userId }: DashboardProps) {
           </div>
         </div>
 
-        <TopStatRow userId={userId} />
+        {openTileId === null && <OverviewWidgets userId={userId} />}
 
         <DashboardGrid
           userId={userId}
           chrome={chrome ?? DEFAULT_CHROME}
           openId={openTileId}
           onOpenIdChange={setOpenTileId}
+          hidePosterGrid
         />
       </div>
 
