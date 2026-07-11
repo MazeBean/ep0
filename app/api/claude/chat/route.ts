@@ -14,7 +14,7 @@ import Anthropic from '@anthropic-ai/sdk'
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
 
-const MODEL = 'claude-opus-4-8'
+const MODEL = 'claude-haiku-4-5'
 const MAX_TOKENS = 1024
 
 interface ChatMessage {
