@@ -1,0 +1,218 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Water — future mock</title>
+<style>
+  :root{
+    --bg:#05060a;
+    --glass:rgba(255,255,255,.045);--glass-strong:rgba(255,255,255,.075);
+    --stroke:rgba(255,255,255,.09);--stroke-soft:rgba(255,255,255,.05);
+    --fg:#f3f4f8;--muted:#8b90a3;
+    --c1:#22D3EE;--c2:#818CF8;--c3:#F472B6;
+    --grad:linear-gradient(135deg,var(--c1),var(--c2) 55%,var(--c3));
+    --font:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,sans-serif;
+    --ease:cubic-bezier(.4,0,.2,1);
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;min-height:100%}
+  body{
+    background:var(--bg);color:var(--fg);font:16px/1.6 var(--font);
+    display:flex;justify-content:center;padding:64px 28px;position:relative;overflow-x:hidden;
+    -webkit-font-smoothing:antialiased;
+  }
+  /* drifting aurora field */
+  .aurora{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden}
+  .blob{position:absolute;border-radius:50%;filter:blur(70px);opacity:.35;animation:drift 22s ease-in-out infinite}
+  .blob.b1{width:520px;height:520px;background:radial-gradient(circle,var(--c1),transparent 70%);top:-160px;left:-120px;animation-duration:26s}
+  .blob.b2{width:460px;height:460px;background:radial-gradient(circle,var(--c2),transparent 70%);bottom:-180px;right:-100px;animation-duration:30s;animation-delay:-6s}
+  .blob.b3{width:380px;height:380px;background:radial-gradient(circle,var(--c3),transparent 70%);top:40%;right:12%;animation-duration:34s;animation-delay:-12s}
+  @keyframes drift{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(30px,-24px) scale(1.08)}}
+  @media(prefers-reduced-motion:reduce){.blob{animation:none}.orbGlow,.mark{animation:none!important}}
+
+  .shell{position:relative;z-index:1;width:100%;max-width:640px}
+
+  .header{display:flex;align-items:center;gap:18px;margin-bottom:30px}
+  .markWrap{position:relative;width:56px;height:56px;flex-shrink:0}
+  .orbGlow{position:absolute;inset:-14px;border-radius:50%;background:var(--grad);filter:blur(18px);opacity:.55;animation:breathe 4s ease-in-out infinite}
+  @keyframes breathe{0%,100%{opacity:.4;transform:scale(.94)}50%{opacity:.7;transform:scale(1.05)}}
+  .mark{position:relative;width:56px;height:56px;border-radius:50%;background:var(--grad);
+    display:flex;align-items:center;justify-content:center;box-shadow:0 6px 30px rgba(99,102,241,.4)}
+  .mark svg{width:26px;height:26px}
+  .titleWrap .title{font-size:26px;font-weight:700;margin:0;letter-spacing:-.01em;
+    background:linear-gradient(135deg,#fff,#cfd6ff 45%,#e9c9ff);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .subtitle{color:var(--muted);font-size:13.5px;margin:6px 0 0}
+
+  .glass{position:relative;border-radius:24px;background:var(--glass);border:1px solid var(--stroke);
+    -webkit-backdrop-filter:blur(28px) saturate(160%);backdrop-filter:blur(28px) saturate(160%);
+    box-shadow:0 1px 0 rgba(255,255,255,.06) inset, 0 20px 60px rgba(0,0,0,.45);
+    padding:26px 24px;margin-bottom:18px}
+
+  .ringCard{display:flex;align-items:center;gap:26px}
+  .ringBox{position:relative;width:168px;height:168px;flex-shrink:0}
+  .ringBox svg{width:100%;height:100%;transform:rotate(-90deg)}
+  .ringBox .ringVal{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+  .ringVal .num{font-size:28px;font-weight:700;letter-spacing:-.01em}
+  .ringVal .unit{font-size:12px;color:var(--muted);margin-top:2px}
+  .ringMeta{flex:1;min-width:0}
+  .ringMeta .goal{font-size:13.5px;color:var(--muted);margin:0 0 10px}
+  .ringMeta .pct{font-size:34px;font-weight:700;background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .ringMeta .pctLbl{font-size:12.5px;color:var(--muted);margin-top:2px}
+
+  .stats{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin-bottom:18px}
+  .stat{border-radius:20px;background:var(--glass);border:1px solid var(--stroke);
+    -webkit-backdrop-filter:blur(20px);backdrop-filter:blur(20px);padding:18px 16px;text-align:center}
+  .statNum{font-size:23px;font-weight:700}
+  .statLbl{color:var(--muted);font-size:12px;margin-top:6px}
+
+  .cardName{font-size:12.5px;color:var(--muted);display:block;margin-bottom:16px;font-weight:600}
+  .quickRow{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px}
+  .quickBtn{
+    position:relative;border-radius:999px;border:1px solid var(--stroke);background:var(--glass-strong);
+    color:var(--fg);padding:11px 20px;font:inherit;font-size:14px;font-weight:600;cursor:pointer;
+    transition:transform .18s var(--ease),box-shadow .18s var(--ease),border-color .18s var(--ease);
+  }
+  .quickBtn:hover{transform:translateY(-2px);border-color:rgba(255,255,255,.22);box-shadow:0 10px 26px rgba(99,102,241,.28)}
+  .quickBtn:active{transform:translateY(0)}
+
+  .row{display:flex;gap:12px;align-items:center}
+  .field{flex:1;position:relative}
+  input[type=number]{
+    width:100%;background:rgba(0,0,0,.25);border:1px solid var(--stroke);color:var(--fg);
+    border-radius:16px;padding:13px 16px;font:inherit;font-size:15px;
+  }
+  input::placeholder{color:#5a5f74}
+  input:focus{outline:none;border-color:rgba(129,140,248,.6);box-shadow:0 0 0 4px rgba(129,140,248,.15)}
+  .btn-primary{
+    background:var(--grad);color:#05060a;border:none;font-weight:700;border-radius:16px;
+    padding:13px 22px;font:inherit;font-size:14.5px;cursor:pointer;white-space:nowrap;
+    box-shadow:0 8px 24px rgba(129,140,248,.35);transition:transform .18s var(--ease),box-shadow .18s var(--ease);
+  }
+  .btn-primary:hover{transform:translateY(-2px);box-shadow:0 12px 32px rgba(129,140,248,.5)}
+  .btn-primary:active{transform:translateY(0)}
+
+  .logHead{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin:0 0 14px}
+  .sectionTitle{font-weight:700;font-size:16.5px;margin:0}
+  .count{font-size:12.5px;color:var(--muted)}
+  .log{display:flex;flex-direction:column;gap:9px}
+  .entry{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:13px 16px;
+    border-radius:16px;background:rgba(255,255,255,.03);border:1px solid var(--stroke-soft);
+    animation:rise .3s var(--ease)}
+  @keyframes rise{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+  .entryLeft{display:flex;align-items:center;gap:12px}
+  .dot{width:8px;height:8px;border-radius:50%;background:var(--grad);flex-shrink:0}
+  .entryAmt{font-size:14.5px;font-weight:600}
+  .entryMeta{font-size:12px;color:var(--muted)}
+  .xBtn{background:transparent;border:1px solid var(--stroke-soft);color:var(--muted);width:26px;height:26px;
+    border-radius:50%;cursor:pointer;flex-shrink:0;line-height:1;transition:color .15s,border-color .15s}
+  .xBtn:hover{color:#ff8a8a;border-color:rgba(255,138,138,.4)}
+  .empty{color:var(--muted);font-size:13.5px;padding:6px 2px}
+</style>
+</head>
+<body>
+<div class="aurora"><div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div></div>
+<main><div class="shell" id="app"></div></main>
+<script>
+/* Futuristic-but-comfortable mock of the Water tile — glass panels, aurora
+   gradient field, a glowing circular progress ring. Preview only, standalone
+   (falls back to sample data without window.Vitality). */
+const GOAL_ML=2000;
+const QUICK=[250,350,500];
+const CIRC=2*Math.PI*74;
+let entries=[
+  {id:'a',ml:350,ts:Date.now()-3*3600e3},
+  {id:'b',ml:500,ts:Date.now()-1.5*3600e3},
+  {id:'c',ml:250,ts:Date.now()-0.4*3600e3},
+];
+const $=id=>document.getElementById(id);
+function persist(){if(window.Vitality)window.Vitality.save(entries);}
+function newId(){return Date.now().toString(36)+Math.random().toString(36).slice(2,6);}
+function when(ts){const d=new Date(ts);return d.toLocaleTimeString(undefined,{hour:'numeric',minute:'2-digit'});}
+function dayKey(ts){const d=new Date(ts);return d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate();}
+function todayEntries(){const k=dayKey(Date.now());return entries.filter(e=>dayKey(e.ts)===k);}
+function todayTotal(){return todayEntries().reduce((s,e)=>s+e.ml,0);}
+function streak(){return 4;}
+function sevenDayAvg(){return 1840;}
+
+function headerHtml(){
+  return '<header class="header"><div class="markWrap"><div class="orbGlow"></div><div class="mark" aria-hidden="true">'
+    +'<svg viewBox="0 0 24 24" fill="#05060a"><path d="M12 2c0 0-7 8.5-7 13a7 7 0 0 0 14 0c0-4.5-7-13-7-13z"/></svg>'
+    +'</div></div><div class="titleWrap"><h1 class="title">Water</h1><p class="subtitle">Daily hydration</p></div></header>';
+}
+function ringHtml(){
+  const total=todayTotal();
+  const pct=Math.min(1,total/GOAL_ML);
+  const offset=CIRC*(1-pct);
+  return '<section class="glass ringCard">'
+    +'<div class="ringBox"><svg viewBox="0 0 168 168">'
+    +'<circle cx="84" cy="84" r="74" fill="none" stroke="rgba(255,255,255,.07)" stroke-width="13"/>'
+    +'<circle cx="84" cy="84" r="74" fill="none" stroke="url(#g)" stroke-width="13" stroke-linecap="round" '
+    +'stroke-dasharray="'+CIRC.toFixed(1)+'" stroke-dashoffset="'+offset.toFixed(1)+'" '
+    +'style="filter:drop-shadow(0 0 10px rgba(129,140,248,.55));transition:stroke-dashoffset .7s cubic-bezier(.4,0,.2,1)"/>'
+    +'<defs><linearGradient id="g" x1="0%" y1="0%" x2="100%" y2="100%">'
+    +'<stop offset="0%" stop-color="#22D3EE"/><stop offset="55%" stop-color="#818CF8"/><stop offset="100%" stop-color="#F472B6"/>'
+    +'</linearGradient></defs></svg>'
+    +'<div class="ringVal"><div class="num">'+total.toLocaleString()+'</div><div class="unit">ml today</div></div></div>'
+    +'<div class="ringMeta"><div class="pct">'+Math.round(pct*100)+'%</div><div class="pctLbl">of daily goal</div>'
+    +'<p class="goal">Goal '+GOAL_ML.toLocaleString()+' ml</p></div>'
+    +'</section>';
+}
+function statsHtml(){
+  return '<section class="stats">'
+    +'<div class="stat"><div class="statNum">'+streak()+'</div><div class="statLbl">Day streak</div></div>'
+    +'<div class="stat"><div class="statNum">'+sevenDayAvg().toLocaleString()+'</div><div class="statLbl">7-day avg ml</div></div>'
+    +'</section>';
+}
+function formHtml(){
+  const chips=QUICK.map(ml=>'<button class="quickBtn" data-quick="'+ml+'">+'+ml+' ml</button>').join('');
+  return '<section class="glass"><span class="cardName">Log water</span>'
+    +'<div class="quickRow">'+chips+'</div>'
+    +'<div class="row"><div class="field">'
+    +'<input type="number" id="amount" min="0" placeholder="Custom amount (ml)" /></div>'
+    +'<button class="btn-primary" id="add">Add</button></div>'
+    +'</section>';
+}
+function logInner(){
+  const today=todayEntries().slice().sort((a,b)=>b.ts-a.ts);
+  if(!today.length)return '<p class="empty">No water logged today. Add your first cup above.</p>';
+  return today.map(e=>
+    '<div class="entry"><div class="entryLeft"><span class="dot"></span><div>'
+    +'<span class="entryAmt">'+e.ml+' ml</span><br><span class="entryMeta">'+when(e.ts)+'</span></div></div>'
+    +'<button class="xBtn" data-del="'+e.id+'" title="Remove">×</button></div>'
+  ).join('');
+}
+function logHtml(){
+  const today=todayEntries();
+  return '<section class="glass"><div class="logHead"><h2 class="sectionTitle">Today</h2>'
+    +'<span class="count">'+(today.length?today.length+(today.length===1?' entry':' entries'):'empty')+'</span></div>'
+    +'<div class="log" id="log">'+logInner()+'</div></section>';
+}
+function render(){$('app').innerHTML=headerHtml()+ringHtml()+statsHtml()+formHtml()+logHtml();}
+
+function addAmount(ml){
+  if(!ml||ml<=0)return;
+  entries.push({id:newId(),ml,ts:Date.now()});
+  persist();render();
+}
+function addCustom(){
+  const ml=parseInt($('amount').value,10);
+  if(ml>0)addAmount(ml);
+}
+
+document.addEventListener('click',e=>{
+  const quick=e.target.closest('[data-quick]');
+  if(quick){addAmount(parseInt(quick.getAttribute('data-quick'),10));return;}
+  if(e.target.closest('#add')){addCustom();return;}
+  const del=e.target.closest('[data-del]');
+  if(del){const id=del.getAttribute('data-del');entries=entries.filter(en=>en.id!==id);persist();render();}
+});
+document.addEventListener('keydown',e=>{if(e.target.id==='amount'&&e.key==='Enter'){e.preventDefault();addCustom();}});
+
+(async()=>{
+  if(window.Vitality){const d=await window.Vitality.load();if(Array.isArray(d)&&d.length)entries=d;}
+  render();
+})();
+</script>
+</body>
+</html>
