@@ -22,6 +22,14 @@
   overflow: hidden;
 }
 
+/* Room for the fixed AppSidebar (216px + its own padding) on the widths where
+   it actually renders (see AppSidebar.module.css's matching 980px cutoff). */
+@media (min-width: 981px) {
+  .page {
+    padding-left: calc(216px + var(--space-6));
+  }
+}
+
 /* Top-right settings gear — opens the shared SettingsSheet (Personal,
    training setup, units toggle). Same icon language as the logger
    pages so the entry point reads identically wherever it sits. */
@@ -72,13 +80,13 @@
   width: 40px;
   height: 40px;
   border-radius: 50%;
-  color: var(--mint);
+  color: #ff6a3d;
   font-weight: 600;
   font-size: 0.95rem;
   text-decoration: none;
-  background: radial-gradient(120% 120% at 35% 25%, rgba(110, 231, 183, 0.22), rgba(110, 231, 183, 0.05));
-  border: 1.5px solid rgba(110, 231, 183, 0.4);
-  box-shadow: 0 0 24px -8px var(--mint-glow), inset 0 0 14px -6px rgba(110, 231, 183, 0.5);
+  background: radial-gradient(120% 120% at 35% 25%, rgba(255, 106, 61, 0.22), rgba(255, 106, 61, 0.05));
+  border: 1.5px solid rgba(255, 106, 61, 0.4);
+  box-shadow: 0 0 24px -8px rgba(255, 106, 61, 0.4), inset 0 0 14px -6px rgba(255, 106, 61, 0.5);
   transition:
     transform var(--duration) var(--ease),
     box-shadow var(--duration) var(--ease),
@@ -86,11 +94,11 @@
 }
 .profileAvatar:hover {
   transform: translateY(-1px);
-  border-color: var(--mint);
-  box-shadow: 0 0 30px -6px var(--mint-glow), inset 0 0 14px -4px rgba(110, 231, 183, 0.6);
+  border-color: #ff6a3d;
+  box-shadow: 0 0 30px -6px rgba(255, 106, 61, 0.4), inset 0 0 14px -4px rgba(255, 106, 61, 0.6);
 }
 .profileAvatar:focus-visible {
-  outline: 2px solid var(--mint);
+  outline: 2px solid #ff6a3d;
   outline-offset: 2px;
 }
 /* An uploaded photo fills the avatar and clips to its circle (the initial span,
@@ -110,8 +118,8 @@
   position: absolute;
   inset: -10% -5%;
   background:
-    radial-gradient(ellipse 50% 35% at 70% 20%, rgba(110, 231, 183, 0.06), transparent 65%),
-    radial-gradient(ellipse 40% 30% at 20% 80%, rgba(110, 231, 183, 0.04), transparent 70%);
+    radial-gradient(ellipse 50% 35% at 70% 20%, rgba(255, 106, 61, 0.06), transparent 65%),
+    radial-gradient(ellipse 40% 30% at 20% 80%, rgba(255, 106, 61, 0.04), transparent 70%);
   pointer-events: none;
   animation: canvasDrift 60s ease-in-out infinite alternate;
   z-index: 0;

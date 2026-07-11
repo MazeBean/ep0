@@ -1,0 +1,134 @@
+/* Persistent left nav — one slot per real tile, matching the reference's
+   sidebar structure. Scoped accent tokens so this component owns its own
+   orange-red identity without touching the app-wide --mint (used elsewhere,
+   outside this dashboard). */
+.sidebar {
+  --accent: #ff6a3d;
+  --accent-ink: #2a0e04;
+  --accent-soft: rgba(255, 106, 61, 0.1);
+  --accent-line: rgba(255, 106, 61, 0.3);
+
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  z-index: 20;
+  width: 216px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+  padding: var(--space-6) var(--space-4);
+  background: rgba(6, 7, 9, 0.72);
+  border-right: 1px solid var(--border);
+  backdrop-filter: blur(20px) saturate(120%);
+  -webkit-backdrop-filter: blur(20px) saturate(120%);
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: 0 var(--space-2);
+}
+
+.mark {
+  display: inline-flex;
+  width: 26px;
+  height: 26px;
+  color: var(--accent);
+  flex-shrink: 0;
+}
+
+.mark svg {
+  width: 100%;
+  height: 100%;
+}
+
+.brandName {
+  font-family: var(--font-hanken), system-ui, sans-serif;
+  font-weight: 700;
+  font-size: 1rem;
+  letter-spacing: -0.01em;
+  text-transform: lowercase;
+  color: var(--fg);
+}
+
+.nav {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.navItem {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  width: 100%;
+  border: none;
+  background: transparent;
+  color: var(--muted-strong);
+  padding: 10px var(--space-3);
+  border-radius: var(--radius-md);
+  font-family: var(--font-hanken), system-ui, sans-serif;
+  font-size: 0.875rem;
+  letter-spacing: 0.01em;
+  text-transform: lowercase;
+  cursor: pointer;
+  transition:
+    background var(--duration) var(--ease),
+    color var(--duration) var(--ease),
+    transform var(--duration-fast) var(--ease);
+}
+
+.navItem:hover {
+  background: var(--card-elevated);
+  color: var(--fg);
+}
+
+.navItem:active {
+  transform: scale(0.98);
+}
+
+.navItem:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.navItemActive {
+  background: var(--accent-soft);
+  color: var(--fg);
+  border: 1px solid var(--accent-line);
+  padding: 9px calc(var(--space-3) - 1px);
+}
+
+.navItemActive .navGlyph {
+  color: var(--accent);
+}
+
+.navGlyph {
+  display: inline-flex;
+  width: 17px;
+  height: 17px;
+  flex-shrink: 0;
+  color: var(--muted);
+  transition: color var(--duration) var(--ease);
+}
+
+.navGlyph svg {
+  width: 100%;
+  height: 100%;
+}
+
+.navLabel {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Mobile: the sidebar steps aside entirely — small screens keep today's
+   grid + full-screen-open UX untouched. */
+@media (max-width: 980px) {
+  .sidebar {
+    display: none;
+  }
+}

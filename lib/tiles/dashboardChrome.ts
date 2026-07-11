@@ -48,7 +48,7 @@ export interface DashboardChrome {
  *  time-of-day greeting with the accented name, the full date, the mint gem.
  *  Existing users see zero change until they touch something. */
 export const DEFAULT_CHROME: DashboardChrome = {
-  background: { mode: 'world', accent: '#c3c6d0', particles: 24, mountains: true, speed: 0.4 },
+  background: { mode: 'world', accent: '#ff6a3d', particles: 24, mountains: true, speed: 0.4 },
   greeting: { mode: 'auto', text: '', showName: true, accentName: true, scale: 1 },
   date: { show: true, format: 'full' },
   gem: { show: true, tint: 'mint' },
@@ -146,8 +146,8 @@ function reset(userId: string): DashboardChrome {
 /** The accent a chosen background publishes into --wall-accent (themes the UI). */
 export function backgroundAccent(bg: Background): string {
   if (bg.mode === 'world') return bg.accent
-  if (bg.mode === 'gradient') return '#c3c6d0'
-  return '#c3c6d0'
+  if (bg.mode === 'gradient') return '#ff6a3d'
+  return '#ff6a3d'
 }
 
 export const dashboardChrome = { get, update, setBackground, reset }

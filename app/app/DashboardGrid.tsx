@@ -479,14 +479,17 @@ function VisionEmptyState({ onNewTile }: { onNewTile: () => void }) {
 interface DashboardGridProps {
   userId: string
   chrome?: DashboardChrome
+  /** Controlled "which slot is open" — lifted to Dashboard.tsx so the sidebar
+   *  nav can open the same docked tile view a grid-tile click would. */
+  openId: string | null
+  onOpenIdChange: (id: string | null) => void
 }
 
-export default function DashboardGrid({ userId }: DashboardGridProps) {
+export default function DashboardGrid({ userId, openId, onOpenIdChange }: DashboardGridProps) {
   const ref = useRef<HTMLDivElement>(null)
   const [mounted, setMounted] = useState(false)
   const [cols, setCols] = useState(4)
   const [filled, setFilled] = useState<FilledMap>({})
-  const [openId, setOpenId] = useState<string | null>(null) // filled slot opened live
   const [connectId, setConnectId] = useState<string | null>(null) // empty slot connector
   const [newOpen, setNewOpen] = useState(false) // "+ New tile" creator
   const [showWelcome, setShowWelcome] = useState(false) // transient "see the vision" home (non-destructive)
@@ -576,18 +579,18 @@ export default function DashboardGrid({ userId }: DashboardGridProps) {
     if (!openId && !connectId) return
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
-        setOpenId(null)
+        onOpenIdChange(null)
         setConnectId(null)
       }
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
-  }, [openId, connectId])
+  }, [openId, connectId, onOpenIdChange])
 
   if (!mounted) return null
 
   const openSlot = (id: string) => {
-    if (filled[id]) setOpenId(id)
+    if (filled[id]) onOpenIdChange(id)
     else setConnectId(id)
   }
 
@@ -625,7 +628,7 @@ export default function DashboardGrid({ userId }: DashboardGridProps) {
           slot={{ id: openId, name: labelFor(openId), html: filled[openId] }}
           register={register}
           unregister={unregister}
-          onClose={() => setOpenId(null)}
+          onClose={() => onOpenIdChange(null)}
         />
       )}
 

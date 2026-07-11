@@ -6,6 +6,8 @@ import DashboardHeader from './DashboardHeader'
 import WelcomeBackdrop from '@/components/WelcomeBackdrop'
 import DashboardHeaderGem from './DashboardHeaderGem'
 import DashboardGrid from './DashboardGrid'
+import AppSidebar from './AppSidebar'
+import TopStatRow from './TopStatRow'
 import '@/components/veeTiles.css'
 import { dashboardChrome, backgroundAccent, DEFAULT_CHROME, type DashboardChrome } from '@/lib/tiles/dashboardChrome'
 import { syncWipe } from '@/lib/sync'
@@ -179,17 +181,22 @@ export default function Dashboard({ firstName, userId }: DashboardProps) {
   const avatarInitial = (firstName?.trim()?.[0] || 'V').toUpperCase()
   const [chrome, setChrome] = useState<DashboardChrome | undefined>(undefined)
   const [scratchOpen, setScratchOpen] = useState(false)
+  // Which tile is open, docked in the main pane — shared by the sidebar nav
+  // and the grid so either entry point opens the exact same view.
+  const [openTileId, setOpenTileId] = useState<string | null>(null)
 
   useEffect(() => {
     setChrome(dashboardChrome.get(userId))
   }, [userId])
 
-  const wallAccent = chrome ? backgroundAccent(chrome.background) : '#c3c6d0'
+  const wallAccent = chrome ? backgroundAccent(chrome.background) : '#ff6a3d'
   const showGem = chrome?.gem.show ?? true
 
   return (
     <main className={`${styles.page} ${styles.oneScreen} grain-overlay`} style={{ ['--wall-accent' as string]: wallAccent }}>
       <WelcomeBackdrop background={chrome?.background} />
+
+      <AppSidebar activeId={openTileId} onSelect={setOpenTileId} />
 
       <div className={styles.shell}>
         <div className={styles.headerRow}>
@@ -215,7 +222,14 @@ export default function Dashboard({ firstName, userId }: DashboardProps) {
           </div>
         </div>
 
-        <DashboardGrid userId={userId} chrome={chrome ?? DEFAULT_CHROME} />
+        <TopStatRow userId={userId} />
+
+        <DashboardGrid
+          userId={userId}
+          chrome={chrome ?? DEFAULT_CHROME}
+          openId={openTileId}
+          onOpenIdChange={setOpenTileId}
+        />
       </div>
 
       {scratchOpen && <ScratchPanel userId={userId} onClose={() => setScratchOpen(false)} />}
