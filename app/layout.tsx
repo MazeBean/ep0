@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from 'next'
 import { Inter, Instrument_Serif, Hanken_Grotesk, JetBrains_Mono, Nunito } from 'next/font/google'
 import './globals.css'
+import { cn } from "@/lib/utils";
 
 const inter = Inter({
   subsets: ['latin'],
@@ -83,7 +84,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${inter.variable} ${instrumentSerif.variable} ${hankenGrotesk.variable} ${jetBrainsMono.variable} ${nunito.variable}`}
+      className={cn(inter.variable, instrumentSerif.variable, hankenGrotesk.variable, jetBrainsMono.variable, nunito.variable, "font-sans")}
     >
       <body>{children}</body>
     </html>
