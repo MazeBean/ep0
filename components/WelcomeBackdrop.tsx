@@ -63,14 +63,14 @@ export default function WelcomeBackdrop({ background }: { background?: Backgroun
           <svg viewBox="0 0 1600 420" preserveAspectRatio="none">
             <defs>
               <linearGradient id="welcome-backdrop-mt-far" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="#0d1a17" stopOpacity="0" />
-                <stop offset="55%" stopColor="#0d1a17" stopOpacity=".55" />
-                <stop offset="100%" stopColor="#0d1a17" stopOpacity=".95" />
+                <stop offset="0%" stopColor="#131315" stopOpacity="0" />
+                <stop offset="55%" stopColor="#131315" stopOpacity=".55" />
+                <stop offset="100%" stopColor="#131315" stopOpacity=".95" />
               </linearGradient>
               <linearGradient id="welcome-backdrop-mt-near" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="#050a09" stopOpacity=".4" />
-                <stop offset="60%" stopColor="#050a09" stopOpacity=".95" />
-                <stop offset="100%" stopColor="#050a09" stopOpacity="1" />
+                <stop offset="0%" stopColor="#08080a" stopOpacity=".4" />
+                <stop offset="60%" stopColor="#08080a" stopOpacity=".95" />
+                <stop offset="100%" stopColor="#08080a" stopOpacity="1" />
               </linearGradient>
             </defs>
             <path d="M0,300 L120,230 L210,260 L320,180 L430,220 L560,150 L680,210 L820,170 L960,220 L1100,180 L1240,240 L1380,200 L1500,250 L1600,220 L1600,420 L0,420 Z" fill="url(#welcome-backdrop-mt-far)" />

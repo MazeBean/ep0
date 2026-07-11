@@ -28,11 +28,11 @@
      the wallpaper color re-themes the whole glow. Falls back to mint. */
   background-image:
     radial-gradient(60% 50% at 50% 30%,
-      color-mix(in srgb, var(--wall-accent, #6EE7B7) 16%, transparent) 0%,
-      color-mix(in srgb, var(--wall-accent, #6EE7B7) 6%, transparent) 32%,
+      color-mix(in srgb, var(--wall-accent, #c3c6d0) 16%, transparent) 0%,
+      color-mix(in srgb, var(--wall-accent, #c3c6d0) 6%, transparent) 32%,
       transparent 65%),
-    radial-gradient(28% 22% at 50% 38%, rgba(255, 226, 181, 0.07) 0%, rgba(255, 226, 181, 0) 70%),
-    radial-gradient(120% 80% at 50% 100%, rgba(14, 38, 30, 0.5) 0%, rgba(4, 6, 10, 0.95) 75%);
+    radial-gradient(28% 22% at 50% 38%, rgba(220, 220, 226, 0.05) 0%, rgba(220, 220, 226, 0) 70%),
+    radial-gradient(120% 80% at 50% 100%, rgba(20, 20, 24, 0.5) 0%, rgba(4, 6, 10, 0.95) 75%);
   background-repeat: no-repeat;
   background-size: 100% 100%;
 }
@@ -67,11 +67,11 @@
   position: absolute;
   width: 1.5px;
   height: 1.5px;
-  background: rgba(233, 239, 233, 0.7);
+  background: rgba(233, 233, 236, 0.7);
   border-radius: 50%;
   animation: welcome-backdrop-drift linear infinite;
   /* particle glow tints to the chosen accent too */
-  box-shadow: 0 0 6px color-mix(in srgb, var(--wall-accent, #a7f3d0) 55%, transparent);
+  box-shadow: 0 0 6px color-mix(in srgb, var(--wall-accent, #dcdee4) 55%, transparent);
 }
 
 @keyframes welcome-backdrop-drift {

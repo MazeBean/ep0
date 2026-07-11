@@ -48,7 +48,7 @@ export interface DashboardChrome {
  *  time-of-day greeting with the accented name, the full date, the mint gem.
  *  Existing users see zero change until they touch something. */
 export const DEFAULT_CHROME: DashboardChrome = {
-  background: { mode: 'world', accent: '#6EE7B7', particles: 24, mountains: true, speed: 1 },
+  background: { mode: 'world', accent: '#c3c6d0', particles: 24, mountains: true, speed: 0.4 },
   greeting: { mode: 'auto', text: '', showName: true, accentName: true, scale: 1 },
   date: { show: true, format: 'full' },
   gem: { show: true, tint: 'mint' },
