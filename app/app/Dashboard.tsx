@@ -6,7 +6,6 @@ import DashboardHeader from './DashboardHeader'
 import WelcomeBackdrop from '@/components/WelcomeBackdrop'
 import DashboardHeaderGem from './DashboardHeaderGem'
 import DashboardGrid from './DashboardGrid'
-import DashboardChat from './DashboardChat'
 import '@/components/veeTiles.css'
 import { dashboardChrome, backgroundAccent, DEFAULT_CHROME, type DashboardChrome } from '@/lib/tiles/dashboardChrome'
 import { syncWipe } from '@/lib/sync'
@@ -220,7 +219,6 @@ export default function Dashboard({ firstName, userId }: DashboardProps) {
       </div>
 
       {scratchOpen && <ScratchPanel userId={userId} onClose={() => setScratchOpen(false)} />}
-      <DashboardChat userId={userId} />
     </main>
   )
 }
