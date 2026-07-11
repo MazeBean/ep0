@@ -44,7 +44,7 @@ Say it plainly: this is a starting point, not a cage.
 - **Don't want a tile?** Delete its file in `public/tiles/` (e.g. `rm public/tiles/finance.html`) and it
   disappears from the board on reload.
 - **Want to change one?** Rebuild it your way with `/tile <slot>` (slots: `train, fuel, vitals, vee, brand,
-  water, peak, finance`), or just ask me to edit `public/tiles/<slot>.html`.
+  water, todoist, peak, finance`), or just ask me to edit `public/tiles/<slot>.html`.
 
 ## Step 4 — Put it live (if their dashboard is already on GitHub)
 

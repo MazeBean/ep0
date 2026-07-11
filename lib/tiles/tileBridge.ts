@@ -20,6 +20,8 @@ const SHIM = `<script>
     if (m.type === 'load:result') p.resolve(m.data);
     else if (m.type === 'save:ok') p.resolve(true);
     else if (m.type === 'save:error') p.reject(new Error(m.reason || 'save_failed'));
+    else if (m.type === 'todoist:result') p.resolve(m.data);
+    else if (m.type === 'todoist:error') p.reject(new Error(m.reason || 'todoist_failed'));
   });
   function call(type, extra) {
     return new Promise(function (resolve, reject) {
@@ -42,6 +44,12 @@ const SHIM = `<script>
     load: function () { return call('load', {}); },
     report: function (stream) {
       parent.postMessage({ source: 'vitality-tile', type: 'report', stream: stream }, '*');
+    },
+    todoist: {
+      list: function () { return call('todoist:list', {}); },
+      add: function (content, due) { return call('todoist:add', { content: content, due: due }); },
+      complete: function (id) { return call('todoist:complete', { id: id }); },
+      remove: function (id) { return call('todoist:delete', { id: id }); }
     }
   };
 })();

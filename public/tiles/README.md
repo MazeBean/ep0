@@ -20,6 +20,7 @@ shows the "how to build this" panel instead.
 | `vee`    | Vee      | `public/tiles/vee.html`    |
 | `brand`  | Brand    | `public/tiles/brand.html`  |
 | `water`  | Water    | `public/tiles/water.html`  |
+| `todoist`| Todoist  | `public/tiles/todoist.html`|
 | `peak`   | Peak     | `public/tiles/peak.html`   |
 | `finance`| Finance  | `public/tiles/finance.html`|
 
@@ -28,7 +29,8 @@ shows the "how to build this" panel instead.
 Each slot file is **one self-contained HTML file**: all CSS and JS inline, no
 external requests. It runs in a sandboxed frame with `allow-scripts` and no
 same-origin access, so it has no network and cannot use localStorage. Match the
-look: dark background, mint accent `#6EE7B7`.
+look: near-black background, a muted accent (see the existing tiles for the
+current palette).
 
 ### Saving data
 
@@ -44,6 +46,23 @@ const data = await window.Vitality.load()  // read it back, returns [] when empt
 By default this saves in the browser. If the dashboard owner has added a Supabase
 project (see the main README), the same calls sync across devices with no change to
 your tile.
+
+### Todoist (the `todoist` slot only)
+
+The `todoist` tile talks to the real Todoist API through the same bridge — the
+dashboard owner adds `TODOIST_TOKEN` as an env var (see the main README), and
+the tile calls:
+
+```js
+const tasks = await window.Vitality.todoist.list()        // active tasks
+await window.Vitality.todoist.add('Buy milk', 'today')    // content, optional due_string
+await window.Vitality.todoist.complete(taskId)
+await window.Vitality.todoist.remove(taskId)
+```
+
+These still make no direct network call from inside the sealed frame — the
+dashboard's own page does the real fetch (server-side, holding the token
+privately) and relays the result back over the same postMessage bridge.
 
 ## Two ways to fill a slot
 

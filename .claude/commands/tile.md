@@ -5,7 +5,7 @@ description: Build a self-contained Vitality dashboard tile and drop it into its
 You are building ONE dashboard tile for a Vitality Base fork.
 
 The argument is the slot name. It must be exactly one of:
-`train, fuel, vitals, vee, brand, water, peak, finance`
+`train, fuel, vitals, vee, brand, water, todoist, peak, finance`
 
 If no slot is given, ask which one, then continue.
 

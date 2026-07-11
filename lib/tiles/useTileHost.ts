@@ -113,6 +113,38 @@ export function useTileHost(
         return
       }
 
+      if (msg.type === 'todoist:list' || msg.type === 'todoist:add' || msg.type === 'todoist:complete' || msg.type === 'todoist:delete') {
+        try {
+          let data: unknown
+          if (msg.type === 'todoist:list') {
+            const res = await fetch('/api/todoist/tasks', { cache: 'no-store' })
+            if (!res.ok) throw new Error('todoist_list_failed')
+            data = await res.json()
+          } else if (msg.type === 'todoist:add') {
+            const res = await fetch('/api/todoist/tasks', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ content: msg.content, due: msg.due }),
+            })
+            if (!res.ok) throw new Error('todoist_add_failed')
+            data = await res.json()
+          } else if (msg.type === 'todoist:complete') {
+            const res = await fetch(`/api/todoist/tasks/${encodeURIComponent(msg.id)}`, { method: 'POST' })
+            if (!res.ok) throw new Error('todoist_complete_failed')
+            data = await res.json()
+          } else {
+            const res = await fetch(`/api/todoist/tasks/${encodeURIComponent(msg.id)}`, { method: 'DELETE' })
+            if (!res.ok) throw new Error('todoist_delete_failed')
+            data = await res.json()
+          }
+          src.postMessage({ source: 'vitality-host', type: 'todoist:result', id: msg.id, data }, '*')
+        } catch (err) {
+          src.postMessage({ source: 'vitality-host', type: 'todoist:error', id: msg.id, reason: err instanceof Error ? err.message : 'todoist_failed' }, '*')
+        }
+        activity.current?.({ tileId, type: 'report', count: 1 })
+        return
+      }
+
       if (msg.type === 'report') {
         // One numeric life-stream into Vee. The host only forwards the raw stream
         // plus the SENDER's tileId (from our own registry, never the iframe's

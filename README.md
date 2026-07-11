@@ -74,7 +74,21 @@ A tile is one self-contained HTML file. It saves its own data through the dashbo
 bridge, `window.Vitality.save()` and `window.Vitality.load()`, which the dashboard
 provides. Full contract: [`public/tiles/README.md`](public/tiles/README.md).
 
-The slots: `train`, `fuel`, `vitals`, `vee`, `brand`, `water`, `peak`, `finance`.
+The slots: `train`, `fuel`, `vitals`, `vee`, `brand`, `water`, `todoist`, `peak`, `finance`.
+
+---
+
+## Todoist (optional)
+
+The `todoist` tile is real — it lists, adds, completes, and deletes tasks in your
+actual Todoist account. Sealed tiles have no network, so the fetch happens
+server-side (`app/api/todoist`) and relays back through the same bridge as
+`window.Vitality.save/load`.
+
+1. Get your personal API token: Todoist → Settings → Integrations → Developer.
+2. Set `TODOIST_TOKEN` in Vercel **and** `.env.local` for local dev, then redeploy.
+
+Without it, the Todoist tile just shows "not connected" instead of erroring.
 
 ---
 
