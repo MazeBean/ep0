@@ -4,7 +4,6 @@ import { useEffect, useState } from 'react'
 import styles from './dashboard.module.css'
 import DashboardHeader from './DashboardHeader'
 import WelcomeBackdrop from '@/components/WelcomeBackdrop'
-import DashboardHeaderGem from './DashboardHeaderGem'
 import DashboardGrid from './DashboardGrid'
 import AppSidebar from './AppSidebar'
 import OverviewWidgets from './OverviewWidgets'
@@ -189,8 +188,7 @@ export default function Dashboard({ firstName, userId }: DashboardProps) {
     setChrome(dashboardChrome.get(userId))
   }, [userId])
 
-  const wallAccent = chrome ? backgroundAccent(chrome.background) : '#ff6a3d'
-  const showGem = chrome?.gem.show ?? true
+  const wallAccent = chrome ? backgroundAccent(chrome.background) : '#e0b13c'
 
   return (
     <main className={`${styles.page} ${styles.oneScreen} grain-overlay`} style={{ ['--wall-accent' as string]: wallAccent }}>
@@ -200,7 +198,6 @@ export default function Dashboard({ firstName, userId }: DashboardProps) {
 
       <div className={styles.shell}>
         <div className={styles.headerRow}>
-          {showGem && <DashboardHeaderGem className={styles.headerGem} />}
           <DashboardHeader firstName={firstName} greeting={chrome?.greeting} date={chrome?.date} />
           {/* The V (top-right): click to start from scratch (hard reset → black). */}
           <div

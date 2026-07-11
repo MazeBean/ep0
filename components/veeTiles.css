@@ -7,7 +7,7 @@
    gem, greeting, date, settings and background are untouched. */
 
 .veeTiles{
-  --mint:#ff6a3d; --mint-hi:#ff8f66; --gold:#e0481c; --iris:#e0481c; --amber:#E8964A;
+  --mint:#e0b13c; --mint-hi:#f0cc6e; --gold:#b8842a; --iris:#b8842a; --amber:#E8964A;
   --vfg:#fff; --vmuted:rgba(255,255,255,.5); --vborder:rgba(255,255,255,.08);
   --serif:var(--font-serif),'Times New Roman',Georgia,serif;
   --rounded:var(--font-hanken),system-ui,-apple-system,sans-serif;
@@ -200,7 +200,7 @@
 .veeTiles .editToggle svg{width:16px;height:16px;opacity:.9}
 .veeTiles .editToggle:hover{border-color:rgba(195,198,208,.45);color:#fff}
 .veeTiles .editToggle:active{transform:scale(.97)}
-.veeTiles .editToggle.on{background:var(--mint);color:#2a0e04;border-color:var(--mint)}
+.veeTiles .editToggle.on{background:var(--mint);color:#2a1e05;border-color:var(--mint)}
 @media (prefers-reduced-motion:reduce){
   .veeTiles .editTools,.veeTiles .editTool{animation:none}
 }

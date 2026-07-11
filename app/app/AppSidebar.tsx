@@ -30,7 +30,7 @@ export default function AppSidebar({ activeId, onSelect }: AppSidebarProps) {
             <path d="M-8 -5 L0 9 L8 -5" />
           </svg>
         </span>
-        <span className={styles.brandName}>vitality</span>
+        <span className={styles.brandName}>GIZMO</span>
       </div>
 
       <nav className={styles.nav}>

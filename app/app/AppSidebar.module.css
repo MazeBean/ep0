@@ -3,10 +3,10 @@
    orange-red identity without touching the app-wide --mint (used elsewhere,
    outside this dashboard). */
 .sidebar {
-  --accent: #ff6a3d;
-  --accent-ink: #2a0e04;
-  --accent-soft: rgba(255, 106, 61, 0.1);
-  --accent-line: rgba(255, 106, 61, 0.3);
+  --accent: #e0b13c;
+  --accent-ink: #2a1e05;
+  --accent-soft: rgba(224, 177, 60, 0.1);
+  --accent-line: rgba(224, 177, 60, 0.3);
 
   position: fixed;
   top: 0;
@@ -48,8 +48,7 @@
   font-family: var(--font-hanken), system-ui, sans-serif;
   font-weight: 700;
   font-size: 1rem;
-  letter-spacing: -0.01em;
-  text-transform: lowercase;
+  letter-spacing: 0.02em;
   color: var(--fg);
 }
 

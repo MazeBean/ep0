@@ -10,8 +10,8 @@
      rhythm, last night's sleep, and caffeine pharmacokinetics. No network, no
      browser storage, no external files — persists through the dashboard bridge. */
   :root{
-    --bg:#0a0a0c;--surface:rgba(255,255,255,.045);--border:rgba(255,255,255,.11);--brand:#ff6a3d;
-    --brand-soft:rgba(255,106,61,.08);--brand-line:rgba(255,106,61,.3);
+    --bg:#0a0a0c;--surface:rgba(255,255,255,.045);--border:rgba(255,255,255,.11);--brand:#e0b13c;
+    --brand-soft:rgba(224,177,60,.08);--brand-line:rgba(224,177,60,.3);
     --muted:#8a8a90;--muted-strong:#a8a8b0;--fg:#ededf0;--neg:#ff6b6b;--neg-line:rgba(255,107,107,.4);
     --warn:#f5b169;--track:#17171b;--radius-md:12px;--radius-pill:999px;
     --font-display:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,sans-serif;
@@ -248,7 +248,7 @@ function chartHtml(){
   const labels=[[3,'3a'],[9,'9a'],[15,'3p'],[21,'9p']].map(a=>'<text x="'+xOf(a[0])+'" y="'+(CY1+15)+'" class="axl" text-anchor="middle">'+a[1]+'</text>').join('');
   return '<svg viewBox="0 0 '+CW+' '+(CY1+22)+'" class="chart" role="img" aria-label="Predicted energy through the day">'
     +'<defs><linearGradient id="fill" x1="0" y1="0" x2="0" y2="1">'
-    +'<stop offset="0" stop-color="#ff6a3d" stop-opacity=".24"/><stop offset="1" stop-color="#ff6a3d" stop-opacity="0"/></linearGradient></defs>'
+    +'<stop offset="0" stop-color="#e0b13c" stop-opacity=".24"/><stop offset="1" stop-color="#e0b13c" stop-opacity="0"/></linearGradient></defs>'
     +grid
     +'<path d="'+area+'" fill="url(#fill)"/>'
     +'<path d="'+bline+'" class="bline"/>'

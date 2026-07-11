@@ -80,13 +80,13 @@
   width: 40px;
   height: 40px;
   border-radius: 50%;
-  color: #ff6a3d;
+  color: #e0b13c;
   font-weight: 600;
   font-size: 0.95rem;
   text-decoration: none;
-  background: radial-gradient(120% 120% at 35% 25%, rgba(255, 106, 61, 0.22), rgba(255, 106, 61, 0.05));
-  border: 1.5px solid rgba(255, 106, 61, 0.4);
-  box-shadow: 0 0 24px -8px rgba(255, 106, 61, 0.4), inset 0 0 14px -6px rgba(255, 106, 61, 0.5);
+  background: radial-gradient(120% 120% at 35% 25%, rgba(224, 177, 60, 0.22), rgba(224, 177, 60, 0.05));
+  border: 1.5px solid rgba(224, 177, 60, 0.4);
+  box-shadow: 0 0 24px -8px rgba(224, 177, 60, 0.4), inset 0 0 14px -6px rgba(224, 177, 60, 0.5);
   transition:
     transform var(--duration) var(--ease),
     box-shadow var(--duration) var(--ease),
@@ -94,11 +94,11 @@
 }
 .profileAvatar:hover {
   transform: translateY(-1px);
-  border-color: #ff6a3d;
-  box-shadow: 0 0 30px -6px rgba(255, 106, 61, 0.4), inset 0 0 14px -4px rgba(255, 106, 61, 0.6);
+  border-color: #e0b13c;
+  box-shadow: 0 0 30px -6px rgba(224, 177, 60, 0.4), inset 0 0 14px -4px rgba(224, 177, 60, 0.6);
 }
 .profileAvatar:focus-visible {
-  outline: 2px solid #ff6a3d;
+  outline: 2px solid #e0b13c;
   outline-offset: 2px;
 }
 /* An uploaded photo fills the avatar and clips to its circle (the initial span,
@@ -118,8 +118,8 @@
   position: absolute;
   inset: -10% -5%;
   background:
-    radial-gradient(ellipse 50% 35% at 70% 20%, rgba(255, 106, 61, 0.06), transparent 65%),
-    radial-gradient(ellipse 40% 30% at 20% 80%, rgba(255, 106, 61, 0.04), transparent 70%);
+    radial-gradient(ellipse 50% 35% at 70% 20%, rgba(224, 177, 60, 0.06), transparent 65%),
+    radial-gradient(ellipse 40% 30% at 20% 80%, rgba(224, 177, 60, 0.04), transparent 70%);
   pointer-events: none;
   animation: canvasDrift 60s ease-in-out infinite alternate;
   z-index: 0;
