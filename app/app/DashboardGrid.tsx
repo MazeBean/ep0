@@ -130,6 +130,29 @@ function OpenTileOverlay({
   onClose: () => void
 }) {
   const winRef = useRef<Window | null>(null)
+  // A sealed tile's own layout is correct the instant its srcDoc parses (its
+  // <style> is inline), but its DATA isn't: window.Vitality.load() is an async
+  // bridge round-trip, so render() hasn't populated real content yet at the
+  // exact moment the iframe box first appears. Revealing it immediately is
+  // what read as "shows the tile but it's too small, then updates" — not a
+  // sizing bug, a content-not-ready-yet bug. Hold it at opacity:0 (still
+  // loading normally behind the scenes) until BOTH the iframe's own load
+  // event has fired AND a small floor has passed, then cross-fade it in over
+  // an already-opaque black stage — so there is nothing to flash past.
+  const [ready, setReady] = useState(false)
+  const loadedRef = useRef(false)
+  const flooredRef = useRef(false)
+  const reveal = () => {
+    if (loadedRef.current && flooredRef.current) setReady(true)
+  }
+  useEffect(() => {
+    const t = window.setTimeout(() => {
+      flooredRef.current = true
+      reveal()
+    }, 140)
+    return () => window.clearTimeout(t)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [slot.id])
   return (
     <div className="openOverlay openFull" role="dialog" aria-modal="true" aria-label={slot.name}>
       <div className="openCard">
@@ -153,8 +176,10 @@ function OpenTileOverlay({
             onLoad={(e) => {
               winRef.current = e.currentTarget.contentWindow
               register(e.currentTarget.contentWindow, slot.id)
+              loadedRef.current = true
+              reveal()
             }}
-            className="openFrame"
+            className={ready ? 'openFrame openFrameReady' : 'openFrame'}
             srcDoc={withBridge(slot.html)}
             sandbox="allow-scripts"
             title={slot.name}
