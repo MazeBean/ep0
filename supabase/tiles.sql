@@ -13,7 +13,7 @@
 -- write to it. (Lock the table down later with Supabase Auth if you add accounts.)
 
 create table if not exists public.tiles (
-  slot       text primary key,       -- one of: train, fuel, vitals, vee, brand, water, todoist, goals, peak, finance
+  slot       text primary key,       -- one of: train, fuel, vitals, vee, brand, water, todoist, goals, workout, peak, finance
   name       text,                    -- optional display name
   html       text not null,           -- the sealed, self-contained tile HTML
   updated_at timestamptz not null default now()

@@ -70,10 +70,13 @@
   .calOp{font-size:22px;color:var(--muted)}
   .calCell.remain .n{color:var(--brand)}
   .calCell.remain.over .n{color:var(--neg)}
-  .goalEdit{display:flex;align-items:center;gap:8px}
+  .goalEdits{display:flex;flex-direction:column;gap:8px}
+  .goalEdit{display:flex;align-items:center;justify-content:flex-end;gap:8px}
   .fieldInput{background:var(--bg);border:1px solid var(--border);color:var(--fg);border-radius:10px;padding:9px 11px;font:inherit}
   .fieldInput:focus{outline:none;border-color:var(--brand)}
   .goalEdit .fieldInput{width:92px}
+  .macroBar{height:4px;border-radius:var(--radius-pill);background:var(--track);overflow:hidden;margin-top:8px}
+  .macroBarFill{height:100%;border-radius:var(--radius-pill);background:var(--brand);transition:width var(--duration) ease}
   .bar{height:10px;border-radius:var(--radius-pill);background:var(--track);overflow:hidden}
   .barFill{height:100%;border-radius:var(--radius-pill);background:var(--brand);transition:width var(--duration) ease}
   .barFill.over{background:var(--neg)}
@@ -98,6 +101,18 @@
   .xBtn:hover{color:var(--neg);border-color:var(--neg-line)}
   .empty{color:var(--muted);font-size:13px;padding:12px 0}
   .hint{color:var(--neg);font-size:12px;font-family:var(--font-mono);min-height:14px;margin-top:4px}
+  .suppAdd{display:flex;gap:8px;margin:10px 0 14px}
+  .suppAdd .fieldInput{flex:1}
+  .suppList{display:flex;flex-direction:column;gap:6px}
+  .suppRow{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 12px;border:1px solid var(--border);border-radius:var(--radius-md);background:var(--surface)}
+  .suppLeft{display:flex;align-items:center;gap:12px;min-width:0}
+  .checkBtn{background:transparent;border:1.5px solid var(--border);color:transparent;width:22px;height:22px;border-radius:50%;
+    cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:border-color .15s,background .15s,color .15s}
+  .checkBtn:hover{border-color:var(--brand)}
+  .checkBtn.checked{background:var(--brand);border-color:var(--brand);color:#0a0a0c}
+  .checkBtn svg{width:12px;height:12px}
+  .suppName{font-size:14px}
+  .suppRow.checked .suppName{color:var(--muted);text-decoration:line-through}
 </style>
 </head>
 <body>
@@ -166,18 +181,55 @@ function todaysLog(){return store[todayKey()]||[];}
 function setTodaysLog(l){store[todayKey()]=l;persist();}
 function goalCal(){return store.goalCal!=null?store.goalCal:2000;}
 function setGoalCal(n){store.goalCal=n;persist();}
+function goalProtein(){return store.goalProtein!=null?store.goalProtein:150;}
+function setGoalProtein(n){store.goalProtein=n;persist();}
 function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 const round=n=>Math.round(n);
 let query='',matches=[];
 function totals(){return todaysLog().reduce((t,e)=>{t.cal+=e.cal;t.p+=e.p;t.c+=e.c;t.f+=e.f;return t;},{cal:0,p:0,c:0,f:0});}
+
+/* ---- daily supplements checklist: the supplement list persists; which ones
+   are checked resets each day (keyed by date, same pattern as the food log) ---- */
+function allSupplements(){return Array.isArray(store.supplements)?store.supplements:[];}
+function todaysChecked(){
+  if(!store.supplementChecks||typeof store.supplementChecks!=='object')store.supplementChecks={};
+  return Array.isArray(store.supplementChecks[todayKey()])?store.supplementChecks[todayKey()]:[];
+}
+function setTodaysChecked(ids){
+  if(!store.supplementChecks||typeof store.supplementChecks!=='object')store.supplementChecks={};
+  store.supplementChecks[todayKey()]=ids;persist();
+}
+function addSupplement(name){
+  const trimmed=name.trim();if(!trimmed)return;
+  if(!Array.isArray(store.supplements))store.supplements=[];
+  store.supplements.push({id:newId(),name:trimmed});persist();
+}
+function deleteSupplement(id){
+  store.supplements=allSupplements().filter(s=>s.id!==id);
+  setTodaysChecked(todaysChecked().filter(x=>x!==id));
+  persist();
+}
+function toggleSupplement(id){
+  const checked=todaysChecked();
+  const next=checked.includes(id)?checked.filter(x=>x!==id):[...checked,id];
+  setTodaysChecked(next);
+}
+function newId(){return Date.now().toString(36)+Math.random().toString(36).slice(2,6);}
 function summaryHtml(){
-  const t=totals(),goal=goalCal(),remaining=goal-t.cal,over=remaining<0,pct=Math.min(100,goal>0?(t.cal/goal)*100:0);
+  const t=totals(),goal=goalCal(),pGoal=goalProtein();
+  const remaining=goal-t.cal,over=remaining<0,pct=Math.min(100,goal>0?(t.cal/goal)*100:0);
+  const pPct=Math.min(100,pGoal>0?(t.p/pGoal)*100:0);
   const cell=(cls,n,l)=>'<div class="calCell '+cls+'"><span class="n">'+round(n)+'</span><span class="l">'+l+'</span></div>';
   const head='<div class="calHead"><div class="calMath">'+cell('',goal,'goal')+'<span class="calOp">−</span>'+cell('',t.cal,'food')+'<span class="calOp">=</span>'+cell('remain'+(over?' over':''),Math.abs(remaining),over?'over':'remaining')+'</div>'
-    +'<div class="goalEdit"><span class="calCell"><span class="l">daily goal</span></span><input class="fieldInput" id="goal" type="number" min="0" step="50" value="'+goal+'" /></div></div>';
+    +'<div class="goalEdits">'
+    +'<div class="goalEdit"><span class="calCell"><span class="l">calorie goal</span></span><input class="fieldInput" id="goal" type="number" min="0" step="50" value="'+goal+'" /></div>'
+    +'<div class="goalEdit"><span class="calCell"><span class="l">protein goal (g)</span></span><input class="fieldInput" id="proteinGoal" type="number" min="0" step="5" value="'+pGoal+'" /></div>'
+    +'</div></div>';
   const bar='<div class="bar"><div class="barFill'+(over?' over':'')+'" style="width:'+pct+'%"></div></div>';
-  const box=(a,v,u,l)=>'<div class="macroBox" data-accent="'+a+'"><span class="macroVal">'+round(v)+(u||'')+'</span><span class="macroLabel">'+l+'</span></div>';
-  return '<section class="card"><span class="cardName">Today</span>'+head+bar+'<div class="macroGrid">'+box('p',t.p,'g','protein')+box('c',t.c,'g','carbs')+box('f',t.f,'g','fat')+box('cal',t.cal,'','calories')+'</div></section>';
+  const box=(a,v,u,l,goalPct)=>'<div class="macroBox" data-accent="'+a+'"><span class="macroVal">'+round(v)+(u||'')+'</span><span class="macroLabel">'+l+'</span>'
+    +(goalPct!=null?'<div class="macroBar"><div class="macroBarFill" style="width:'+goalPct+'%"></div></div>':'')+'</div>';
+  return '<section class="card"><span class="cardName">Today</span>'+head+bar+'<div class="macroGrid">'
+    +box('p',t.p,'g','protein / '+pGoal+'g',pPct)+box('c',t.c,'g','carbs')+box('f',t.f,'g','fat')+box('cal',t.cal,'','calories')+'</div></section>';
 }
 function resultsInner(){
   const q=query.trim().toLowerCase();
@@ -193,15 +245,31 @@ function logHtml(){
   const rows=log.map((e,i)=>'<div class="logRow"><div><div class="foodName">'+esc(e.name)+' <span class="meta">'+e.grams+'g</span></div><div class="nums">'+round(e.cal)+' kcal · '+round(e.p)+'P / '+round(e.c)+'C / '+round(e.f)+'F</div></div><button class="xBtn" data-del="'+i+'" title="Remove">×</button></div>').join('');
   return '<h2 class="sectionTitle">Logged today</h2><div class="logList">'+rows+'</div>';
 }
+function supplementsHtml(){
+  const items=allSupplements(),checked=todaysChecked();
+  const rows=items.length?items.map(s=>{
+    const isChecked=checked.includes(s.id);
+    return '<div class="suppRow'+(isChecked?' checked':'')+'"><div class="suppLeft">'
+      +'<button class="checkBtn'+(isChecked?' checked':'')+'" data-toggle-supp="'+s.id+'" title="Toggle taken today">'
+      +'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12l5 5L20 6"/></svg></button>'
+      +'<span class="suppName">'+esc(s.name)+'</span></div>'
+      +'<button class="xBtn" data-del-supp="'+s.id+'" title="Remove">×</button></div>';
+  }).join('') : '<p class="empty">No supplements yet. Add one below.</p>';
+  return '<h2 class="sectionTitle">Supplements</h2>'
+    +'<div class="suppAdd"><input class="fieldInput" id="suppName" type="text" placeholder="e.g. Vitamin D, creatine" autocomplete="off" />'
+    +'<button class="btn btn-primary" id="suppAdd">Add</button></div>'
+    +'<div class="suppList">'+rows+'</div>';
+}
 function headerHtml(){
   return '<header class="header"><div class="markWrap"><div class="markGlow"></div><div class="mark" aria-hidden="true">'
     +'<svg viewBox="-12 -12 24 24" fill="#0a0a0c" stroke="none"><path d="M0 -10 C0 -10 -7 -2 -7 3 a7 7 0 0 0 14 0 C7 -2 0 -10 0 -10 Z"/></svg></div></div>'
     +'<div><h1 class="title">Fuel</h1><p class="subtitle">protein · carbs · fat</p></div></header>';
 }
-function render(){$('app').innerHTML=headerHtml()+summaryHtml()+searchHtml()+logHtml();}
+function render(){$('app').innerHTML=headerHtml()+summaryHtml()+searchHtml()+logHtml()+supplementsHtml();}
 document.addEventListener('input',e=>{
   if(e.target.id==='q'){query=e.target.value;$('results').innerHTML=resultsInner();$('hint').textContent='';}
   if(e.target.id==='goal'){const n=Number(e.target.value);setGoalCal(isFinite(n)&&n>=0?n:0);render();$('goal').focus();}
+  if(e.target.id==='proteinGoal'){const n=Number(e.target.value);setGoalProtein(isFinite(n)&&n>=0?n:0);render();$('proteinGoal').focus();}
 });
 document.addEventListener('click',e=>{
   const add=e.target.closest('[data-add]');
@@ -215,7 +283,24 @@ document.addEventListener('click',e=>{
     setTodaysLog(log);query='';render();return;
   }
   const del=e.target.closest('[data-del]');
-  if(del){const log=todaysLog();log.splice(Number(del.getAttribute('data-del')),1);setTodaysLog(log);render();}
+  if(del){const log=todaysLog();log.splice(Number(del.getAttribute('data-del')),1);setTodaysLog(log);render();return;}
+  if(e.target.closest('#suppAdd')){
+    const el=$('suppName');
+    addSupplement((el&&el.value)||'');
+    if(el)el.value='';
+    render();return;
+  }
+  const toggleSupp=e.target.closest('[data-toggle-supp]');
+  if(toggleSupp){toggleSupplement(toggleSupp.getAttribute('data-toggle-supp'));render();return;}
+  const delSupp=e.target.closest('[data-del-supp]');
+  if(delSupp){deleteSupplement(delSupp.getAttribute('data-del-supp'));render();}
+});
+document.addEventListener('keydown',e=>{
+  if(e.target.id==='suppName'&&e.key==='Enter'){
+    e.preventDefault();
+    addSupplement(e.target.value||'');
+    e.target.value='';render();
+  }
 });
 spawnStars();
 initTilt();

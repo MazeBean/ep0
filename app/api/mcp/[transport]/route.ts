@@ -34,7 +34,7 @@ import { MCP_SCOPE, mcpResourceUrl, oauthSecret, originOf, resourceMetadataUrl }
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
 
-const SLOTS = ['train', 'fuel', 'vitals', 'vee', 'brand', 'water', 'todoist', 'goals', 'peak', 'finance'] as const
+const SLOTS = ['train', 'fuel', 'vitals', 'vee', 'brand', 'water', 'todoist', 'goals', 'workout', 'peak', 'finance'] as const
 
 const MAX_TILE_HTML = 1024 * 1024 // 1MB — one tile can never be pathological
 
@@ -61,7 +61,7 @@ const mcpHandler = createMcpHandler(
       {
         title: 'List dashboard slots',
         description:
-          'READ. List the ten dashboard tile slots (train, fuel, vitals, vee, brand, water, todoist, goals, peak, finance) and whether each currently holds a tile.',
+          'READ. List the eleven dashboard tile slots (train, fuel, vitals, vee, brand, water, todoist, goals, workout, peak, finance) and whether each currently holds a tile.',
         inputSchema: {},
       },
       async (): Promise<ToolResult> => {

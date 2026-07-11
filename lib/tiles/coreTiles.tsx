@@ -29,6 +29,7 @@ export type CoreTileId =
   | 'water'
   | 'todoist'
   | 'goals'
+  | 'workout'
   | 'finance'
 
 /** A single live metric to surface on a tile (Train day, Fuel kcal). */
@@ -229,6 +230,27 @@ export const CORE_TILES: Record<CoreTileId, CoreTile> = {
       </svg>
     ),
   },
+  workout: {
+    id: 'workout',
+    href: '/app/starter',
+    index: '11',
+    label: 'Workout',
+    orb: { mode: 'wander' },
+    defaultSize: 'tall',
+    glyph: (
+      <svg viewBox="-12 -12 24 24" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round">
+        <rect x="-10" y="-3" width="2.8" height="6" rx="0.6" strokeWidth="1.3" />
+        <rect x="7.2" y="-3" width="2.8" height="6" rx="0.6" strokeWidth="1.3" />
+        <line x1="-7.2" y1="0" x2="7.2" y2="0" strokeWidth="1.3" />
+      </svg>
+    ),
+    art: (
+      <svg className="art" viewBox="0 0 210 250">
+        <path className="mot" d="M40 190 L80 165 L110 175 L145 130 L175 140 L200 95" />
+        <g className="orb"><circle className="glow" r="10" /><circle className="node" r="3.4" /></g>
+      </svg>
+    ),
+  },
   finance: {
     id: 'finance',
     href: '/app/starter',
@@ -325,6 +347,7 @@ export const DEFAULT_HOME_ORDER: HomeTileId[] = [
   'water',
   'todoist',
   'goals',
+  'workout',
   'peak',
   'finance',
 ]
