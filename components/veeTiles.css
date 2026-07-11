@@ -374,10 +374,17 @@
 @keyframes openFade{from{opacity:0}to{opacity:1}}
 @keyframes openRise{from{opacity:0;transform:translateY(14px) scale(.985)}to{opacity:1;transform:none}}
 
-/* Filled tile = full page. No scrim, no card chrome: the tile IS the page. */
-.veeTiles .openOverlay.openFull{padding:0;place-items:stretch;background:#000;backdrop-filter:none}
+/* Filled tile = full page. No scrim, no card chrome: the tile IS the page.
+   Neither the overlay nor the card fade in via opacity here (unlike the
+   connector/new-tile dialogs above, which keep openFade/openRise): opacity
+   is a whole-subtree effect, so a 0→1 fade on either one made the dashboard
+   underneath visibly show THROUGH the not-yet-opaque tile for the first
+   ~200ms — read as "flashes the home screen, then the tile is too small,
+   then it updates" when switching tabs. This is opaque from the very first
+   frame instead; only the chrome settles into place via transform. */
+.veeTiles .openOverlay.openFull{padding:0;place-items:stretch;background:#000;backdrop-filter:none;animation:none}
 .veeTiles .openOverlay.openFull .openCard{width:100%;height:100%;border:0;border-radius:0;box-shadow:none;
-  animation:openPage .32s var(--vease) both}
+  animation:openPage .28s var(--vease) both}
 .veeTiles .openOverlay.openFull .openTop{padding:max(14px,env(safe-area-inset-top)) 20px 12px;
   border-bottom:1px solid rgba(255,255,255,.06)}
 .veeTiles .openBack{display:inline-flex;align-items:center;gap:10px;border:0;background:none;cursor:pointer;
@@ -386,7 +393,7 @@
 .veeTiles .openBack:hover{color:var(--mint)}
 .veeTiles .openSlotName{font-family:var(--mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;
   color:rgba(255,255,255,.38);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-@keyframes openPage{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+@keyframes openPage{from{transform:translateY(10px)}to{transform:none}}
 
 /* No-routine state: a gentle prompt replaces the score number on the Vee tile. */
 .veeTiles .tile.vee .vee-setup-prompt {
