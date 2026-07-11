@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Water — retro mock</title>
+<style>
+  :root{
+    --bg:#000000;--surface:#0a0a0a;--border:#2a2a2a;--brand:#4AFF88;
+    --brand-dim:#1f6b3d;--fg:#e8ffe8;--muted:#5f8f6f;--neg:#ff5555;
+    --font:ui-monospace,"Courier New",Consolas,monospace;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%}
+  body{
+    background:var(--bg);color:var(--fg);font:15px/1.5 var(--font);
+    display:flex;justify-content:center;padding:40px 20px;position:relative;
+    text-transform:uppercase;letter-spacing:.03em;
+  }
+  /* scanlines */
+  body::before{
+    content:'';position:fixed;inset:0;pointer-events:none;z-index:50;
+    background:repeating-linear-gradient(0deg,rgba(0,0,0,.25) 0px,rgba(0,0,0,.25) 1px,transparent 1px,transparent 3px);
+    mix-blend-mode:multiply;
+  }
+  .shell{width:100%;max-width:560px}
+  .header{display:flex;align-items:center;gap:14px;margin-bottom:22px}
+  .mark{width:40px;height:40px;flex-shrink:0;background:var(--brand);
+    box-shadow:4px 4px 0 #000,0 0 0 2px var(--brand);
+    display:flex;align-items:center;justify-content:center}
+  .mark svg{width:22px;height:22px;image-rendering:pixelated}
+  .title{font-size:22px;font-weight:700;margin:0;letter-spacing:.08em}
+  .subtitle{color:var(--muted);font-size:11px;letter-spacing:.15em;margin:6px 0 0}
+  .panel{border:2px solid var(--border);box-shadow:0 0 0 2px #000,4px 4px 0 var(--brand-dim);
+    background:var(--surface);padding:16px;margin-bottom:18px}
+  .progressTop{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin-bottom:12px}
+  .progressNum{font-size:24px;font-weight:700}
+  .progressNum .unit{font-size:12px;color:var(--muted);margin-left:6px}
+  .progressGoal{font-size:11px;color:var(--muted);letter-spacing:.1em}
+  .track{width:100%;height:14px;background:#000;border:2px solid var(--border);padding:2px}
+  .fill{height:100%;background:repeating-linear-gradient(90deg,var(--brand) 0 6px,var(--brand-dim) 6px 8px)}
+  .stats{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-bottom:18px}
+  .stat{border:2px solid var(--border);box-shadow:3px 3px 0 #000;background:var(--surface);padding:12px;text-align:center}
+  .statNum{font-size:20px;font-weight:700}
+  .statNum.brand{color:var(--brand)}
+  .statLbl{color:var(--muted);font-size:10px;letter-spacing:.1em;margin-top:4px}
+  .cardName{font-size:10px;letter-spacing:.15em;color:var(--muted);display:block;margin-bottom:12px}
+  .quickRow{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+  .quickBtn{
+    border:2px solid var(--brand);background:#000;color:var(--brand);
+    box-shadow:3px 3px 0 var(--brand-dim);
+    padding:8px 14px;font:inherit;font-size:12.5px;font-weight:700;cursor:pointer;
+    text-transform:uppercase;letter-spacing:.05em;
+  }
+  .quickBtn:hover{background:var(--brand);color:#000}
+  .quickBtn:active{box-shadow:1px 1px 0 var(--brand-dim);transform:translate(2px,2px)}
+  .row{display:flex;gap:10px;align-items:flex-end}
+  .field{flex:1}
+  .fieldLbl{display:block;font-size:10px;color:var(--muted);margin-bottom:6px;letter-spacing:.1em}
+  input[type=number]{
+    width:100%;background:#000;border:2px solid var(--border);color:var(--fg);
+    padding:9px 10px;font:inherit;text-transform:uppercase;
+  }
+  input:focus{outline:none;border-color:var(--brand)}
+  .btn-primary{
+    background:var(--brand);color:#000;border:2px solid var(--brand);font-weight:700;
+    box-shadow:3px 3px 0 var(--brand-dim);padding:9px 16px;font:inherit;cursor:pointer;white-space:nowrap;
+  }
+  .btn-primary:active{box-shadow:1px 1px 0 var(--brand-dim);transform:translate(2px,2px)}
+  .logHead{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin:0 0 12px}
+  .sectionTitle{font-weight:700;font-size:15px;margin:0;letter-spacing:.08em}
+  .count{font-size:10px;letter-spacing:.12em;color:var(--muted)}
+  .log{display:flex;flex-direction:column;gap:8px}
+  .entry{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 12px;
+    border:2px solid var(--border);border-left:6px solid var(--brand);background:var(--surface)}
+  .entryAmt{font-size:13.5px;font-weight:700}
+  .entryMeta{font-size:10px;letter-spacing:.1em;color:var(--muted);margin-left:10px}
+  .xBtn{background:#000;border:2px solid var(--border);color:var(--muted);width:24px;height:24px;cursor:pointer;flex-shrink:0;line-height:1}
+  .xBtn:hover{color:var(--neg);border-color:var(--neg)}
+</style>
+</head>
+<body>
+<main><div class="shell" id="app"></div></main>
+<script>
+/* Retro/pixel mock of the Water tile — preview only, not wired to a real slot.
+   Falls back to sample data when window.Vitality isn't present (opened directly). */
+const GOAL_ML=2000;
+const QUICK=[250,350,500];
+let entries=[
+  {id:'a',ml:350,ts:Date.now()-3*3600e3},
+  {id:'b',ml:500,ts:Date.now()-1.5*3600e3},
+  {id:'c',ml:250,ts:Date.now()-0.4*3600e3},
+];
+const $=id=>document.getElementById(id);
+function persist(){if(window.Vitality)window.Vitality.save(entries);}
+function newId(){return Date.now().toString(36)+Math.random().toString(36).slice(2,6);}
+function when(ts){const d=new Date(ts);return d.toLocaleTimeString(undefined,{hour:'numeric',minute:'2-digit'});}
+function dayKey(ts){const d=new Date(ts);return d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate();}
+function todayEntries(){const k=dayKey(Date.now());return entries.filter(e=>dayKey(e.ts)===k);}
+function todayTotal(){return todayEntries().reduce((s,e)=>s+e.ml,0);}
+function streak(){return 4;}
+function sevenDayAvg(){return 1840;}
+
+function headerHtml(){
+  return '<header class="header"><div class="mark" aria-hidden="true">'
+    +'<svg viewBox="0 0 16 16" shape-rendering="crispEdges">'
+    +'<rect x="7" y="1" width="2" height="2" fill="#000"/><rect x="6" y="3" width="4" height="2" fill="#000"/>'
+    +'<rect x="5" y="5" width="6" height="2" fill="#000"/><rect x="4" y="7" width="8" height="5" fill="#000"/>'
+    +'<rect x="5" y="12" width="6" height="2" fill="#000"/></svg></div>'
+    +'<div><h1 class="title">Water</h1><p class="subtitle">daily hydration</p></div></header>';
+}
+function progressHtml(){
+  const total=todayTotal();
+  const pct=Math.min(100,Math.round((total/GOAL_ML)*100));
+  return '<section class="panel">'
+    +'<div class="progressTop"><div class="progressNum">'+total.toLocaleString()+'<span class="unit">ML</span></div>'
+    +'<div class="progressGoal">GOAL '+GOAL_ML.toLocaleString()+' ML</div></div>'
+    +'<div class="track"><div class="fill" style="width:'+pct+'%"></div></div>'
+    +'</section>';
+}
+function statsHtml(){
+  return '<section class="stats">'
+    +'<div class="stat"><div class="statNum brand">'+streak()+'</div><div class="statLbl">Day streak</div></div>'
+    +'<div class="stat"><div class="statNum">'+sevenDayAvg().toLocaleString()+'</div><div class="statLbl">7-day avg ml</div></div>'
+    +'</section>';
+}
+function formHtml(){
+  const chips=QUICK.map(ml=>'<button class="quickBtn" data-quick="'+ml+'">+'+ml+' ML</button>').join('');
+  return '<section class="panel"><span class="cardName">Log water</span>'
+    +'<div class="quickRow">'+chips+'</div>'
+    +'<div class="row"><div class="field"><label class="fieldLbl">Custom (ml)</label>'
+    +'<input type="number" id="amount" min="0" placeholder="300" /></div>'
+    +'<button class="btn-primary" id="add">Add</button></div>'
+    +'</section>';
+}
+function logInner(){
+  const today=todayEntries().slice().sort((a,b)=>b.ts-a.ts);
+  if(!today.length)return '<p class="statLbl">No water logged today.</p>';
+  return today.map(e=>
+    '<div class="entry"><div><span class="entryAmt">'+e.ml+' ML</span><span class="entryMeta">'+when(e.ts)+'</span></div>'
+    +'<button class="xBtn" data-del="'+e.id+'">X</button></div>'
+  ).join('');
+}
+function logHtml(){
+  const today=todayEntries();
+  return '<div class="logHead"><h2 class="sectionTitle">Today</h2>'
+    +'<span class="count">'+(today.length?today.length+' entries':'empty')+'</span></div>'
+    +'<div class="log" id="log">'+logInner()+'</div>';
+}
+function render(){$('app').innerHTML=headerHtml()+progressHtml()+statsHtml()+formHtml()+logHtml();}
+
+function addAmount(ml){
+  if(!ml||ml<=0)return;
+  entries.push({id:newId(),ml,ts:Date.now()});
+  persist();render();
+}
+function addCustom(){
+  const ml=parseInt($('amount').value,10);
+  if(ml>0)addAmount(ml);
+}
+
+document.addEventListener('click',e=>{
+  const quick=e.target.closest('[data-quick]');
+  if(quick){addAmount(parseInt(quick.getAttribute('data-quick'),10));return;}
+  if(e.target.closest('#add')){addCustom();return;}
+  const del=e.target.closest('[data-del]');
+  if(del){const id=del.getAttribute('data-del');entries=entries.filter(en=>en.id!==id);persist();render();}
+});
+document.addEventListener('keydown',e=>{if(e.target.id==='amount'&&e.key==='Enter'){e.preventDefault();addCustom();}});
+
+(async()=>{
+  if(window.Vitality){const d=await window.Vitality.load();if(Array.isArray(d)&&d.length)entries=d;}
+  render();
+})();
+</script>
+</body>
+</html>
