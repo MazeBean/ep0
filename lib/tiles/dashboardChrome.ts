@@ -146,8 +146,8 @@ function reset(userId: string): DashboardChrome {
 /** The accent a chosen background publishes into --wall-accent (themes the UI). */
 export function backgroundAccent(bg: Background): string {
   if (bg.mode === 'world') return bg.accent
-  if (bg.mode === 'gradient') return '#6EE7B7'
-  return '#6EE7B7'
+  if (bg.mode === 'gradient') return '#c3c6d0'
+  return '#c3c6d0'
 }
 
 export const dashboardChrome = { get, update, setBackground, reset }

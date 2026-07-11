@@ -17,12 +17,38 @@ interface DashboardHeaderProps {
  * FONT stays Instrument Serif italic (the unified Vitality voice) — only wording,
  * name, accent, and scale are exposed.
  */
+interface WeatherState {
+  tempF: number
+  humidity: number
+  sunset: string
+}
+
+/** Open-Meteo needs no API key and allows unauthenticated browser calls, so
+ *  this fetches straight from the client — no server route to maintain. */
+async function fetchWeather(lat: number, lon: number): Promise<WeatherState> {
+  const url =
+    `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}` +
+    `&current=temperature_2m,relative_humidity_2m&daily=sunset` +
+    `&temperature_unit=fahrenheit&timezone=auto`
+  const res = await fetch(url)
+  if (!res.ok) throw new Error('weather fetch failed')
+  const data = await res.json()
+  return {
+    tempF: Math.round(data.current.temperature_2m),
+    humidity: Math.round(data.current.relative_humidity_2m),
+    sunset: data.daily.sunset[0],
+  }
+}
+
 export default function DashboardHeader({ firstName, greeting, date }: DashboardHeaderProps) {
   const g = greeting ?? DEFAULT_CHROME.greeting
   const d = date ?? DEFAULT_CHROME.date
   const [autoWord, setAutoWord] = useState('')
   const [fullDate, setFullDate] = useState('')
   const [todayDate, setTodayDate] = useState('')
+  const [clock, setClock] = useState('')
+  const [weather, setWeather] = useState<WeatherState | null>(null)
+  const [weatherStatus, setWeatherStatus] = useState<'loading' | 'ok' | 'unavailable'>('loading')
 
   useEffect(() => {
     const now = new Date()
@@ -32,11 +58,44 @@ export default function DashboardHeader({ firstName, greeting, date }: Dashboard
     setTodayDate(now.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' }))
   }, [])
 
+  // Live clock, ticking every second (formatted without seconds).
+  useEffect(() => {
+    const tick = () => setClock(new Date().toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }))
+    tick()
+    const id = setInterval(tick, 1000)
+    return () => clearInterval(id)
+  }, [])
+
+  // Weather for the user's own location — needs geolocation permission.
+  // Fails quiet: if it's denied or the fetch errors, the hero just shows
+  // the greeting + clock with no weather row.
+  useEffect(() => {
+    if (!('geolocation' in navigator)) {
+      setWeatherStatus('unavailable')
+      return
+    }
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        fetchWeather(pos.coords.latitude, pos.coords.longitude)
+          .then((w) => {
+            setWeather(w)
+            setWeatherStatus('ok')
+          })
+          .catch(() => setWeatherStatus('unavailable'))
+      },
+      () => setWeatherStatus('unavailable'),
+      { timeout: 10000 },
+    )
+  }, [])
+
   // Custom wording falls back to the auto line if blank (never render empty).
   const word = g.mode === 'custom' && g.text.trim() ? g.text.trim() : autoWord
   const includesName = !!(firstName && word.toLowerCase().includes(firstName.toLowerCase()))
   const renderName = g.showName && firstName && !includesName
   const dateText = d.format === 'today' ? todayDate : fullDate
+  const sunsetText = weather
+    ? new Date(weather.sunset).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })
+    : null
 
   return (
     <div className={styles.header} style={{ ['--greet-scale' as string]: g.scale }}>
@@ -49,6 +108,23 @@ export default function DashboardHeader({ firstName, greeting, date }: Dashboard
         ) : null}
       </h1>
       {d.show && <p className={styles.date}>{dateText}</p>}
+      <div className={styles.heroStats}>
+        {clock && <span className={styles.heroStat}>{clock}</span>}
+        {weatherStatus === 'ok' && weather && (
+          <>
+            <span className={styles.heroDot} aria-hidden>·</span>
+            <span className={styles.heroStat}>{weather.tempF}°F</span>
+            <span className={styles.heroDot} aria-hidden>·</span>
+            <span className={styles.heroStat}>{weather.humidity}% humidity</span>
+            {sunsetText && (
+              <>
+                <span className={styles.heroDot} aria-hidden>·</span>
+                <span className={styles.heroStat}>Sunset {sunsetText}</span>
+              </>
+            )}
+          </>
+        )}
+      </div>
     </div>
   )
 }

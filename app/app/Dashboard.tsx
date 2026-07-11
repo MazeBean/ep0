@@ -184,7 +184,7 @@ export default function Dashboard({ firstName, userId }: DashboardProps) {
     setChrome(dashboardChrome.get(userId))
   }, [userId])
 
-  const wallAccent = chrome ? backgroundAccent(chrome.background) : '#6EE7B7'
+  const wallAccent = chrome ? backgroundAccent(chrome.background) : '#c3c6d0'
   const showGem = chrome?.gem.show ?? true
 
   return (
