@@ -94,6 +94,32 @@
   .empty{color:var(--muted);font-size:13px;padding:14px 0;text-transform:lowercase}
   .notConnected{color:var(--muted-strong);font-size:13.5px;line-height:1.6}
   .notConnected code{font-family:var(--font-mono);background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:2px 6px;color:var(--fg)}
+
+  .weekGrid{display:grid;grid-template-columns:repeat(7,1fr);gap:6px}
+  .dayCol{display:flex;flex-direction:column;gap:6px;min-width:0}
+  .dayHead{text-align:center;padding-bottom:6px;border-bottom:1px solid var(--border)}
+  .dayHead .wd{font-family:var(--font-mono);font-size:9px;letter-spacing:.06em;color:var(--muted);text-transform:lowercase;display:block}
+  .dayHead .dn{font-size:14px;font-weight:600;margin-top:2px}
+  .dayCol.today .dayHead{border-bottom-color:var(--brand)}
+  .dayCol.today .dn{color:var(--brand)}
+  .dayChips{display:flex;flex-direction:column;gap:5px;min-height:20px}
+  .chip{position:relative;background:var(--bg);border:1px solid var(--border);border-radius:8px;
+    padding:6px 16px 6px 7px;font-size:11px;line-height:1.35;cursor:pointer;transition:border-color .15s,background .15s}
+  .chip:hover{border-color:var(--brand-line);background:var(--brand-soft)}
+  .chip .chipText{display:block;overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical}
+  .chip .chipDel{position:absolute;top:1px;right:2px;background:none;border:none;color:var(--muted);cursor:pointer;font-size:12px;line-height:1;padding:3px}
+  .chip .chipDel:hover{color:var(--neg)}
+  .dayEmpty{color:#4a4a50;font-size:16px;text-align:center;padding:4px 0}
+  .bucketRow{display:flex;flex-direction:column;gap:6px;margin-top:14px}
+  .bucketRow:first-of-type{margin-top:0}
+  .bucketLbl{font-family:var(--font-mono);font-size:10px;letter-spacing:.1em;text-transform:lowercase;color:var(--muted)}
+  .bucketList{display:flex;flex-wrap:wrap;gap:6px}
+  .bucketChip{position:relative;background:var(--bg);border:1px solid var(--border);border-left:3px solid var(--muted);border-radius:8px;
+    padding:6px 26px 6px 10px;font-size:12px;cursor:pointer;max-width:100%}
+  .bucketChip.overdue{border-left-color:var(--neg)}
+  .bucketChip:hover{border-color:var(--brand-line)}
+  .bucketChip .chipDel{position:absolute;top:2px;right:4px;background:none;border:none;color:var(--muted);cursor:pointer;font-size:12px;line-height:1;padding:3px}
+  .bucketChip .chipDel:hover{color:var(--neg)}
 </style>
 </head>
 <body>
@@ -171,6 +197,68 @@ function dueLabel(due){
   return d.toLocaleDateString(undefined,{month:'short',day:'numeric'});
 }
 
+/* ---- the next-7-days calendar grid ---- */
+function weekDays(){
+  const days=[];
+  const base=new Date();base.setHours(0,0,0,0);
+  for(let i=0;i<7;i++){const d=new Date(base);d.setDate(base.getDate()+i);days.push(d);}
+  return days;
+}
+function groupTasks(){
+  const days=weekDays();
+  const map={};
+  days.forEach(d=>{map[dayKey(d)]=[];});
+  const overdue=[], later=[], undated=[];
+  const first=days[0], last=days[days.length-1];
+  for(const t of tasks){
+    if(!t.due){undated.push(t);continue;}
+    const d=new Date(t.due);
+    if(isNaN(d.getTime())){undated.push(t);continue;}
+    d.setHours(0,0,0,0);
+    const k=dayKey(d);
+    if(map[k]){map[k].push(t);continue;}
+    if(d<first){overdue.push(t);continue;}
+    if(d>last){later.push(t);continue;}
+    undated.push(t);
+  }
+  return {days,map,overdue,later,undated};
+}
+function chipHtml(t,cls){
+  return '<div class="'+(cls||'chip')+'" data-complete="'+t.id+'">'
+    +'<span class="chipText">'+esc(t.content)+'</span>'
+    +'<button class="chipDel" data-del="'+t.id+'" title="Delete">×</button>'
+    +'</div>';
+}
+function weekGridHtml(){
+  const {days,map}=groupTasks();
+  const todayKey=dayKey(new Date());
+  const cols=days.map(d=>{
+    const k=dayKey(d);
+    const isToday=k===todayKey;
+    const items=map[k];
+    const chips=items.length?items.map(t=>chipHtml(t)).join(''):'<div class="dayEmpty">·</div>';
+    return '<div class="dayCol'+(isToday?' today':'')+'"><div class="dayHead">'
+      +'<span class="wd">'+d.toLocaleDateString(undefined,{weekday:'short'})+'</span>'
+      +'<span class="dn">'+d.getDate()+'</span></div>'
+      +'<div class="dayChips">'+chips+'</div></div>';
+  }).join('');
+  return '<section class="card"><span class="cardName">next 7 days</span><div class="weekGrid">'+cols+'</div></section>';
+}
+function bucketsHtml(){
+  const {overdue,later,undated}=groupTasks();
+  if(!overdue.length&&!later.length&&!undated.length)return '';
+  const bucket=(label,items,cls)=>{
+    if(!items.length)return '';
+    return '<div class="bucketRow"><span class="bucketLbl">'+label+'</span><div class="bucketList">'
+      +items.map(t=>chipHtml(t,'bucketChip'+(cls?' '+cls:''))).join('')+'</div></div>';
+  };
+  return '<section class="card">'
+    +bucket('overdue',overdue,'overdue')
+    +bucket('later',later,'')
+    +bucket('no due date',undated,'')
+    +'</section>';
+}
+
 function headerHtml(){
   return '<header class="header"><div class="markWrap"><div class="markGlow"></div><div class="mark" aria-hidden="true">'
     +'<svg viewBox="-12 -12 24 24" fill="none" stroke="#0a0a0c" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">'
@@ -193,29 +281,6 @@ function formHtml(){
     +'<div class="hint" id="hint"></div>'
     +'</section>';
 }
-function logInner(){
-  if(!tasks.length)return '<p class="empty">nothing open. add a task above.</p>';
-  const sorted=tasks.slice().sort((a,b)=>{
-    if(!a.due&&!b.due)return 0;
-    if(!a.due)return 1;
-    if(!b.due)return -1;
-    return new Date(a.due)-new Date(b.due);
-  });
-  return sorted.map(t=>
-    '<div class="entry"><div class="entryLeft">'
-    +'<button class="checkBtn" data-complete="'+t.id+'" title="Complete"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12l5 5L20 6"/></svg></button>'
-    +'<span class="entryContent">'+esc(t.content)+'</span></div>'
-    +'<div style="display:flex;align-items:center;gap:10px">'
-    +(t.due?'<span class="entryDue">'+esc(dueLabel(t.due))+'</span>':'')
-    +'<button class="xBtn" data-del="'+t.id+'" title="Delete">×</button></div>'
-    +'</div>'
-  ).join('');
-}
-function logHtml(){
-  return '<div class="logHead"><h2 class="sectionTitle">open tasks</h2>'
-    +'<span class="count">'+(tasks.length?tasks.length+(tasks.length===1?' task':' tasks'):'empty')+'</span></div>'
-    +'<div class="log" id="log">'+logInner()+'</div>';
-}
 function notConnectedHtml(){
   return '<section class="card"><span class="cardName">todoist</span>'
     +'<p class="notConnected">Not connected yet. Add <code>TODOIST_TOKEN</code> as an env var '
@@ -227,7 +292,7 @@ function render(){
     $('app').innerHTML=headerHtml()+notConnectedHtml();
     return;
   }
-  $('app').innerHTML=headerHtml()+statsHtml()+formHtml()+logHtml();
+  $('app').innerHTML=headerHtml()+statsHtml()+formHtml()+weekGridHtml()+bucketsHtml();
 }
 
 async function refresh(){
@@ -265,10 +330,12 @@ async function deleteTask(id){
 
 document.addEventListener('click',e=>{
   if(e.target.closest('#add')){addTask();return;}
-  const complete=e.target.closest('[data-complete]');
-  if(complete){completeTask(complete.getAttribute('data-complete'));return;}
+  // data-del is checked first: in the calendar chips it's a button NESTED
+  // inside the chip's own data-complete div, so it must win over the parent.
   const del=e.target.closest('[data-del]');
   if(del){deleteTask(del.getAttribute('data-del'));return;}
+  const complete=e.target.closest('[data-complete]');
+  if(complete){completeTask(complete.getAttribute('data-complete'));return;}
 });
 document.addEventListener('input',e=>{if(e.target.id==='content'||e.target.id==='due'){const h=$('hint');if(h&&h.textContent)h.textContent='';}});
 document.addEventListener('keydown',e=>{if((e.target.id==='content'||e.target.id==='due')&&e.key==='Enter'){e.preventDefault();addTask();}});
