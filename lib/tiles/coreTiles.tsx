@@ -196,7 +196,7 @@ export const CORE_TILES: Record<CoreTileId, CoreTile> = {
     id: 'todoist',
     href: '/app/starter',
     index: '09',
-    label: 'Todoist',
+    label: 'Calendar',
     orb: { mode: 'wander' },
     defaultSize: 'tall',
     glyph: (
