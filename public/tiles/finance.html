@@ -125,7 +125,7 @@
   .chartWrap, .donutWrap { position: relative; padding: var(--space-5); background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); box-shadow: var(--card-shadow); }
   .chartHead { display:flex; justify-content:space-between; align-items:baseline; margin-bottom: var(--space-4); gap: var(--space-3); flex-wrap: wrap; }
   .chartHeadLeft { display:inline-flex; align-items:baseline; gap: var(--space-3); }
-  .chartLabel { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.14em; text-transform: lowercase; color: var(--muted); font-weight: 500; }
+  .chartLabel { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.12em; text-transform: lowercase; color: var(--muted-strong); font-weight: 500; }
   .chartDelta { font-family: var(--font-mono); font-size: 11px; color: var(--muted); font-variant-numeric: tabular-nums; }
   .chartDelta.up { color: var(--pos); } .chartDelta.down { color: var(--neg); }
   .periodSeg { display:inline-flex; align-items:center; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-pill); padding: 2px; gap: 1px; }
@@ -305,16 +305,17 @@
   .emptyTitle { font-family: var(--font-display); font-weight: 700; font-size: var(--text-lg); color: var(--muted-strong); margin-bottom: var(--space-2); text-transform: lowercase; }
   .emptyBody { font-size: 12px; color: var(--muted); max-width: 38ch; margin: 0 auto; line-height: 1.55; }
 
-  /* Pointer-reactive holographic tilt + sheen on the main surfaces */
+  /* Hover trim on the main surfaces (was a pointer-tracked 3D tilt — replaced
+     with a plain border highlight, which reads as intentional and doesn't
+     fight the reader's eye while scanning numbers). */
   .chartWrap, .donutWrap, .accountCard, .subRow, .ordCard, .wishHero, .wishRow, .addCard, .emptyState {
-    position: relative; overflow: hidden; transform-style: preserve-3d; transition: transform .15s var(--ease-premium);
+    position: relative; overflow: hidden; transition: border-color .2s var(--ease);
     -webkit-backdrop-filter: blur(20px) saturate(120%); backdrop-filter: blur(20px) saturate(120%);
   }
-  .chartWrap::after, .donutWrap::after, .accountCard::after, .subRow::after, .ordCard::after,
-  .wishHero::after, .wishRow::after, .addCard::after, .emptyState::after {
-    content: ''; position: absolute; inset: 0; border-radius: inherit; pointer-events: none;
-    background: radial-gradient(circle at var(--mx,50%) var(--my,20%), rgba(255,255,255,.14), transparent 46%);
-    mix-blend-mode: overlay; opacity: .9;
+  .chartWrap:hover, .donutWrap:hover, .accountCard:hover, .subRow:hover, .ordCard:hover,
+  .wishHero:hover, .wishRow:hover, .addCard:hover, .emptyState:hover {
+    border-color: var(--brand-line);
+    box-shadow: 0 0 0 1px var(--brand-line) inset;
   }
 
   /* Tab bar */
@@ -1147,22 +1148,6 @@ function spawnStars() {
   }
   wrap.innerHTML = html;
 }
-function initTilt() {
-  if (REDUCED) return;
-  document.addEventListener('mousemove', e => {
-    document.querySelectorAll('.chartWrap, .donutWrap, .accountCard, .subRow, .ordCard, .wishHero, .wishRow, .addCard, .emptyState').forEach(el => {
-      const r = el.getBoundingClientRect();
-      let mx = (e.clientX - r.left) / r.width, my = (e.clientY - r.top) / r.height;
-      mx = Math.min(1.4, Math.max(-0.4, mx)); my = Math.min(1.4, Math.max(-0.4, my));
-      const rx = (Math.min(1, Math.max(0, my)) - 0.5) * -6;
-      const ry = (Math.min(1, Math.max(0, mx)) - 0.5) * 8;
-      el.style.setProperty('--mx', (mx * 100) + '%');
-      el.style.setProperty('--my', (my * 100) + '%');
-      el.style.transform = 'perspective(900px) rotateX(' + rx.toFixed(2) + 'deg) rotateY(' + ry.toFixed(2) + 'deg)';
-    });
-  });
-}
-
 /* ============================================================
  * Boot — load through the bridge, snapshot NW, render.
  * ============================================================ */
@@ -1176,7 +1161,6 @@ function initTilt() {
   if (TAB_KEYS.indexOf(state.activeTab) < 0) state.activeTab = 'net';
   maybeSnapshotNw(); save();
   spawnStars();
-  initTilt();
   render();
 })();
 </script>

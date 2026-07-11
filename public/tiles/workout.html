@@ -56,17 +56,15 @@
   .subtitle{color:var(--muted);font-family:var(--font-mono);font-size:11px;letter-spacing:.12em;text-transform:lowercase;margin:5px 0 0}
   .stats{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:18px}
   .stat{position:relative;border:1px solid var(--border);border-radius:var(--radius-md);background:var(--surface);padding:14px 12px;text-align:center;
-    -webkit-backdrop-filter:blur(18px);backdrop-filter:blur(18px);overflow:hidden;transform-style:preserve-3d;transition:transform .15s ease-out}
-  .stat::after,.card::after{content:'';position:absolute;inset:0;border-radius:inherit;pointer-events:none;
-    background:radial-gradient(circle at var(--mx,50%) var(--my,20%),rgba(255,255,255,.14),transparent 46%);
-    mix-blend-mode:overlay;opacity:.9}
+    -webkit-backdrop-filter:blur(18px);backdrop-filter:blur(18px);overflow:hidden;transition:border-color .2s var(--ease)}
+  .stat:hover,.card:hover{border-color:var(--brand-line);box-shadow:0 0 0 1px var(--brand-line) inset}
   .statNum{font-size:22px;font-weight:600;letter-spacing:-.01em}
   .statNum.brand{color:var(--brand)}
   .statLbl{color:var(--muted);font-family:var(--font-mono);font-size:10px;letter-spacing:.1em;text-transform:lowercase;margin-top:4px}
   .card{position:relative;border:1px solid var(--border);border-radius:16px;background:var(--surface);padding:18px;margin-bottom:22px;
     -webkit-backdrop-filter:blur(20px) saturate(120%);backdrop-filter:blur(20px) saturate(120%);
-    overflow:hidden;transform-style:preserve-3d;transition:transform .15s ease-out}
-  .cardName{font-family:var(--font-mono);font-size:10px;letter-spacing:.14em;text-transform:lowercase;color:var(--muted);display:block;margin-bottom:14px}
+    overflow:hidden;transition:border-color .2s var(--ease)}
+  .cardName{font-family:var(--font-mono);font-size:11px;letter-spacing:.12em;text-transform:lowercase;color:var(--muted-strong);display:block;margin-bottom:14px}
   .row{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end}
   .field{flex:1;min-width:100px}
   .fieldLbl{display:block;font-size:11px;color:var(--muted);margin-bottom:6px;text-transform:lowercase}
@@ -146,22 +144,6 @@ function spawnStars(){
   }
   wrap.innerHTML=html;
 }
-function initTilt(){
-  if(REDUCED)return;
-  document.addEventListener('mousemove',e=>{
-    document.querySelectorAll('.stat, .card').forEach(el=>{
-      const r=el.getBoundingClientRect();
-      let mx=(e.clientX-r.left)/r.width, my=(e.clientY-r.top)/r.height;
-      mx=Math.min(1.4,Math.max(-0.4,mx));my=Math.min(1.4,Math.max(-0.4,my));
-      const rx=(Math.min(1,Math.max(0,my))-0.5)*-6;
-      const ry=(Math.min(1,Math.max(0,mx))-0.5)*8;
-      el.style.setProperty('--mx',(mx*100)+'%');
-      el.style.setProperty('--my',(my*100)+'%');
-      el.style.transform='perspective(900px) rotateX('+rx.toFixed(2)+'deg) rotateY('+ry.toFixed(2)+'deg)';
-    });
-  });
-}
-
 /* ---- derived data ---- */
 function exercises(){
   const seen=new Map();
@@ -336,7 +318,6 @@ document.addEventListener('keydown',e=>{
 });
 
 spawnStars();
-initTilt();
 (async()=>{
   const d=await window.Vitality.load();
   if(d&&typeof d==='object'&&!Array.isArray(d)&&Array.isArray(d.entries))store.entries=d.entries;
