@@ -74,7 +74,7 @@ A tile is one self-contained HTML file. It saves its own data through the dashbo
 bridge, `window.Vitality.save()` and `window.Vitality.load()`, which the dashboard
 provides. Full contract: [`public/tiles/README.md`](public/tiles/README.md).
 
-The slots: `train`, `fuel`, `vitals`, `vee`, `brand`, `peak`, `finance`.
+The slots: `train`, `fuel`, `vitals`, `vee`, `brand`, `water`, `peak`, `finance`.
 
 ---
 

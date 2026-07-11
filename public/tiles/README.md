@@ -19,6 +19,7 @@ shows the "how to build this" panel instead.
 | `vitals` | Vitals   | `public/tiles/vitals.html` |
 | `vee`    | Vee      | `public/tiles/vee.html`    |
 | `brand`  | Brand    | `public/tiles/brand.html`  |
+| `water`  | Water    | `public/tiles/water.html`  |
 | `peak`   | Peak     | `public/tiles/peak.html`   |
 | `finance`| Finance  | `public/tiles/finance.html`|
 
