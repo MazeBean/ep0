@@ -142,23 +142,6 @@
   gap: var(--space-10);
 }
 
-/* The AppSidebar's fixed 216px (see .page's padding-left above) shifts
-   .shell's own centred box right of the true viewport centre by exactly
-   half that width — the --space-6 gutter is added on the left and already
-   present on the right, so it cancels out of the difference. Shifting
-   .shell itself (not just the greeting) keeps the greeting, the stat
-   widgets, and the tile grid all moving together as one aligned block.
-   `translate` (not `transform`) on purpose: profileAvatar is an absolutely
-   positioned descendant of .shell, and `transform` on an ancestor would
-   quietly make .shell its new containing block instead of .page, breaking
-   its position — `translate` never establishes a containing block, so it
-   can't do that. */
-@media (min-width: 981px) {
-  .shell {
-    translate: -108px 0;
-  }
-}
-
 /* ───────── Editorial greeting (parent /app dashboard) ───────── */
 
 .header {
