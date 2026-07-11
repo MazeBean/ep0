@@ -142,6 +142,23 @@
   gap: var(--space-10);
 }
 
+/* The AppSidebar's fixed 216px (see .page's padding-left above) shifts
+   .shell's own centred box right of the true viewport centre by exactly
+   half that width — the --space-6 gutter is added on the left and already
+   present on the right, so it cancels out of the difference. Shifting
+   .shell itself (not just the greeting) keeps the greeting, the stat
+   widgets, and the tile grid all moving together as one aligned block.
+   `translate` (not `transform`) on purpose: profileAvatar is an absolutely
+   positioned descendant of .shell, and `transform` on an ancestor would
+   quietly make .shell its new containing block instead of .page, breaking
+   its position — `translate` never establishes a containing block, so it
+   can't do that. */
+@media (min-width: 981px) {
+  .shell {
+    translate: -108px 0;
+  }
+}
+
 /* ───────── Editorial greeting (parent /app dashboard) ───────── */
 
 .header {
@@ -152,22 +169,6 @@
   gap: var(--space-2);
   opacity: 0;
   animation: fadeUp 700ms var(--ease-premium) forwards;
-}
-
-/* .header sits inside .shell, whose OWN centred box is offset right of the
-   true viewport centre by however much padding-left the sidebar consumes
-   (see .page above). Calc-ing the exact compensating offset back is fragile
-   (it broke once already). Instead, break .header out of that constrained
-   box entirely: give it the true viewport's full width, so its centered
-   children (align-items:center/text-align:center) land on the actual screen
-   centre no matter what any ancestor's padding or a sidebar's width is. This
-   stays in normal flow (unlike position:fixed), so vertical spacing and the
-   fadeUp entrance animation are untouched. */
-@media (min-width: 981px) {
-  .header {
-    width: 100vw;
-    margin-left: calc(50% - 50vw);
-  }
 }
 
 /* Live clock + weather row — sits under the date, same muted mono voice. */
