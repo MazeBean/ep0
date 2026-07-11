@@ -145,6 +145,14 @@
 /* ───────── Editorial greeting (parent /app dashboard) ───────── */
 
 .header {
+  /* .headerRow is grid-template-columns: 180px 1fr 180px. profileAvatar is
+     position:absolute, so it never participates in grid auto-placement —
+     this is the ONLY grid-placed child. Auto-placement defaults an only
+     child into column 1, not the centre column, which is what actually
+     broke when the header gem (previously the first grid-placed child,
+     pushing this into column 2 by ordinary flow) was removed. Force it
+     explicitly instead of relying on now-nonexistent sibling order. */
+  grid-column: 2;
   display: flex;
   flex-direction: column;
   align-items: center;
