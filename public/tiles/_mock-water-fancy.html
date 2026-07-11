@@ -1,0 +1,340 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Water — fancy mock</title>
+<style>
+  :root{
+    --glass:rgba(255,255,255,.05);--stroke:rgba(255,255,255,.11);--stroke-soft:rgba(255,255,255,.06);
+    --fg:#f6f7fb;--muted:#9aa0b8;
+    --font:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,sans-serif;
+    --ease:cubic-bezier(.4,0,.2,1);
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;min-height:100%}
+  body{
+    background:#050308;color:var(--fg);font:16px/1.6 var(--font);
+    display:flex;justify-content:center;padding:64px 28px;position:relative;overflow-x:hidden;
+    -webkit-font-smoothing:antialiased;
+  }
+
+  /* layer 1 — a generative particle constellation, real per-frame canvas motion */
+  #net{position:fixed;inset:0;z-index:0;pointer-events:none;mix-blend-mode:screen;opacity:.85}
+
+  /* layer 2 — gooey metaball blobs: opaque circles blurred + contrast-snapped so
+     they melt into and out of each other, wrapped in a slow hue rotation */
+  .gooHue{position:fixed;inset:-15%;z-index:0;pointer-events:none;filter:saturate(1.6);animation:hueShift 30s linear infinite}
+  .goo{position:absolute;inset:0;filter:blur(30px) contrast(26) brightness(1.04);opacity:.8}
+  .blob{position:absolute;border-radius:50%}
+  .blob.b1{width:30vw;height:30vw;max-width:380px;max-height:380px;background:#22D3EE;top:6%;left:8%;animation:drift1 17s ease-in-out infinite}
+  .blob.b2{width:26vw;height:26vw;max-width:340px;max-height:340px;background:#F472B6;bottom:10%;right:10%;animation:drift2 21s ease-in-out infinite}
+  .blob.b3{width:22vw;height:22vw;max-width:300px;max-height:300px;background:#818CF8;top:44%;right:20%;animation:drift3 19s ease-in-out infinite}
+  .blob.b4{width:18vw;height:18vw;max-width:260px;max-height:260px;background:#FBBF24;bottom:26%;left:18%;animation:drift4 23s ease-in-out infinite}
+
+  @keyframes hueShift{0%{filter:hue-rotate(0deg) saturate(1.6)}100%{filter:hue-rotate(360deg) saturate(1.6)}}
+  @keyframes drift1{0%,100%{transform:translate(0,0)}50%{transform:translate(14vw,10vh)}}
+  @keyframes drift2{0%,100%{transform:translate(0,0)}50%{transform:translate(-12vw,-14vh)}}
+  @keyframes drift3{0%,100%{transform:translate(0,0)}50%{transform:translate(-16vw,8vh)}}
+  @keyframes drift4{0%,100%{transform:translate(0,0)}50%{transform:translate(10vw,-10vh)}}
+
+  @media(prefers-reduced-motion:reduce){
+    .gooHue,.blob,.markOrb,.haloSpin,.title,.pct,.quickBtn,.btn-primary,.glitchLayer{animation:none!important}
+  }
+
+  .shell{position:relative;z-index:1;width:100%;max-width:640px}
+
+  .header{display:flex;align-items:center;gap:18px;margin-bottom:30px}
+  .markWrap{position:relative;width:58px;height:58px;flex-shrink:0}
+  .haloSpin{position:absolute;inset:-16px;border-radius:50%;
+    background:conic-gradient(from 0deg,#22D3EE,#818CF8,#F472B6,#FBBF24,#22D3EE);
+    filter:blur(10px);opacity:.75;animation:spin 6s linear infinite}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .markOrb{position:relative;width:58px;height:58px;border-radius:50%;
+    background:linear-gradient(135deg,#22D3EE,#818CF8 55%,#F472B6);
+    display:flex;align-items:center;justify-content:center;box-shadow:0 6px 34px rgba(129,140,248,.55);
+    animation:breathe 2.4s ease-in-out infinite}
+  @keyframes breathe{0%,100%{transform:scale(.95)}50%{transform:scale(1.07)}}
+  .markOrb svg{width:26px;height:26px}
+  .titleWrap{position:relative}
+  .title{position:relative;font-size:27px;font-weight:800;margin:0;letter-spacing:-.01em;
+    background:linear-gradient(90deg,#22D3EE,#818CF8,#F472B6,#FBBF24,#22D3EE);
+    background-size:300% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;
+    animation:hueSlide 5s linear infinite, glitch 7s steps(1) infinite}
+  @keyframes hueSlide{0%{background-position:0% 50%}100%{background-position:300% 50%}}
+  @keyframes glitch{
+    0%,93%,100%{filter:none;transform:translate(0,0) skewX(0)}
+    93.5%{filter:drop-shadow(2px 0 #ff2079) drop-shadow(-2px 0 #22D3EE);transform:translate(-2px,1px) skewX(2deg)}
+    95%{filter:drop-shadow(-2px 0 #ff2079) drop-shadow(2px 0 #22D3EE);transform:translate(2px,-1px) skewX(-2deg)}
+    96.5%{filter:drop-shadow(1px 0 #ff2079) drop-shadow(-1px 0 #22D3EE);transform:translate(-1px,0) skewX(1deg)}
+  }
+  .subtitle{color:var(--muted);font-size:13.5px;margin:6px 0 0}
+
+  /* glass panels: frosted, with a pointer-reactive holographic tilt + sheen */
+  .glass{position:relative;border-radius:26px;background:var(--glass);border:1px solid var(--stroke);
+    -webkit-backdrop-filter:blur(30px) saturate(160%);backdrop-filter:blur(30px) saturate(160%);
+    box-shadow:0 1px 0 rgba(255,255,255,.07) inset, 0 20px 60px rgba(0,0,0,.5);
+    padding:26px 24px;margin-bottom:18px;overflow:hidden;transform-style:preserve-3d;
+    transition:transform .12s ease-out}
+  .glass::after{content:'';position:absolute;inset:0;border-radius:inherit;pointer-events:none;
+    background:radial-gradient(circle at var(--mx,50%) var(--my,15%),rgba(255,255,255,.22),transparent 46%);
+    mix-blend-mode:overlay;opacity:.9}
+  .glass::before{content:'';position:absolute;inset:0;border-radius:inherit;padding:1px;pointer-events:none;z-index:2;
+    background:conic-gradient(from var(--ang,0deg),transparent 0 70%,rgba(255,255,255,.55),transparent 78%);
+    -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;
+    animation:sweep 5s linear infinite}
+  @keyframes sweep{to{--ang:360deg}}
+  @property --ang{syntax:'<angle>';inherits:false;initial-value:0deg}
+
+  .ringCard{display:flex;align-items:center;gap:26px}
+  .ringBox{position:relative;width:172px;height:172px;flex-shrink:0}
+  .ringBox svg{width:100%;height:100%;transform:rotate(-90deg)}
+  .ringBox .ringVal{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+  .ringVal .num{font-size:28px;font-weight:700;letter-spacing:-.01em}
+  .ringVal .unit{font-size:12px;color:var(--muted);margin-top:2px}
+  .ringMeta{flex:1;min-width:0}
+  .ringMeta .goal{font-size:13.5px;color:var(--muted);margin:0 0 10px}
+  .pct{font-size:35px;font-weight:800;
+    background:linear-gradient(90deg,#22D3EE,#818CF8,#F472B6,#FBBF24,#22D3EE);background-size:300% 100%;
+    -webkit-background-clip:text;background-clip:text;color:transparent;animation:hueSlide 5s linear infinite}
+  .pctLbl{font-size:12.5px;color:var(--muted);margin-top:2px}
+
+  .stats{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin-bottom:18px}
+  .stat{border-radius:20px;background:var(--glass);border:1px solid var(--stroke);
+    -webkit-backdrop-filter:blur(22px);backdrop-filter:blur(22px);padding:18px 16px;text-align:center;
+    position:relative;overflow:hidden;transform-style:preserve-3d;transition:transform .12s ease-out}
+  .stat::after{content:'';position:absolute;inset:0;pointer-events:none;
+    background:radial-gradient(circle at var(--mx,50%) var(--my,15%),rgba(255,255,255,.2),transparent 46%);
+    mix-blend-mode:overlay}
+  .statNum{font-size:23px;font-weight:700}
+  .statLbl{color:var(--muted);font-size:12px;margin-top:6px}
+
+  .cardName{font-size:12.5px;color:var(--muted);display:block;margin-bottom:16px;font-weight:600}
+  .quickRow{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px}
+  .quickBtn{
+    position:relative;border-radius:999px;border:1px solid var(--stroke);background:rgba(255,255,255,.07);
+    color:var(--fg);padding:11px 20px;font:inherit;font-size:14px;font-weight:600;cursor:pointer;
+    transition:transform .18s var(--ease),box-shadow .18s var(--ease);
+    animation:pulseGlow 3.2s ease-in-out infinite;
+  }
+  .quickBtn:nth-child(2){animation-delay:-1s}
+  .quickBtn:nth-child(3){animation-delay:-2s}
+  @keyframes pulseGlow{0%,100%{box-shadow:0 0 0 rgba(129,140,248,0)}50%{box-shadow:0 0 22px rgba(129,140,248,.35)}}
+  .quickBtn:hover{transform:translateY(-3px) scale(1.03);box-shadow:0 12px 30px rgba(244,114,182,.4)}
+
+  .row{display:flex;gap:12px;align-items:center}
+  .field{flex:1;position:relative}
+  input[type=number]{
+    width:100%;background:rgba(0,0,0,.3);border:1px solid var(--stroke);color:var(--fg);
+    border-radius:16px;padding:13px 16px;font:inherit;font-size:15px;
+  }
+  input::placeholder{color:#5a5f74}
+  input:focus{outline:none;border-color:rgba(129,140,248,.7);box-shadow:0 0 0 4px rgba(129,140,248,.18)}
+  .btn-primary{
+    background:linear-gradient(90deg,#22D3EE,#818CF8,#F472B6,#FBBF24,#22D3EE);background-size:300% 100%;
+    color:#05060a;border:none;font-weight:800;border-radius:16px;
+    padding:13px 22px;font:inherit;font-size:14.5px;cursor:pointer;white-space:nowrap;
+    box-shadow:0 10px 28px rgba(129,140,248,.4);transition:transform .18s var(--ease),box-shadow .18s var(--ease);
+    animation:hueSlide 4s linear infinite;
+  }
+  .btn-primary:hover{transform:translateY(-3px) scale(1.03);box-shadow:0 16px 40px rgba(244,114,182,.55)}
+
+  .logHead{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin:0 0 14px}
+  .sectionTitle{font-weight:700;font-size:16.5px;margin:0}
+  .count{font-size:12.5px;color:var(--muted)}
+  .log{display:flex;flex-direction:column;gap:9px}
+  .entry{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:13px 16px;
+    border-radius:16px;background:rgba(255,255,255,.04);border:1px solid var(--stroke-soft);
+    animation:rise .35s var(--ease)}
+  @keyframes rise{from{opacity:0;transform:translateY(8px) scale(.98)}to{opacity:1;transform:translateY(0) scale(1)}}
+  .entryLeft{display:flex;align-items:center;gap:12px}
+  .dot{width:9px;height:9px;border-radius:50%;
+    background:linear-gradient(135deg,#22D3EE,#818CF8,#F472B6);flex-shrink:0;
+    box-shadow:0 0 10px rgba(129,140,248,.7);animation:breathe 2.2s ease-in-out infinite}
+  .entryAmt{font-size:14.5px;font-weight:600}
+  .entryMeta{font-size:12px;color:var(--muted)}
+  .xBtn{background:transparent;border:1px solid var(--stroke-soft);color:var(--muted);width:26px;height:26px;
+    border-radius:50%;cursor:pointer;flex-shrink:0;line-height:1;transition:color .15s,border-color .15s}
+  .xBtn:hover{color:#ff8a8a;border-color:rgba(255,138,138,.4)}
+  .empty{color:var(--muted);font-size:13.5px;padding:6px 2px}
+</style>
+</head>
+<body>
+<canvas id="net"></canvas>
+<div class="gooHue"><div class="goo">
+  <div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div><div class="blob b4"></div>
+</div></div>
+<main><div class="shell" id="app"></div></main>
+<script>
+/* Fancy mock of the Water tile — three real systems stacked instead of flat
+   CSS tricks: (1) a per-frame canvas particle constellation, (2) gooey
+   metaball blobs (blurred + contrast-snapped so they melt together) under a
+   slow hue rotation, (3) pointer-reactive holographic tilt + sheen on every
+   glass panel. Preview only, standalone (falls back to sample data). */
+const GOAL_ML=2000;
+const QUICK=[250,350,500];
+const CIRC=2*Math.PI*74;
+let entries=[
+  {id:'a',ml:350,ts:Date.now()-3*3600e3},
+  {id:'b',ml:500,ts:Date.now()-1.5*3600e3},
+  {id:'c',ml:250,ts:Date.now()-0.4*3600e3},
+];
+const $=id=>document.getElementById(id);
+const REDUCED=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+function persist(){if(window.Vitality)window.Vitality.save(entries);}
+function newId(){return Date.now().toString(36)+Math.random().toString(36).slice(2,6);}
+function when(ts){const d=new Date(ts);return d.toLocaleTimeString(undefined,{hour:'numeric',minute:'2-digit'});}
+function dayKey(ts){const d=new Date(ts);return d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate();}
+function todayEntries(){const k=dayKey(Date.now());return entries.filter(e=>dayKey(e.ts)===k);}
+function todayTotal(){return todayEntries().reduce((s,e)=>s+e.ml,0);}
+function streak(){return 4;}
+function sevenDayAvg(){return 1840;}
+
+/* ---- system 1: generative particle constellation on canvas ---- */
+function initNet(){
+  const canvas=$('net');
+  if(!canvas)return;
+  const ctx=canvas.getContext('2d');
+  let w,h,particles=[];
+  function resize(){
+    w=canvas.width=window.innerWidth;h=canvas.height=window.innerHeight;
+    const count=Math.min(80,Math.max(30,Math.floor((w*h)/24000)));
+    particles=Array.from({length:count},()=>({
+      x:Math.random()*w,y:Math.random()*h,
+      vx:(Math.random()-0.5)*0.28,vy:(Math.random()-0.5)*0.28,
+      r:1+Math.random()*1.6,
+    }));
+  }
+  resize();
+  window.addEventListener('resize',resize);
+  let hue=190;
+  function frame(){
+    ctx.clearRect(0,0,w,h);
+    hue=(hue+0.05)%360;
+    for(const p of particles){
+      p.x+=p.vx;p.y+=p.vy;
+      if(p.x<0||p.x>w)p.vx*=-1;
+      if(p.y<0||p.y>h)p.vy*=-1;
+    }
+    for(let i=0;i<particles.length;i++){
+      for(let j=i+1;j<particles.length;j++){
+        const a=particles[i],b=particles[j];
+        const dx=a.x-b.x,dy=a.y-b.y,dist=Math.sqrt(dx*dx+dy*dy);
+        if(dist<130){
+          ctx.strokeStyle='hsla('+hue+',85%,70%,'+(0.18*(1-dist/130)).toFixed(3)+')';
+          ctx.lineWidth=1;
+          ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.stroke();
+        }
+      }
+    }
+    for(const p of particles){
+      const c='hsla('+((hue+40)%360)+',90%,75%,0.8)';
+      ctx.beginPath();ctx.fillStyle=c;ctx.shadowColor=c;ctx.shadowBlur=6;
+      ctx.arc(p.x,p.y,p.r,0,Math.PI*2);ctx.fill();
+    }
+    if(!REDUCED)requestAnimationFrame(frame);
+  }
+  frame();
+}
+
+/* ---- system 2: pointer-reactive holographic tilt + sheen on glass panels ---- */
+function initTilt(){
+  if(REDUCED)return;
+  document.addEventListener('mousemove',e=>{
+    document.querySelectorAll('.glass, .stat').forEach(el=>{
+      const r=el.getBoundingClientRect();
+      let mx=(e.clientX-r.left)/r.width, my=(e.clientY-r.top)/r.height;
+      mx=Math.min(1.4,Math.max(-0.4,mx));my=Math.min(1.4,Math.max(-0.4,my));
+      const rx=(Math.min(1,Math.max(0,my))-0.5)*-7;
+      const ry=(Math.min(1,Math.max(0,mx))-0.5)*9;
+      el.style.setProperty('--mx',(mx*100)+'%');
+      el.style.setProperty('--my',(my*100)+'%');
+      el.style.transform='perspective(900px) rotateX('+rx.toFixed(2)+'deg) rotateY('+ry.toFixed(2)+'deg)';
+    });
+  });
+}
+
+function headerHtml(){
+  return '<header class="header"><div class="markWrap"><div class="haloSpin"></div><div class="markOrb" aria-hidden="true">'
+    +'<svg viewBox="0 0 24 24" fill="#05060a"><path d="M12 2c0 0-7 8.5-7 13a7 7 0 0 0 14 0c0-4.5-7-13-7-13z"/></svg>'
+    +'</div></div><div class="titleWrap"><h1 class="title">Water</h1><p class="subtitle">Daily hydration</p></div></header>';
+}
+function ringHtml(){
+  const total=todayTotal();
+  const pct=Math.min(1,total/GOAL_ML);
+  const offset=CIRC*(1-pct);
+  return '<section class="glass ringCard">'
+    +'<div class="ringBox"><svg viewBox="0 0 168 168">'
+    +'<circle cx="84" cy="84" r="74" fill="none" stroke="rgba(255,255,255,.08)" stroke-width="13"/>'
+    +'<circle cx="84" cy="84" r="74" fill="none" stroke="url(#g)" stroke-width="13" stroke-linecap="round" '
+    +'stroke-dasharray="'+CIRC.toFixed(1)+'" stroke-dashoffset="'+offset.toFixed(1)+'" '
+    +'style="filter:drop-shadow(0 0 12px rgba(244,114,182,.6));transition:stroke-dashoffset .7s cubic-bezier(.4,0,.2,1)"/>'
+    +'<defs><linearGradient id="g" x1="0%" y1="0%" x2="100%" y2="100%">'
+    +'<stop offset="0%" stop-color="#22D3EE"/><stop offset="40%" stop-color="#818CF8"/>'
+    +'<stop offset="75%" stop-color="#F472B6"/><stop offset="100%" stop-color="#FBBF24"/>'
+    +'</linearGradient></defs></svg>'
+    +'<div class="ringVal"><div class="num">'+total.toLocaleString()+'</div><div class="unit">ml today</div></div></div>'
+    +'<div class="ringMeta"><div class="pct">'+Math.round(pct*100)+'%</div><div class="pctLbl">of daily goal</div>'
+    +'<p class="goal">Goal '+GOAL_ML.toLocaleString()+' ml</p></div>'
+    +'</section>';
+}
+function statsHtml(){
+  return '<section class="stats">'
+    +'<div class="stat"><div class="statNum">'+streak()+'</div><div class="statLbl">Day streak</div></div>'
+    +'<div class="stat"><div class="statNum">'+sevenDayAvg().toLocaleString()+'</div><div class="statLbl">7-day avg ml</div></div>'
+    +'</section>';
+}
+function formHtml(){
+  const chips=QUICK.map(ml=>'<button class="quickBtn" data-quick="'+ml+'">+'+ml+' ml</button>').join('');
+  return '<section class="glass"><span class="cardName">Log water</span>'
+    +'<div class="quickRow">'+chips+'</div>'
+    +'<div class="row"><div class="field">'
+    +'<input type="number" id="amount" min="0" placeholder="Custom amount (ml)" /></div>'
+    +'<button class="btn-primary" id="add">Add</button></div>'
+    +'</section>';
+}
+function logInner(){
+  const today=todayEntries().slice().sort((a,b)=>b.ts-a.ts);
+  if(!today.length)return '<p class="empty">No water logged today. Add your first cup above.</p>';
+  return today.map(e=>
+    '<div class="entry"><div class="entryLeft"><span class="dot"></span><div>'
+    +'<span class="entryAmt">'+e.ml+' ml</span><br><span class="entryMeta">'+when(e.ts)+'</span></div></div>'
+    +'<button class="xBtn" data-del="'+e.id+'" title="Remove">×</button></div>'
+  ).join('');
+}
+function logHtml(){
+  const today=todayEntries();
+  return '<section class="glass"><div class="logHead"><h2 class="sectionTitle">Today</h2>'
+    +'<span class="count">'+(today.length?today.length+(today.length===1?' entry':' entries'):'empty')+'</span></div>'
+    +'<div class="log" id="log">'+logInner()+'</div></section>';
+}
+function render(){$('app').innerHTML=headerHtml()+ringHtml()+statsHtml()+formHtml()+logHtml();}
+
+function addAmount(ml){
+  if(!ml||ml<=0)return;
+  entries.push({id:newId(),ml,ts:Date.now()});
+  persist();render();
+}
+function addCustom(){
+  const ml=parseInt($('amount').value,10);
+  if(ml>0)addAmount(ml);
+}
+
+document.addEventListener('click',e=>{
+  const quick=e.target.closest('[data-quick]');
+  if(quick){addAmount(parseInt(quick.getAttribute('data-quick'),10));return;}
+  if(e.target.closest('#add')){addCustom();return;}
+  const del=e.target.closest('[data-del]');
+  if(del){const id=del.getAttribute('data-del');entries=entries.filter(en=>en.id!==id);persist();render();}
+});
+document.addEventListener('keydown',e=>{if(e.target.id==='amount'&&e.key==='Enter'){e.preventDefault();addCustom();}});
+
+initNet();
+initTilt();
+(async()=>{
+  if(window.Vitality){const d=await window.Vitality.load();if(Array.isArray(d)&&d.length)entries=d;}
+  render();
+})();
+</script>
+</body>
+</html>
