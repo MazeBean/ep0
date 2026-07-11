@@ -1,0 +1,11 @@
+{
+  "version": 1,
+  "skills": {
+    "transitions-dev": {
+      "source": "jakubantalik/transitions-dev",
+      "sourceType": "github",
+      "skillPath": "skills/transitions-dev/SKILL.md",
+      "computedHash": "c4dd7001f07f4b95219d9116854f506118af4877b16bb5bed22a03381622a22e"
+    }
+  }
+}
