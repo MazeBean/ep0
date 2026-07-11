@@ -93,9 +93,9 @@ export const CORE_TILES: Record<CoreTileId, CoreTile> = {
     defaultSize: 'tall',
     glyph: (
       <svg viewBox="-12 -12 24 24" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round" strokeLinecap="round">
-        <path d="M-7 -6 C-9 -2 -8 3 -3 5 C2 7 6 3 6 -2 C6 -6 2 -9 -2 -8 C-4 -8 -6 -7 -7 -6 Z" />
-        <path d="M4 4 L9 9" />
-        <circle cx="9.4" cy="9.4" r="1.3" fill="currentColor" stroke="none" />
+        <path d="M0 -2 C-1.5 -4 -4 -5 -6.5 -3.5 C-9 -2 -9.5 2 -7 5 C-5 7.5 -2 8 0 6.5 C2 8 5 7.5 7 5 C9.5 2 9 -2 6.5 -3.5 C4 -5 1.5 -4 0 -2 Z" />
+        <path d="M0 -2 C0 -4 0.5 -6 1.5 -7.5" />
+        <path d="M1.5 -7 C3.5 -8.5 6 -7.5 5.5 -5.5 C4 -6 2 -6.5 1.5 -7 Z" />
       </svg>
     ),
     art: (

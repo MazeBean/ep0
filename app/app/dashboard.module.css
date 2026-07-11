@@ -154,6 +154,19 @@
   animation: fadeUp 700ms var(--ease-premium) forwards;
 }
 
+/* The AppSidebar's fixed 216px (see .page's matching padding-left) shifts
+   .shell's own centred box right of the true viewport centre by exactly half
+   that width (the --space-6 gutter cancels out: it's added on the left and
+   already present on the right). The fadeUp animation above already owns
+   `transform` (translateY), so the compensating shift uses the independent
+   `translate` property instead of `transform` — the two compose without
+   either one clobbering the other. */
+@media (min-width: 981px) {
+  .header {
+    translate: -108px 0;
+  }
+}
+
 /* Live clock + weather row — sits under the date, same muted mono voice. */
 .heroStats {
   display: flex;
@@ -178,21 +191,11 @@
   color: var(--border-strong);
 }
 
-/* Weather reads easier at a glance than the muted mono clock line: brighter,
-   a step up in size, with a condition icon so "72°F" doesn't need a second
-   look to place against "72% Humidity". */
-.heroWeatherStat {
-  white-space: nowrap;
-  color: var(--fg);
-  font-size: var(--text-sm);
-  font-weight: 500;
-}
-
 .heroWeatherIcon {
   display: inline-flex;
-  width: 16px;
-  height: 16px;
-  color: var(--fg);
+  width: 14px;
+  height: 14px;
+  color: var(--muted);
   flex-shrink: 0;
 }
 
@@ -639,17 +642,6 @@
   grid-template-columns: 180px 1fr 180px;
   align-items: center;
   gap: var(--space-6);
-}
-
-/* The AppSidebar's fixed 216px + gutter (see .page's matching padding-left
-   above) shifts .shell's own centred box right of the true viewport centre,
-   so a header centred WITHIN .shell reads as visibly off-centre on the whole
-   screen. Shift it back by half that sidebar footprint so it centres against
-   the viewport again, the way it did before the sidebar existed. */
-@media (min-width: 981px) {
-  .headerRow {
-    transform: translateX(calc(-1 * (216px + var(--space-6)) / 2));
-  }
 }
 
 .headerGem {
