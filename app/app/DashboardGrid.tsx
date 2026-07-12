@@ -559,14 +559,15 @@ export default function DashboardGrid({ userId, openId, onOpenIdChange, hidePost
   }, [openId])
 
   // Once the newest stacked tile has actually rendered, drop any older ones
-  // underneath it — after the CSS crossfade duration, so the swap is never
+  // underneath it — after the CSS crossfade duration (the "page side-by-side"
+  // pattern's --page-slide-dur, transitions-dev), so the swap is never
   // visible mid-transition.
   useEffect(() => {
     const newest = stack[stack.length - 1]
     if (!newest || stack.length < 2 || !readyIds.has(newest.id)) return
     const t = window.setTimeout(() => {
       setStack((prev) => (prev[prev.length - 1]?.id === newest.id ? [{ ...newest, crossfade: false }] : prev))
-    }, 320)
+    }, 240)
     return () => window.clearTimeout(t)
   }, [stack, readyIds])
 
