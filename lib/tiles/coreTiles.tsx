@@ -31,6 +31,7 @@ export type CoreTileId =
   | 'goals'
   | 'workout'
   | 'finance'
+  | 'intake'
 
 /** A single live metric to surface on a tile (Train day, Fuel kcal). */
 export interface CoreStat {
@@ -278,6 +279,28 @@ export const CORE_TILES: Record<CoreTileId, CoreTile> = {
       </svg>
     ),
   },
+  intake: {
+    id: 'intake',
+    href: '/app/starter',
+    index: '12',
+    label: 'Intake',
+    orb: { mode: 'wander' },
+    defaultSize: 'tall',
+    glyph: (
+      <svg viewBox="-12 -12 24 24" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round" strokeLinecap="round">
+        <g transform="rotate(45)">
+          <rect x="-9" y="-4.5" width="18" height="9" rx="4.5" />
+          <line x1="0" y1="-4.5" x2="0" y2="4.5" />
+        </g>
+      </svg>
+    ),
+    art: (
+      <svg className="art" viewBox="0 0 210 250">
+        <path className="mot" d="M40 150 Q75 90 105 120 T170 70" />
+        <g className="orb"><circle className="glow" r="10" /><circle className="node" r="3.4" /></g>
+      </svg>
+    ),
+  },
 }
 
 /**
@@ -352,6 +375,7 @@ export const DEFAULT_HOME_ORDER: HomeTileId[] = [
   'workout',
   'peak',
   'finance',
+  'intake',
 ]
 
 /** Is this id one of the pre-installed core tiles (incl. Vee)? */

@@ -1,0 +1,329 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Intake</title>
+<style>
+  /* Vitality Intake tile — caffeine log (400mg ceiling + one-compartment
+     half-life decay, same pharmacokinetic model as Peak's caffeine card) and
+     a daily med/supplement stack checklist. Sealed & bridge-backed. */
+  :root{
+    --bg:#0a0a0c;--surface:rgba(255,255,255,.045);--border:rgba(255,255,255,.11);--brand:#e0b13c;
+    --brand-soft:rgba(224,177,60,.08);--brand-line:rgba(224,177,60,.3);
+    --muted:#8a8a90;--muted-strong:#a8a8b0;--fg:#ededf0;--neg:#ff6b6b;--neg-line:rgba(255,107,107,.4);
+    --warn:#e8b05f;--track:#17171b;--radius-md:12px;--radius-pill:999px;
+    --font-display:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,sans-serif;
+    --font-mono:ui-monospace,SFMono-Regular,Menlo,"JetBrains Mono",monospace;
+    --duration:.2s;--ease:cubic-bezier(.4,0,.2,1);
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%}
+  body{background:radial-gradient(120% 60% at 50% 0%,#17171b 0%,#101013 42%,#0a0a0c 70%,#08080a 100%);
+    color:var(--fg);font:15px/1.5 var(--font-display);display:flex;justify-content:center;padding:40px 20px;
+    position:relative;overflow-x:hidden;-webkit-font-smoothing:antialiased}
+  body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
+    background:repeating-linear-gradient(0deg,rgba(255,255,255,.03) 0 1px,transparent 1px 3px);mix-blend-mode:overlay}
+  .bgWarp{position:fixed;inset:0;z-index:0;pointer-events:none;filter:url(#distort)}
+  .stars{position:absolute;inset:0}
+  .star{position:absolute;width:2px;height:2px;background:#cfd0d6;border-radius:50%;opacity:.4;animation:twinkle 8s ease-in-out infinite}
+  .sun{position:absolute;bottom:30vh;left:50%;transform:translateX(-50%);width:230px;height:230px;border-radius:50%;opacity:.4;
+    background:linear-gradient(180deg,#d9d9dd 0%,#b7b7bd 26%,#96969d 55%,#7a7a80 82%,#5c5c62 100%);box-shadow:0 0 100px rgba(200,200,210,.15);
+    animation:sunPulse 14s ease-in-out infinite}
+  .sun::after{content:'';position:absolute;inset:0;border-radius:50%;background:repeating-linear-gradient(0deg,transparent 0 7px,#0a0a0c 7px 12px);
+    -webkit-mask-image:linear-gradient(to bottom,transparent 0%,black 46%);mask-image:linear-gradient(to bottom,transparent 0%,black 46%)}
+  @keyframes sunPulse{0%,100%{filter:brightness(1)}50%{filter:brightness(1.06)}}
+  .groundWrap{position:absolute;left:0;right:0;bottom:0;height:44vh;overflow:hidden;
+    -webkit-mask-image:linear-gradient(to top,black 55%,transparent 100%);mask-image:linear-gradient(to top,black 55%,transparent 100%)}
+  .ground{position:absolute;inset:-30% -60% 0 -60%;
+    background-image:linear-gradient(rgba(180,180,190,.22) 1px,transparent 1px),linear-gradient(90deg,rgba(160,160,170,.16) 1px,transparent 1px);
+    background-size:64px 64px;transform:perspective(260px) rotateX(63deg);transform-origin:bottom;animation:gridMove 20s linear infinite}
+  @keyframes gridMove{from{background-position:0 0,0 0}to{background-position:0 64px,64px 0}}
+  .horizonLine{position:absolute;left:0;right:0;bottom:calc(44vh - 1px);height:2px;
+    background:linear-gradient(90deg,transparent,rgba(190,190,198,.35) 30%,rgba(190,190,198,.45) 50%,rgba(190,190,198,.35) 70%,transparent);
+    box-shadow:0 0 16px rgba(190,190,198,.25)}
+  @keyframes twinkle{0%,100%{opacity:.15}50%{opacity:.5}}
+  @media(prefers-reduced-motion:reduce){.ground,.sun,.star,.markOrb,.markGlow{animation:none!important}.card{transition:none}}
+  .shell{position:relative;z-index:1;width:100%;max-width:680px}
+  .header{display:flex;align-items:center;gap:14px;margin-bottom:22px}
+  .markWrap{position:relative;width:44px;height:44px;flex-shrink:0}
+  .markGlow{position:absolute;inset:-10px;border-radius:50%;background:var(--brand);filter:blur(14px);opacity:.4;
+    animation:glowBreathe 4.5s ease-in-out infinite}
+  @keyframes glowBreathe{0%,100%{opacity:.28;transform:scale(.92)}50%{opacity:.5;transform:scale(1.06)}}
+  .mark{position:relative;width:44px;height:44px;flex-shrink:0;border-radius:50%;display:flex;align-items:center;justify-content:center;
+    background:radial-gradient(circle at 35% 30%,#e4e5ea,var(--brand) 46%,#6d6f76 100%);box-shadow:0 0 26px rgba(0,0,0,.5);
+    animation:sway 7s ease-in-out infinite}
+  @keyframes sway{0%,100%{transform:rotate(-3deg) translateY(0)}50%{transform:rotate(3deg) translateY(-2px)}}
+  .mark svg{width:22px;height:22px}
+  .title{font-size:24px;font-weight:700;letter-spacing:-.01em;margin:0;text-transform:lowercase}
+  .subtitle{color:var(--muted);font-family:var(--font-mono);font-size:11px;letter-spacing:.12em;text-transform:lowercase;margin:6px 0 0}
+  .card{position:relative;border:1px solid var(--border);border-radius:16px;background:var(--surface);padding:18px;margin-bottom:22px;
+    -webkit-backdrop-filter:blur(20px) saturate(120%);backdrop-filter:blur(20px) saturate(120%);
+    overflow:hidden;transition:border-color .2s var(--ease),box-shadow .2s var(--ease)}
+  .card:hover{border-color:var(--brand-line);box-shadow:0 0 0 1px var(--brand-line) inset}
+  .cardName{font-family:var(--font-mono);font-size:11px;letter-spacing:.12em;text-transform:lowercase;color:var(--muted-strong);display:block;margin-bottom:14px}
+  .caffHead{display:flex;align-items:baseline;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:4px}
+  .caffTotal{font-weight:600;font-size:26px;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+  .caffTotal.over{color:var(--neg)}
+  .caffCeil{font-family:var(--font-mono);font-size:11px;letter-spacing:.08em;color:var(--muted)}
+  .caffBarTrack{height:8px;border-radius:var(--radius-pill);background:var(--track);overflow:hidden;margin:10px 0 4px}
+  .caffBarFill{height:100%;border-radius:var(--radius-pill);background:var(--brand);transition:width var(--duration) ease}
+  .caffBarFill.over{background:var(--neg)}
+  .coach{font-family:var(--font-mono);font-size:11px;letter-spacing:.02em;color:var(--muted-strong);margin:8px 0 14px}
+  .coach.warn{color:var(--warn)}
+  .presets{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+  .chip{border:1px solid var(--border);background:var(--bg);color:var(--fg);border-radius:var(--radius-pill);padding:8px 12px;font:inherit;font-size:13px;cursor:pointer;transition:border-color .15s var(--ease)}
+  .chip:hover{border-color:var(--brand-line)}
+  .chip .mg{color:var(--muted);font-family:var(--font-mono);font-size:10px;margin-left:5px}
+  .customAdd{display:flex;gap:8px;align-items:center;margin-bottom:6px}
+  .fieldInput{background:var(--bg);border:1px solid var(--border);color:var(--fg);border-radius:10px;padding:9px 11px;font:inherit}
+  .fieldInput:focus{outline:none;border-color:var(--brand)}
+  .customAdd .fieldInput{width:92px}
+  .btn-primary{background:var(--brand);color:#0a0a0c;border:none;border-radius:10px;padding:9px 14px;font:inherit;font-weight:600;cursor:pointer}
+  .hint{color:var(--neg);font-size:12px;font-family:var(--font-mono);min-height:14px;margin-top:6px}
+  .decayRow{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;margin:16px 0 4px;flex-wrap:wrap}
+  .decayNow{display:flex;flex-direction:column;gap:2px}
+  .decayNow .n{font-weight:600;font-size:34px;letter-spacing:-.02em;line-height:1;font-variant-numeric:tabular-nums;color:var(--brand)}
+  .decayNow .l{font-family:var(--font-mono);font-size:10px;letter-spacing:.12em;text-transform:lowercase;color:var(--muted)}
+  .decayHalf{text-align:right;font-family:var(--font-mono);font-size:11px;color:var(--muted-strong)}
+  .chart{width:100%;height:auto;display:block;margin-top:6px}
+  .chart .grid{stroke:var(--border);stroke-width:1}
+  .chart .axl{fill:var(--muted);font-family:var(--font-mono);font-size:9px;letter-spacing:.08em}
+  .chart .dline{fill:none;stroke:var(--brand);stroke-width:2;stroke-linejoin:round;stroke-linecap:round}
+  .chart .darea{opacity:.6}
+  .chart .nowd{fill:var(--brand);stroke:var(--bg);stroke-width:1.5}
+  .logList{display:flex;flex-direction:column;gap:6px;margin-top:14px}
+  .logRow{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 12px;border:1px solid var(--border);border-radius:var(--radius-md);background:var(--bg)}
+  .logRow .nm{font-weight:600;font-size:14px}
+  .logRow .meta{font-family:var(--font-mono);font-size:11px;color:var(--muted)}
+  .xBtn{background:transparent;border:1px solid var(--border);color:var(--muted);width:26px;height:26px;border-radius:50%;cursor:pointer;flex-shrink:0}
+  .xBtn:hover{color:var(--neg);border-color:var(--neg-line)}
+  .empty{color:var(--muted);font-size:13px;padding:10px 0}
+  .stackList{display:flex;flex-direction:column;gap:8px}
+  .stackRow{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 15px;border:1px solid var(--border);
+    border-left:3px solid var(--brand-line);border-radius:var(--radius-md);background:var(--surface)}
+  .stackRow.checked{opacity:.55}
+  .stackRow.checked .stackName{text-decoration:line-through}
+  .stackLeft{display:flex;align-items:center;gap:12px;min-width:0}
+  .checkBtn{background:transparent;border:1.5px solid var(--border);color:transparent;width:24px;height:24px;border-radius:50%;
+    cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:border-color .15s,background .15s,color .15s}
+  .checkBtn:hover{border-color:var(--brand)}
+  .checkBtn.checked{background:var(--brand);border-color:var(--brand);color:#0a0a0c}
+  .checkBtn svg{width:13px;height:13px}
+  .stackName{font-size:14.5px}
+  .stackAdd{display:flex;gap:8px;margin-top:12px}
+  .stackAdd .fieldInput{flex:1}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute">
+  <filter id="distort" x="-20%" y="-20%" width="140%" height="140%">
+    <feTurbulence type="fractalNoise" baseFrequency="0.006 0.012" numOctaves="2" seed="7" result="noise">
+      <animate attributeName="seed" values="0;9;3;11;0" dur="46s" repeatCount="indefinite"/>
+    </feTurbulence>
+    <feDisplacementMap in="SourceGraphic" in2="noise" scale="16" xChannelSelector="R" yChannelSelector="G"/>
+  </filter>
+</svg>
+<div class="bgWarp">
+  <div class="sun"></div>
+  <div class="groundWrap"><div class="ground"></div></div>
+  <div class="horizonLine"></div>
+  <div class="stars" id="stars"></div>
+</div>
+<main><div class="shell" id="app"></div></main>
+<script>
+/* Intake — caffeine log (400mg ceiling + one-compartment half-life decay,
+   same pharmacokinetic model Peak's caffeine card uses) and a daily
+   med/supplement stack checklist. No network: persists through the
+   dashboard bridge (window.Vitality). Independent of Peak's own caffeine
+   log — each sealed tile keeps its own store. */
+let store={};
+const $=id=>document.getElementById(id);
+const REDUCED=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function persist(){window.Vitality.save(store);}
+function newId(){return Date.now().toString(36)+Math.random().toString(36).slice(2,6);}
+function todayKey(){const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
+
+function spawnStars(){
+  const wrap=$('stars');if(!wrap)return;
+  let html='';
+  for(let i=0;i<40;i++){
+    const left=Math.random()*100, top=Math.random()*55, delay=-Math.random()*8;
+    html+='<div class="star" style="left:'+left+'%;top:'+top+'%;animation-delay:'+delay+'s"></div>';
+  }
+  wrap.innerHTML=html;
+}
+
+/* ---- caffeine: today's dose log, keyed by date (resets daily) ---- */
+function today(){
+  if(!store.caff||typeof store.caff!=='object')store.caff={};
+  let d=store.caff[todayKey()];
+  if(!d||typeof d!=='object'){d={doses:[]};store.caff[todayKey()]=d;}
+  if(!Array.isArray(d.doses))d.doses=[];
+  return d;
+}
+const PRESETS=[['Coffee',95],['Diet Coke',46]];
+const CAFF_CEIL=400; // FDA-cited safe daily ceiling (mg)
+
+/* ---- one-compartment pharmacokinetic model — same constants as Peak's
+   caffeine card, so "mg in your system" reads the same way across tiles. ---- */
+const KA=4.0,HALF_LIFE=5,KE=Math.LN2/HALF_LIFE;
+function clamp(x,a,b){return Math.max(a,Math.min(b,x));}
+function doseAmount(mg,h){ if(h<0)return 0; if(Math.abs(KA-KE)<1e-9)return 0;
+  const a=mg*KA/(KA-KE)*(Math.exp(-KE*h)-Math.exp(-KA*h)); return Math.max(0,a); }
+function nowT(){ const d=new Date(); return d.getHours()+d.getMinutes()/60; }
+function clockOf(t){ t=((t%24)+24)%24; let hh=Math.floor(t); const mm=Math.round((t-hh)*60); let m2=mm; if(m2===60){hh+=1;m2=0;} const ap=hh<12?'AM':'PM'; let h12=hh%12; if(h12===0)h12=12; return h12+(m2?':'+String(m2).padStart(2,'0'):'')+' '+ap; }
+function bodyAt(t){ return today().doses.reduce((s,l)=>s+doseAmount(+l.mg||0,t-(+l.t||0)),0); }
+function caffTotal(){ return today().doses.reduce((s,l)=>s+(+l.mg||0),0); }
+
+function addDose(mg,label){
+  mg=Math.round(mg);
+  today().doses.push({id:newId(),t:Math.round(nowT()*4)/4,mg,label:label||''});
+  persist(); render();
+}
+function deleteDose(id){
+  const d=today(); d.doses=d.doses.filter(l=>String(l.id)!==id); persist(); render();
+}
+
+/* ---- decay chart: mg remaining from now out to +10h, assuming no more
+   doses — the visual half-life tracker. ---- */
+const CW=560,CX0=10,CX1=550,CY0=14,CY1=110;
+function decayChartHtml(){
+  const now=nowT(), nowMg=bodyAt(now);
+  const HOURS=10, STEP=0.25, N=Math.round(HOURS/STEP);
+  const pts=[]; for(let i=0;i<=N;i++)pts.push({h:i*STEP,mg:bodyAt(now+i*STEP)});
+  const maxMg=Math.max(nowMg,1,...pts.map(p=>p.mg))*1.1;
+  const xOf=h=>CX0+(h/HOURS)*(CX1-CX0);
+  const yOf=mg=>CY1-(clamp(mg/maxMg,0,1))*(CY1-CY0);
+  const dline=pts.map((p,i)=>(i?'L':'M')+xOf(p.h).toFixed(1)+' '+yOf(p.mg).toFixed(1)).join(' ');
+  const area=dline+' L '+xOf(HOURS).toFixed(1)+' '+CY1+' L '+xOf(0).toFixed(1)+' '+CY1+' Z';
+  const grid=[2.5,5,7.5].map(h=>'<line x1="'+xOf(h).toFixed(1)+'" y1="'+CY0+'" x2="'+xOf(h).toFixed(1)+'" y2="'+CY1+'" class="grid"/>').join('');
+  const labels=[0,2.5,5,7.5,10].map(h=>{
+    const label=h===0?'now':'+'+h+'h';
+    return '<text x="'+xOf(h).toFixed(1)+'" y="'+(CY1+15)+'" class="axl" text-anchor="middle">'+label+'</text>';
+  }).join('');
+  return '<svg viewBox="0 0 '+CW+' '+(CY1+22)+'" class="chart" role="img" aria-label="Caffeine remaining over the next 10 hours">'
+    +'<defs><linearGradient id="dfill" x1="0" y1="0" x2="0" y2="1">'
+    +'<stop offset="0" stop-color="#e0b13c" stop-opacity=".24"/><stop offset="1" stop-color="#e0b13c" stop-opacity="0"/></linearGradient></defs>'
+    +grid+'<path d="'+area+'" fill="url(#dfill)" class="darea"/><path d="'+dline+'" class="dline"/>'
+    +'<circle cx="'+xOf(0).toFixed(1)+'" cy="'+yOf(nowMg).toFixed(1)+'" r="4" class="nowd"/>'
+    +labels+'</svg>';
+}
+
+function caffeineHtml(){
+  const total=caffTotal(), over=total>=CAFF_CEIL, nowMg=Math.round(bodyAt(nowT()));
+  const pct=Math.min(100,(total/CAFF_CEIL)*100);
+  const coachTxt=over?'At your '+CAFF_CEIL+' mg ceiling — more now risks jitters + a rough crash.':Math.round(CAFF_CEIL-total)+' mg left today';
+  const chips=PRESETS.map((p,i)=>'<button class="chip" data-preset="'+i+'">'+p[0]+'<span class="mg">'+p[1]+'mg</span></button>').join('');
+  const log=today().doses.slice().sort((a,b)=>a.t-b.t);
+  const rows=log.length
+    ? '<div class="logList">'+log.map(l=>'<div class="logRow"><div><div class="nm">'+Math.round(l.mg)+' mg <span class="meta">'+(l.label?esc(l.label)+' · ':'')+clockOf(l.t)+'</span></div></div><button class="xBtn" data-del="'+l.id+'" title="Remove">×</button></div>').join('')+'</div>'
+    : '<p class="empty">No caffeine logged yet today.</p>';
+  return '<section class="card"><span class="cardName">Caffeine</span>'
+    +'<div class="caffHead"><span class="caffTotal'+(over?' over':'')+'">'+Math.round(total)+' mg</span><span class="caffCeil">of '+CAFF_CEIL+' mg limit</span></div>'
+    +'<div class="caffBarTrack"><div class="caffBarFill'+(over?' over':'')+'" style="width:'+pct+'%"></div></div>'
+    +'<p class="coach'+(over?' warn':'')+'">'+coachTxt+'</p>'
+    +'<div class="presets">'+chips+'</div>'
+    +'<div class="customAdd"><input class="fieldInput" id="caffMg" type="number" min="1" step="5" placeholder="mg" /><button class="btn-primary" id="caffAdd">Add now</button></div>'
+    +'<div class="hint" id="hint"></div>'
+    +'<div class="decayRow"><div class="decayNow"><span class="n">'+nowMg+'</span><span class="l">mg in system now</span></div>'
+    +'<span class="decayHalf">~'+HALF_LIFE+'h half-life</span></div>'
+    +decayChartHtml()
+    +rows+'</section>';
+}
+
+/* ---- daily stack: Celexa 20mg + Creatine by default, one-tap check that
+   resets each day (same pattern as Fuel's supplement checklist). ---- */
+function stackItems(){
+  if(!Array.isArray(store.stack)){
+    store.stack=[{id:newId(),name:'Celexa 20mg'},{id:newId(),name:'Creatine'}];
+  }
+  return store.stack;
+}
+function stackChecked(){
+  if(!store.stackChecks||typeof store.stackChecks!=='object')store.stackChecks={};
+  return Array.isArray(store.stackChecks[todayKey()])?store.stackChecks[todayKey()]:[];
+}
+function setStackChecked(ids){
+  if(!store.stackChecks||typeof store.stackChecks!=='object')store.stackChecks={};
+  store.stackChecks[todayKey()]=ids;persist();
+}
+function toggleStack(id){
+  const checked=stackChecked();
+  const next=checked.includes(id)?checked.filter(x=>x!==id):[...checked,id];
+  setStackChecked(next);
+}
+function addStackItem(name){
+  const trimmed=name.trim();if(!trimmed)return;
+  stackItems().push({id:newId(),name:trimmed});persist();
+}
+function deleteStackItem(id){
+  store.stack=stackItems().filter(s=>s.id!==id);
+  setStackChecked(stackChecked().filter(x=>x!==id));
+  persist();
+}
+function stackHtml(){
+  const items=stackItems(),checked=stackChecked();
+  const rows=items.map(s=>{
+    const isChecked=checked.includes(s.id);
+    return '<div class="stackRow'+(isChecked?' checked':'')+'"><div class="stackLeft">'
+      +'<button class="checkBtn'+(isChecked?' checked':'')+'" data-toggle-stack="'+s.id+'" title="Toggle taken today">'
+      +'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12l5 5L20 6"/></svg></button>'
+      +'<span class="stackName">'+esc(s.name)+'</span></div>'
+      +'<button class="xBtn" data-del-stack="'+s.id+'" title="Remove">×</button></div>';
+  }).join('');
+  return '<section class="card"><span class="cardName">Daily stack</span>'
+    +'<div class="stackList">'+rows+'</div>'
+    +'<div class="stackAdd"><input class="fieldInput" id="stackName" type="text" placeholder="e.g. Vitamin D" autocomplete="off" />'
+    +'<button class="btn-primary" id="stackAdd">Add</button></div>'
+    +'</section>';
+}
+
+function headerHtml(){
+  return '<header class="header"><div class="markWrap"><div class="markGlow"></div><div class="mark" aria-hidden="true">'
+    +'<svg viewBox="-12 -12 24 24" fill="none" stroke="#0a0a0c" stroke-width="1.4" stroke-linejoin="round" stroke-linecap="round">'
+    +'<g transform="rotate(45)"><rect x="-9" y="-4.5" width="18" height="9" rx="4.5"/><line x1="0" y1="-4.5" x2="0" y2="4.5"/></g></svg></div></div>'
+    +'<div><h1 class="title">Intake</h1><p class="subtitle">caffeine · daily stack</p></div></header>';
+}
+function render(){ $('app').innerHTML=headerHtml()+caffeineHtml()+stackHtml(); }
+
+document.addEventListener('click',e=>{
+  const preset=e.target.closest('[data-preset]');
+  if(preset){ const p=PRESETS[Number(preset.getAttribute('data-preset'))]; if(p)addDose(p[1],p[0]); return; }
+  if(e.target.closest('#caffAdd')){
+    const el=$('caffMg'), mg=Number(el&&el.value);
+    if(!isFinite(mg)||mg<=0){ const h=$('hint'); if(h)h.textContent='Enter a caffeine amount in mg.'; return; }
+    addDose(mg,'Custom'); return;
+  }
+  const del=e.target.closest('[data-del]');
+  if(del){ deleteDose(del.getAttribute('data-del')); return; }
+  if(e.target.closest('#stackAdd')){
+    const el=$('stackName');
+    addStackItem((el&&el.value)||'');
+    if(el)el.value='';
+    render(); return;
+  }
+  const toggleS=e.target.closest('[data-toggle-stack]');
+  if(toggleS){ toggleStack(toggleS.getAttribute('data-toggle-stack')); render(); return; }
+  const delS=e.target.closest('[data-del-stack]');
+  if(delS){ deleteStackItem(delS.getAttribute('data-del-stack')); render(); }
+});
+document.addEventListener('keydown',e=>{
+  if(e.target.id==='stackName'&&e.key==='Enter'){
+    e.preventDefault();
+    addStackItem(e.target.value||'');
+    e.target.value='';render();
+  }
+  if(e.target.id==='caffMg'&&e.key==='Enter'){
+    e.preventDefault();
+    const mg=Number(e.target.value);
+    if(isFinite(mg)&&mg>0){addDose(mg,'Custom');e.target.value='';}
+  }
+});
+
+spawnStars();
+(async()=>{const d=await window.Vitality.load();store=(d&&typeof d==='object'&&!Array.isArray(d))?d:{};render();window.Vitality.ready();})();
+</script>
+</body>
+</html>

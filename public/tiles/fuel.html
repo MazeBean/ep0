@@ -9,9 +9,6 @@
   :root{
     --bg:#0a0a0c;--surface:rgba(255,255,255,.045);--border:rgba(255,255,255,.11);--brand:#e0b13c;
     --brand-soft:rgba(224,177,60,.08);--brand-line:rgba(224,177,60,.3);
-    --p:#5fc98a;--p-soft:rgba(95,201,138,.09);--p-line:rgba(95,201,138,.3);
-    --c:#e8a15f;--c-soft:rgba(232,161,95,.09);--c-line:rgba(232,161,95,.3);
-    --f:#7fa8e0;--f-soft:rgba(127,168,224,.09);--f-line:rgba(127,168,224,.3);
     --muted:#8a8a90;--muted-strong:#a8a8b0;--fg:#ededf0;--neg:#ff6b6b;--neg-line:rgba(255,107,107,.4);
     --track:#17171b;--radius-md:12px;--radius-pill:999px;
     --font-display:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,sans-serif;
@@ -76,23 +73,28 @@
   .fieldInput{background:var(--bg);border:1px solid var(--border);color:var(--fg);border-radius:10px;padding:9px 11px;font:inherit}
   .fieldInput:focus{outline:none;border-color:var(--brand)}
   .goalEdit .fieldInput{width:92px}
-  .macroBar{height:4px;border-radius:var(--radius-pill);background:var(--track);overflow:hidden;margin-top:8px}
-  .macroBarFill{height:100%;border-radius:var(--radius-pill);background:var(--p);transition:width var(--duration) ease}
-  .bar{height:10px;border-radius:var(--radius-pill);background:var(--track);overflow:hidden}
-  .barFill{height:100%;border-radius:var(--radius-pill);background:var(--brand);transition:width var(--duration) ease}
-  .barFill.over{background:var(--neg)}
-  .macroGrid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:14px}
-  @media(max-width:560px){.macroGrid{grid-template-columns:repeat(2,1fr)}}
-  .macroBox{display:flex;flex-direction:column;gap:4px;padding:14px;border:1px solid var(--border);border-radius:var(--radius-md);background:var(--bg)}
-  .macroBox[data-accent="cal"]{border-color:var(--brand-line);background:var(--brand-soft)}
-  .macroBox[data-accent="p"]{border-color:var(--p-line);background:var(--p-soft)}
-  .macroBox[data-accent="p"] .macroVal{color:var(--p)}
-  .macroBox[data-accent="c"]{border-color:var(--c-line);background:var(--c-soft)}
-  .macroBox[data-accent="c"] .macroVal{color:var(--c)}
-  .macroBox[data-accent="f"]{border-color:var(--f-line);background:var(--f-soft)}
-  .macroBox[data-accent="f"] .macroVal{color:var(--f)}
-  .macroVal{font-weight:600;font-size:22px;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
-  .macroLabel{font-family:var(--font-mono);font-size:10px;letter-spacing:.12em;text-transform:lowercase;color:var(--muted)}
+  /* Calorie gauge: a counterclockwise-filling ring (see arcPathCCW in the
+     script — a hand-built SVG arc, not a mirrored stroke-dasharray trick,
+     so the sweep direction is exact rather than guessed). */
+  .calGaugeWrap{display:flex;justify-content:center;margin:18px 0 6px}
+  .calGaugeSvg{width:172px;height:172px}
+  .calGaugeTrack{fill:none;stroke:var(--track);stroke-width:12}
+  .calGaugeFill{fill:none;stroke:var(--brand);stroke-width:12;stroke-linecap:round}
+  .calGaugeFill.over{stroke:var(--neg)}
+  .calGaugeNum{font-family:var(--font-display);font-weight:700;font-size:30px;letter-spacing:-.02em;fill:var(--fg)}
+  .calGaugeLbl{font-family:var(--font-mono);font-size:10.5px;letter-spacing:.1em;fill:var(--muted)}
+  /* Macro bars: protein (gold) on top, carbs + fat (white) below. Carbs/fat
+     have no user-set per-gram goal, so their bars scale against a generic
+     40/30% calorie-split reference derived from the calorie goal — a rough
+     guide, not a personalized target. */
+  .macroBars{display:flex;flex-direction:column;gap:13px;margin-top:16px}
+  .macroBarRow{display:flex;flex-direction:column;gap:6px}
+  .macroBarHead{display:flex;align-items:baseline;justify-content:space-between;font-size:13px;color:var(--muted-strong);text-transform:lowercase}
+  .macroBarHead .v{font-family:var(--font-mono);font-size:11.5px;font-variant-numeric:tabular-nums;color:var(--fg)}
+  .macroBarTrack{height:8px;border-radius:var(--radius-pill);background:var(--track);overflow:hidden}
+  .macroBarFill{height:100%;border-radius:var(--radius-pill);transition:width var(--duration) ease}
+  .macroBarFill.gold{background:var(--brand)}
+  .macroBarFill.white{background:rgba(255,255,255,.78)}
   .sectionTitle{font-weight:700;font-size:17px;margin:28px 0 0;text-transform:lowercase}
   .search{margin:18px 0 10px}
   .search .fieldInput{width:100%}
@@ -231,21 +233,59 @@ function setMeal(dayIdx,slot,value){
   plan[dayIdx][slot]=value;
   persist();
 }
+/* ---- calorie gauge geometry: a hand-built SVG arc (not a mirrored
+   stroke-dasharray) so the counterclockwise sweep direction is exact. ---- */
+function polarPt(cx,cy,r,deg){
+  const rad=(deg-90)*Math.PI/180; // 0deg = 12 o'clock
+  return {x:cx+r*Math.cos(rad),y:cy+r*Math.sin(rad)};
+}
+function arcPathCCW(cx,cy,r,pct){
+  const clamped=Math.max(0,Math.min(0.9999,pct));
+  const sweepDeg=-360*clamped; // negative degrees = counterclockwise from 12 o'clock
+  const start=polarPt(cx,cy,r,0);
+  const end=polarPt(cx,cy,r,sweepDeg);
+  const largeArc=Math.abs(sweepDeg)>180?1:0;
+  return 'M '+start.x.toFixed(2)+' '+start.y.toFixed(2)+' A '+r+' '+r+' 0 '+largeArc+' 0 '+end.x.toFixed(2)+' '+end.y.toFixed(2);
+}
+function calGaugeHtml(pct,eaten,goal,over){
+  const cx=86,cy=86,r=74,d=pct>0?arcPathCCW(cx,cy,r,pct):'';
+  return '<div class="calGaugeWrap"><svg viewBox="0 0 172 172" class="calGaugeSvg">'
+    +'<circle cx="'+cx+'" cy="'+cy+'" r="'+r+'" class="calGaugeTrack"/>'
+    +(d?'<path d="'+d+'" class="calGaugeFill'+(over?' over':'')+'"/>':'')
+    +'<text x="'+cx+'" y="'+(cy-4)+'" text-anchor="middle" class="calGaugeNum">'+round(eaten)+'</text>'
+    +'<text x="'+cx+'" y="'+(cy+18)+'" text-anchor="middle" class="calGaugeLbl">of '+goal+' kcal</text>'
+    +'</svg></div>';
+}
+function macroBarRowHtml(label,valueG,goalG,pct,colorClass){
+  const valTxt=round(valueG)+'g'+(goalG!=null?' / '+goalG+'g':'');
+  return '<div class="macroBarRow"><div class="macroBarHead"><span>'+label+'</span><span class="v">'+valTxt+'</span></div>'
+    +'<div class="macroBarTrack"><div class="macroBarFill '+colorClass+'" style="width:'+Math.max(0,Math.min(100,pct))+'%"></div></div></div>';
+}
 function summaryHtml(){
   const t=totals(),goal=goalCal(),pGoal=goalProtein();
-  const remaining=goal-t.cal,over=remaining<0,pct=Math.min(100,goal>0?(t.cal/goal)*100:0);
-  const pPct=Math.min(100,pGoal>0?(t.p/pGoal)*100:0);
+  const remaining=goal-t.cal,over=remaining<0;
+  const calPct=goal>0?t.cal/goal:0;
+  const pPct=pGoal>0?(t.p/pGoal)*100:0;
+  // Carbs/fat have no per-gram goal in this tile's data model, so their bars
+  // scale against a generic 40%-carb / 30%-fat calorie-split reference
+  // derived from the calorie goal — a rough guide, not a personalized target.
+  const carbsRef=Math.max(1,Math.round(goal*0.4/4));
+  const fatRef=Math.max(1,Math.round(goal*0.3/9));
+  const cPct=(t.c/carbsRef)*100;
+  const fPct=(t.f/fatRef)*100;
   const cell=(cls,n,l)=>'<div class="calCell '+cls+'"><span class="n">'+round(n)+'</span><span class="l">'+l+'</span></div>';
   const head='<div class="calHead"><div class="calMath">'+cell('',goal,'goal')+'<span class="calOp">−</span>'+cell('',t.cal,'food')+'<span class="calOp">=</span>'+cell('remain'+(over?' over':''),Math.abs(remaining),over?'over':'remaining')+'</div>'
     +'<div class="goalEdits">'
     +'<div class="goalEdit"><span class="calCell"><span class="l">calorie goal</span></span><input class="fieldInput" id="goal" type="number" min="0" step="50" value="'+goal+'" /></div>'
     +'<div class="goalEdit"><span class="calCell"><span class="l">protein goal (g)</span></span><input class="fieldInput" id="proteinGoal" type="number" min="0" step="5" value="'+pGoal+'" /></div>'
     +'</div></div>';
-  const bar='<div class="bar"><div class="barFill'+(over?' over':'')+'" style="width:'+pct+'%"></div></div>';
-  const box=(a,v,u,l,goalPct)=>'<div class="macroBox" data-accent="'+a+'"><span class="macroVal">'+round(v)+(u||'')+'</span><span class="macroLabel">'+l+'</span>'
-    +(goalPct!=null?'<div class="macroBar"><div class="macroBarFill" style="width:'+goalPct+'%"></div></div>':'')+'</div>';
-  return '<section class="card"><span class="cardName">Today</span>'+head+bar+'<div class="macroGrid">'
-    +box('p',t.p,'g','protein / '+pGoal+'g',pPct)+box('c',t.c,'g','carbs')+box('f',t.f,'g','fat')+box('cal',t.cal,'','calories')+'</div></section>';
+  const gauge=calGaugeHtml(calPct,t.cal,goal,over);
+  const bars='<div class="macroBars">'
+    +macroBarRowHtml('protein',t.p,pGoal,pPct,'gold')
+    +macroBarRowHtml('carbs',t.c,null,cPct,'white')
+    +macroBarRowHtml('fat',t.f,null,fPct,'white')
+    +'</div>';
+  return '<section class="card"><span class="cardName">Today</span>'+head+gauge+bars+'</section>';
 }
 function mealPlanHtml(){
   const todayIdx=new Date().getDay();

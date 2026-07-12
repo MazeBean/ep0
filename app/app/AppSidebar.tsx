@@ -3,11 +3,11 @@
 import styles from './AppSidebar.module.css'
 import { CORE_TILES, type CoreTileId } from '@/lib/tiles/coreTiles'
 
-/** The 6 real, functional tiles get a permanent nav slot. Vee (locked
+/** The 7 real, functional tiles get a permanent nav slot. Vee (locked
  *  centrepiece, no sealed content of its own) and Library (its own
  *  full-screen manager) stay off this list — this is a nav, not a mirror
  *  of every grid cell. */
-const NAV_TILES: CoreTileId[] = ['fuel', 'workout', 'goals', 'todoist', 'peak', 'finance']
+const NAV_TILES: CoreTileId[] = ['fuel', 'workout', 'goals', 'todoist', 'peak', 'finance', 'intake']
 
 const HOME_GLYPH = (
   <svg viewBox="-12 -12 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
