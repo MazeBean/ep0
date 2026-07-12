@@ -41,7 +41,7 @@
     box-shadow:0 0 16px rgba(190,190,198,.25)}
   @keyframes twinkle{0%,100%{opacity:.15}50%{opacity:.5}}
   @media(prefers-reduced-motion:reduce){.ground,.sun,.star,.markOrb,.markGlow{animation:none!important}.progressWrap,.stat,.card{transition:none}}
-  .shell{position:relative;z-index:1;width:100%;max-width:920px}
+  .shell{position:relative;z-index:1;width:100%;max-width:1200px;min-width:0}
   .header{display:flex;align-items:center;gap:14px;margin-bottom:22px}
   .markWrap{position:relative;width:44px;height:44px;flex-shrink:0}
   .markGlow{position:absolute;inset:-10px;border-radius:50%;background:var(--brand);filter:blur(14px);opacity:.4;
@@ -55,7 +55,7 @@
   .title{font-size:24px;font-weight:700;letter-spacing:-.01em;margin:0}
   .subtitle{color:var(--muted);font-family:var(--font-mono);font-size:11px;letter-spacing:.12em;margin:5px 0 0}
   .stats{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:18px}
-  .stat{position:relative;border:1px solid var(--border);border-radius:var(--radius-md);background:var(--surface);padding:14px 12px;text-align:center;
+  .stat{min-width:0;position:relative;border:1px solid var(--border);border-radius:var(--radius-md);background:var(--surface);padding:14px 12px;text-align:center;
     -webkit-backdrop-filter:blur(18px);backdrop-filter:blur(18px);overflow:hidden;transition:border-color .2s var(--ease)}
   .stat:hover,.card:hover{border-color:var(--brand-line);box-shadow:0 0 0 1px var(--brand-line) inset}
   .statNum{font-size:22px;font-weight:600;letter-spacing:-.01em}
@@ -67,6 +67,12 @@
   .cardName{font-family:var(--font-display);font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#fff;display:block;margin-bottom:14px}
   .row{display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap}
   .field{flex:1;min-width:140px}
+  @media(max-width:640px){
+    .row{flex-direction:column;align-items:stretch}
+    /* the due-date field carries an inline flex-basis for its desktop width;
+       override it so column-direction stacking uses width, not a 140px row height */
+    .row .field{width:100%;flex:1 1 auto!important}
+  }
   .fieldLbl{display:block;font-size:11px;color:var(--muted);margin-bottom:6px}
   input[type=text]{width:100%;background:var(--bg);border:1px solid var(--border);color:var(--fg);
     border-radius:10px;padding:10px 12px;font:inherit}
@@ -94,6 +100,7 @@
   .notConnected code{font-family:var(--font-mono);background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:2px 6px;color:var(--fg)}
 
   .weekGrid{display:grid;grid-template-columns:repeat(7,1fr);gap:10px}
+  @media(max-width:640px){.weekGrid{grid-template-columns:repeat(2,1fr);row-gap:16px}}
   .dayCol{display:flex;flex-direction:column;gap:8px;min-width:0}
   .dayHead{text-align:center;padding-bottom:9px;border-bottom:1px solid var(--border)}
   .dayHead .wd{font-family:var(--font-mono);font-size:10.5px;letter-spacing:.06em;color:var(--muted);display:block}
