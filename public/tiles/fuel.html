@@ -110,18 +110,10 @@
   .xBtn:hover{color:var(--neg);border-color:var(--neg-line)}
   .empty{color:var(--muted);font-size:13px;padding:12px 0}
   .hint{color:var(--neg);font-size:12px;font-family:var(--font-mono);min-height:14px;margin-top:4px}
-  .suppAdd{display:flex;gap:8px;margin:10px 0 14px}
-  .suppAdd .fieldInput{flex:1}
-  .suppList{display:flex;flex-direction:column;gap:6px}
-  .suppRow{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 12px;border:1px solid var(--border);border-radius:var(--radius-md);background:var(--surface)}
-  .suppLeft{display:flex;align-items:center;gap:12px;min-width:0}
-  .checkBtn{background:transparent;border:1.5px solid var(--border);color:transparent;width:22px;height:22px;border-radius:50%;
-    cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:border-color .15s,background .15s,color .15s}
-  .checkBtn:hover{border-color:var(--brand)}
-  .checkBtn.checked{background:var(--brand);border-color:var(--brand);color:#0a0a0c}
-  .checkBtn svg{width:12px;height:12px}
-  .suppName{font-size:14px}
-  .suppRow.checked .suppName{color:var(--muted);text-decoration:line-through}
+  .row{display:flex;gap:10px;flex-wrap:wrap}
+  .field{flex:1;min-width:110px}
+  .fieldLbl{display:block;font-size:11px;color:var(--muted);margin-bottom:6px;text-transform:lowercase}
+  .fieldNote{font-family:var(--font-mono);font-size:10px;letter-spacing:.06em;color:var(--muted);margin:8px 0 0;text-transform:lowercase}
   .mealGrid{display:grid;grid-template-columns:repeat(7,1fr);gap:8px}
   .mealDay{display:flex;flex-direction:column;gap:6px;min-width:0}
   .mealDayHead{text-align:center;font-family:var(--font-mono);font-size:10px;letter-spacing:.06em;color:var(--muted);
@@ -193,33 +185,23 @@ const round=n=>Math.round(n);
 let query='',matches=[];
 function totals(){return todaysLog().reduce((t,e)=>{t.cal+=e.cal;t.p+=e.p;t.c+=e.c;t.f+=e.f;return t;},{cal:0,p:0,c:0,f:0});}
 
-/* ---- daily supplements checklist: the supplement list persists; which ones
-   are checked resets each day (keyed by date, same pattern as the food log) ---- */
-function allSupplements(){return Array.isArray(store.supplements)?store.supplements:[];}
-function todaysChecked(){
-  if(!store.supplementChecks||typeof store.supplementChecks!=='object')store.supplementChecks={};
-  return Array.isArray(store.supplementChecks[todayKey()])?store.supplementChecks[todayKey()]:[];
-}
-function setTodaysChecked(ids){
-  if(!store.supplementChecks||typeof store.supplementChecks!=='object')store.supplementChecks={};
-  store.supplementChecks[todayKey()]=ids;persist();
-}
-function addSupplement(name){
-  const trimmed=name.trim();if(!trimmed)return;
-  if(!Array.isArray(store.supplements))store.supplements=[];
-  store.supplements.push({id:newId(),name:trimmed});persist();
-}
-function deleteSupplement(id){
-  store.supplements=allSupplements().filter(s=>s.id!==id);
-  setTodaysChecked(todaysChecked().filter(x=>x!==id));
+function newId(){return Date.now().toString(36)+Math.random().toString(36).slice(2,6);}
+
+/* ---- custom foods: reusable, persisted entries the user creates once and
+   can then search + add just like the built-in FOODS list (same per-100g
+   convention, so gram-based scaling in resultsInner()/click-to-add works
+   identically for both). ---- */
+function customFoods(){return Array.isArray(store.customFoods)?store.customFoods:[];}
+function allFoods(){return FOODS.concat(customFoods());}
+function addCustomFood(name,cal,p,c,f){
+  if(!Array.isArray(store.customFoods))store.customFoods=[];
+  store.customFoods.push({id:newId(),name,cal,p,c,f});
   persist();
 }
-function toggleSupplement(id){
-  const checked=todaysChecked();
-  const next=checked.includes(id)?checked.filter(x=>x!==id):[...checked,id];
-  setTodaysChecked(next);
+function deleteCustomFood(id){
+  store.customFoods=customFoods().filter(x=>x.id!==id);
+  persist();
 }
-function newId(){return Date.now().toString(36)+Math.random().toString(36).slice(2,6);}
 
 /* ---- weekly meal plan: a reusable Sun–Sat template (not tied to specific
    dates), separate from the daily food log above ---- */
@@ -301,10 +283,28 @@ function mealPlanHtml(){
 }
 function resultsInner(){
   const q=query.trim().toLowerCase();
-  matches=q?FOODS.filter(f=>f.name.toLowerCase().includes(q)).slice(0,8):[];
+  matches=q?allFoods().filter(f=>f.name.toLowerCase().includes(q)).slice(0,8):[];
   if(!q)return '<p class="empty">Start typing to find a food…</p>';
-  if(!matches.length)return '<p class="empty">No match. (Add it to the FOODS list.)</p>';
+  if(!matches.length)return '<p class="empty">No match — create it below.</p>';
   return matches.map((f,i)=>'<div class="foodRow"><div><div class="foodName">'+esc(f.name)+'</div><div class="meta">'+f.cal+' kcal · '+f.p+'P / '+f.c+'C / '+f.f+'F per 100g</div></div><div style="display:flex;align-items:center;gap:8px"><input class="fieldInput gramInput" type="number" min="0" placeholder="g" data-grams="'+i+'" /><button class="btn btn-primary" data-add="'+i+'">Add</button></div></div>').join('');
+}
+function createFoodHtml(){
+  const list=customFoods();
+  const rows=list.length?'<div class="results">'+list.map(f=>'<div class="foodRow"><div><div class="foodName">'+esc(f.name)+'</div><div class="meta">'+f.cal+' kcal · '+f.p+'P / '+f.c+'C / '+f.f+'F per 100g</div></div><button class="xBtn" data-del-food="'+f.id+'" title="Remove">×</button></div>').join('')+'</div>':'';
+  return '<h2 class="sectionTitle">Create a food</h2>'
+    +'<div class="row">'
+    +'<div class="field" style="flex:2;min-width:160px"><label class="fieldLbl">name</label><input class="fieldInput" id="cfName" type="text" placeholder="e.g. protein shake" autocomplete="off" /></div>'
+    +'<div class="field"><label class="fieldLbl">calories</label><input class="fieldInput" id="cfCal" type="number" min="0" step="1" placeholder="165" /></div>'
+    +'</div>'
+    +'<div class="row" style="margin-top:10px">'
+    +'<div class="field"><label class="fieldLbl">protein (g)</label><input class="fieldInput" id="cfP" type="number" min="0" step="0.1" placeholder="31" /></div>'
+    +'<div class="field"><label class="fieldLbl">carbs (g)</label><input class="fieldInput" id="cfC" type="number" min="0" step="0.1" placeholder="0" /></div>'
+    +'<div class="field"><label class="fieldLbl">fat (g)</label><input class="fieldInput" id="cfF" type="number" min="0" step="0.1" placeholder="3.6" /></div>'
+    +'</div>'
+    +'<p class="fieldNote">values per 100g — same convention as the built-in list, so grams entered when logging scale correctly</p>'
+    +'<div class="hint" id="cfHint"></div>'
+    +'<div style="display:flex;justify-content:flex-end;margin-top:10px"><button class="btn btn-primary" id="cfAdd">Add to list</button></div>'
+    +rows;
 }
 function searchHtml(){return '<h2 class="sectionTitle">Add food</h2><div class="search"><input class="fieldInput" id="q" type="text" placeholder="Search foods (e.g. chicken, rice, banana)" value="'+esc(query)+'" autocomplete="off" /></div><div class="hint" id="hint"></div><div class="results" id="results">'+resultsInner()+'</div>';}
 function logHtml(){
@@ -313,29 +313,15 @@ function logHtml(){
   const rows=log.map((e,i)=>'<div class="logRow"><div><div class="foodName">'+esc(e.name)+' <span class="meta">'+e.grams+'g</span></div><div class="nums">'+round(e.cal)+' kcal · '+round(e.p)+'P / '+round(e.c)+'C / '+round(e.f)+'F</div></div><button class="xBtn" data-del="'+i+'" title="Remove">×</button></div>').join('');
   return '<h2 class="sectionTitle">Logged today</h2><div class="logList">'+rows+'</div>';
 }
-function supplementsHtml(){
-  const items=allSupplements(),checked=todaysChecked();
-  const rows=items.length?items.map(s=>{
-    const isChecked=checked.includes(s.id);
-    return '<div class="suppRow'+(isChecked?' checked':'')+'"><div class="suppLeft">'
-      +'<button class="checkBtn'+(isChecked?' checked':'')+'" data-toggle-supp="'+s.id+'" title="Toggle taken today">'
-      +'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12l5 5L20 6"/></svg></button>'
-      +'<span class="suppName">'+esc(s.name)+'</span></div>'
-      +'<button class="xBtn" data-del-supp="'+s.id+'" title="Remove">×</button></div>';
-  }).join('') : '<p class="empty">No supplements yet. Add one below.</p>';
-  return '<h2 class="sectionTitle">Supplements</h2>'
-    +'<div class="suppAdd"><input class="fieldInput" id="suppName" type="text" placeholder="e.g. Vitamin D, creatine" autocomplete="off" />'
-    +'<button class="btn btn-primary" id="suppAdd">Add</button></div>'
-    +'<div class="suppList">'+rows+'</div>';
-}
 function headerHtml(){
   return '<header class="header"><div class="markWrap"><div class="markGlow"></div><div class="mark" aria-hidden="true">'
     +'<svg viewBox="-12 -12 24 24" fill="none" stroke="#0a0a0c"><path d="M0 -2 C-1.5 -4 -4 -5 -6.5 -3.5 C-9 -2 -9.5 2 -7 5 C-5 7.5 -2 8 0 6.5 C2 8 5 7.5 7 5 C9.5 2 9 -2 6.5 -3.5 C4 -5 1.5 -4 0 -2 Z" stroke-width="1.6" stroke-linejoin="round"/><path d="M0 -2 C0 -4 0.5 -6 1.5 -7.5" stroke-width="1.6" stroke-linecap="round"/><path d="M1.5 -7 C3.5 -8.5 6 -7.5 5.5 -5.5 C4 -6 2 -6.5 1.5 -7 Z" stroke-width="1.6" stroke-linejoin="round"/></svg></div></div>'
     +'<div><h1 class="title">Fuel</h1><p class="subtitle">protein · carbs · fat</p></div></header>';
 }
-function render(){$('app').innerHTML=headerHtml()+summaryHtml()+mealPlanHtml()+searchHtml()+logHtml()+supplementsHtml();}
+function render(){$('app').innerHTML=headerHtml()+summaryHtml()+mealPlanHtml()+searchHtml()+createFoodHtml()+logHtml();}
 document.addEventListener('input',e=>{
   if(e.target.id==='q'){query=e.target.value;$('results').innerHTML=resultsInner();$('hint').textContent='';}
+  if(['cfName','cfCal','cfP','cfC','cfF'].includes(e.target.id)){const h=$('cfHint');if(h&&h.textContent)h.textContent='';}
   if(e.target.id==='goal'){const n=Number(e.target.value);setGoalCal(isFinite(n)&&n>=0?n:0);render();$('goal').focus();}
   if(e.target.id==='proteinGoal'){const n=Number(e.target.value);setGoalProtein(isFinite(n)&&n>=0?n:0);render();$('proteinGoal').focus();}
   if(e.target.hasAttribute&&e.target.hasAttribute('data-meal-day')){
@@ -355,22 +341,25 @@ document.addEventListener('click',e=>{
   }
   const del=e.target.closest('[data-del]');
   if(del){const log=todaysLog();log.splice(Number(del.getAttribute('data-del')),1);setTodaysLog(log);render();return;}
-  if(e.target.closest('#suppAdd')){
-    const el=$('suppName');
-    addSupplement((el&&el.value)||'');
-    if(el)el.value='';
-    render();return;
-  }
-  const toggleSupp=e.target.closest('[data-toggle-supp]');
-  if(toggleSupp){toggleSupplement(toggleSupp.getAttribute('data-toggle-supp'));render();return;}
-  const delSupp=e.target.closest('[data-del-supp]');
-  if(delSupp){deleteSupplement(delSupp.getAttribute('data-del-supp'));render();}
+  if(e.target.closest('#cfAdd')){submitCustomFood();return;}
+  const delFood=e.target.closest('[data-del-food]');
+  if(delFood){deleteCustomFood(delFood.getAttribute('data-del-food'));render();}
 });
+function submitCustomFood(){
+  const nameEl=$('cfName'),calEl=$('cfCal'),pEl=$('cfP'),cEl=$('cfC'),fEl=$('cfF');
+  const name=(nameEl.value||'').trim();
+  const cal=Number(calEl.value);
+  const p=Number(pEl.value)||0,c=Number(cEl.value)||0,f=Number(fEl.value)||0;
+  if(!name){$('cfHint').textContent='Name the food first.';nameEl.focus();return;}
+  if(!isFinite(cal)||cal<0){$('cfHint').textContent='Enter calories (per 100g).';calEl.focus();return;}
+  addCustomFood(name,cal,p,c,f);
+  $('cfHint').textContent='';
+  render();
+}
 document.addEventListener('keydown',e=>{
-  if(e.target.id==='suppName'&&e.key==='Enter'){
+  if(['cfName','cfCal','cfP','cfC','cfF'].includes(e.target.id)&&e.key==='Enter'){
     e.preventDefault();
-    addSupplement(e.target.value||'');
-    e.target.value='';render();
+    submitCustomFood();
   }
 });
 spawnStars();
