@@ -315,6 +315,16 @@
   }
 }
 
+/* Reserve room for AppSidebar's fixed bottom tab bar (its only form below
+   980px — see AppSidebar.module.css) so it never covers page content. Kept
+   as its own longhand, after the 560px block, so it wins the bottom inset
+   at every mobile width without touching the top/side padding set above. */
+@media (max-width: 980px) {
+  .page {
+    padding-bottom: calc(76px + env(safe-area-inset-bottom));
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .header, .page::before {
     animation: none !important;
