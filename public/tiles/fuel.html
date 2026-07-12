@@ -334,7 +334,7 @@ document.addEventListener('keydown',e=>{
   }
 });
 spawnStars();
-(async()=>{const d=await window.Vitality.load();store=(d&&typeof d==='object'&&!Array.isArray(d))?d:{};render();})();
+(async()=>{const d=await window.Vitality.load();store=(d&&typeof d==='object'&&!Array.isArray(d))?d:{};render();window.Vitality.ready();})();
 </script>
 </body>
 </html>

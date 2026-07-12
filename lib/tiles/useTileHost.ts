@@ -34,6 +34,10 @@ export function useTileHost(
    * and forwards; the server action validates + RLS-writes.
    */
   onReport?: (stream: unknown, tileId: string) => void,
+  /** Fired once a tile calls window.Vitality.ready() — its first render with
+   *  real data, not the initial empty/loading paint. Lets the host reveal a
+   *  tile only once its true final layout is known. */
+  onReady?: (tileId: string) => void,
 ) {
   const reg = useRef<WeakMap<Window, string>>(new WeakMap())
 
@@ -49,6 +53,9 @@ export function useTileHost(
 
   const report = useRef(onReport)
   report.current = onReport
+
+  const ready = useRef(onReady)
+  ready.current = onReady
 
   const register = useCallback((win: Window | null, tileId: string) => {
     if (win) reg.current.set(win, tileId)
@@ -153,6 +160,11 @@ export function useTileHost(
         // session user. Fire-and-forget: a tile never blocks on Vee.
         report.current?.(msg.stream, tileId)
         activity.current?.({ tileId, type: 'report', count: 1 })
+        return
+      }
+
+      if (msg.type === 'ready') {
+        ready.current?.(tileId)
       }
     }
 

@@ -304,7 +304,7 @@ document.addEventListener('click',e=>{
 
 /* ---- boot: render only after the bridge resolves ---- */
 spawnStars();
-(async()=>{ const d=await window.Vitality.load(); store=(d&&typeof d==='object'&&!Array.isArray(d))?d:{}; render(); })();
+(async()=>{ const d=await window.Vitality.load(); store=(d&&typeof d==='object'&&!Array.isArray(d))?d:{}; render(); window.Vitality.ready(); })();
 </script>
 </body>
 </html>

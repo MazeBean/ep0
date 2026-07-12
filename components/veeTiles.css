@@ -390,6 +390,16 @@
 .veeTiles .openOverlay.openFull{padding:0;place-items:stretch;background:#000;backdrop-filter:none;animation:none}
 .veeTiles .openOverlay.openFull .openCard{width:100%;height:100%;border:0;border-radius:0;box-shadow:none;
   animation:openPage .28s var(--vease) both}
+
+/* Switching FROM one tile straight to another (not through Home): the
+   previous tile stays mounted underneath (see DashboardGrid's stack) and
+   this ENTERING one fades in as a whole over it once its data is ready —
+   panel dissolving into panel, no black in between. Only applies when there
+   is a real tile underneath to dissolve from; the first tile opened from
+   Home has nothing behind it and stays instantly opaque (fading THAT one in
+   is what caused the original home-screen-bleed-through bug). */
+.veeTiles .openOverlay.openFull.entering{opacity:0;transition:opacity .32s var(--vease)}
+.veeTiles .openOverlay.openFull.entering.ready{opacity:1}
 .veeTiles .openOverlay.openFull .openTop{padding:max(14px,env(safe-area-inset-top)) 20px 12px;
   border-bottom:1px solid rgba(255,255,255,.06)}
 .veeTiles .openBack{display:inline-flex;align-items:center;gap:10px;border:0;background:none;cursor:pointer;

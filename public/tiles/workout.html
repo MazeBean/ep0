@@ -322,6 +322,7 @@ spawnStars();
   const d=await window.Vitality.load();
   if(d&&typeof d==='object'&&!Array.isArray(d)&&Array.isArray(d.entries))store.entries=d.entries;
   render();
+  window.Vitality.ready();
 })();
 </script>
 </body>

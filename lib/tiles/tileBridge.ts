@@ -45,6 +45,12 @@ const SHIM = `<script>
     report: function (stream) {
       parent.postMessage({ source: 'vitality-tile', type: 'report', stream: stream }, '*');
     },
+    // Fired once, after a tile's first render with REAL data (not the initial
+    // empty/loading paint) — lets the host wait to reveal the tile until its
+    // true final size is known, instead of guessing a fixed delay.
+    ready: function () {
+      parent.postMessage({ source: 'vitality-tile', type: 'ready' }, '*');
+    },
     todoist: {
       list: function () { return call('todoist:list', {}); },
       add: function (content, due) { return call('todoist:add', { content: content, due: due }); },

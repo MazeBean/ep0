@@ -117,44 +117,47 @@ function TileFace({
   )
 }
 
-/* ── open a filled slot's sealed HTML in a sandboxed iframe ── */
+/* ── open a filled slot's sealed HTML in a sandboxed iframe ──
+ * dataReady comes from the bridge: a tile calls window.Vitality.ready() once
+ * it has actually rendered real data (see useTileHost's onReady), which is
+ * the true signal for "safe to reveal" — an iframe's own onLoad fires long
+ * before the async Vitality.load()/Todoist fetch resolves, which is what
+ * used to read as "shows the tile but it's too small, then updates". A
+ * fallback timer reveals it anyway if some tile never signals, so this can
+ * never hang invisible forever.
+ *
+ * crossfade means a PREVIOUS tile is still mounted underneath this one (see
+ * DashboardGrid's stack): the whole overlay fades in over it instead of
+ * snapping instantly opaque, so switching tile-to-tile reads as one panel
+ * dissolving into the next rather than a cut to black. The very first tile
+ * opened from Home has nothing underneath it, so it stays instant — fading
+ * in over the real dashboard is what caused the original "flash of home
+ * screen" bug. */
 function OpenTileOverlay({
   slot,
   register,
   unregister,
   onClose,
+  dataReady,
+  crossfade,
 }: {
   slot: { id: string; name: string; html: string }
   register: (w: Window | null, id: string) => void
   unregister: (w: Window | null) => void
   onClose: () => void
+  dataReady: boolean
+  crossfade: boolean
 }) {
   const winRef = useRef<Window | null>(null)
-  // A sealed tile's own layout is correct the instant its srcDoc parses (its
-  // <style> is inline), but its DATA isn't: window.Vitality.load() is an async
-  // bridge round-trip, so render() hasn't populated real content yet at the
-  // exact moment the iframe box first appears. Revealing it immediately is
-  // what read as "shows the tile but it's too small, then updates" — not a
-  // sizing bug, a content-not-ready-yet bug. Hold it at opacity:0 (still
-  // loading normally behind the scenes) until BOTH the iframe's own load
-  // event has fired AND a small floor has passed, then cross-fade it in over
-  // an already-opaque black stage — so there is nothing to flash past.
-  const [ready, setReady] = useState(false)
-  const loadedRef = useRef(false)
-  const flooredRef = useRef(false)
-  const reveal = () => {
-    if (loadedRef.current && flooredRef.current) setReady(true)
-  }
+  const [fallback, setFallback] = useState(false)
   useEffect(() => {
-    const t = window.setTimeout(() => {
-      flooredRef.current = true
-      reveal()
-    }, 140)
+    const t = window.setTimeout(() => setFallback(true), 900)
     return () => window.clearTimeout(t)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [slot.id])
+  }, [])
+  const ready = dataReady || fallback
+  const overlayClass = crossfade ? `openOverlay openFull entering${ready ? ' ready' : ''}` : 'openOverlay openFull'
   return (
-    <div className="openOverlay openFull" role="dialog" aria-modal="true" aria-label={slot.name}>
+    <div className={overlayClass} role="dialog" aria-modal="true" aria-label={slot.name}>
       <div className="openCard">
         <div className="openTop">
           <button type="button" className="openBack" onClick={onClose}>
@@ -176,8 +179,6 @@ function OpenTileOverlay({
             onLoad={(e) => {
               winRef.current = e.currentTarget.contentWindow
               register(e.currentTarget.contentWindow, slot.id)
-              loadedRef.current = true
-              reveal()
             }}
             className={ready ? 'openFrame openFrameReady' : 'openFrame'}
             srcDoc={withBridge(slot.html)}
@@ -525,7 +526,38 @@ export default function DashboardGrid({ userId, openId, onOpenIdChange, hidePost
   const [loaded, setLoaded] = useState(false) // tile discovery finished — gates the blank "see the vision" state
   const [scratched, setScratched] = useState(false) // deliberate "start from scratch" → clean canvas, no onboarding text
 
-  const { register, unregister } = useTileHost(userId, undefined, () => {})
+  // Overlay stack for the tile-to-tile crossfade: normally just [openId], but
+  // briefly holds the previous tile too while the new one fades in over it
+  // (see OpenTileOverlay's crossfade prop). readyIds tracks which open tiles
+  // have called window.Vitality.ready() (a real-data render, not the initial
+  // empty paint).
+  const [stack, setStack] = useState<{ id: string; crossfade: boolean }[]>([])
+  const [readyIds, setReadyIds] = useState<Set<string>>(new Set())
+
+  const handleTileReady = (tileId: string) => {
+    setReadyIds((prev) => (prev.has(tileId) ? prev : new Set(prev).add(tileId)))
+  }
+  const { register, unregister } = useTileHost(userId, undefined, () => {}, handleTileReady)
+
+  useEffect(() => {
+    if (openId == null) {
+      setStack([])
+      return
+    }
+    setStack((prev) => (prev.some((e) => e.id === openId) ? prev : [...prev, { id: openId, crossfade: prev.length > 0 }]))
+  }, [openId])
+
+  // Once the newest stacked tile has actually rendered, drop any older ones
+  // underneath it — after the CSS crossfade duration, so the swap is never
+  // visible mid-transition.
+  useEffect(() => {
+    const newest = stack[stack.length - 1]
+    if (!newest || stack.length < 2 || !readyIds.has(newest.id)) return
+    const t = window.setTimeout(() => {
+      setStack((prev) => (prev[prev.length - 1]?.id === newest.id ? [{ ...newest, crossfade: false }] : prev))
+    }, 320)
+    return () => window.clearTimeout(t)
+  }, [stack, readyIds])
 
   useEffect(() => {
     setMounted(true)
@@ -651,14 +683,19 @@ export default function DashboardGrid({ userId, openId, onOpenIdChange, hidePost
         </div>
       )}
 
-      {openId && filled[openId] && (
-        <OpenTileOverlay
-          key={openId}
-          slot={{ id: openId, name: labelFor(openId), html: filled[openId] }}
-          register={register}
-          unregister={unregister}
-          onClose={() => onOpenIdChange(null)}
-        />
+      {stack.map(
+        (entry) =>
+          filled[entry.id] && (
+            <OpenTileOverlay
+              key={entry.id}
+              slot={{ id: entry.id, name: labelFor(entry.id), html: filled[entry.id] }}
+              register={register}
+              unregister={unregister}
+              onClose={() => onOpenIdChange(null)}
+              dataReady={readyIds.has(entry.id)}
+              crossfade={entry.crossfade}
+            />
+          ),
       )}
 
       {connectId && (
