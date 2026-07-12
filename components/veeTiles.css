@@ -354,7 +354,12 @@
    A FILLED tile takes over the whole viewport like a real module page (openFull):
    pure black, a slim top bar with a Dashboard back link, the sealed iframe fills
    the rest. The centred card look remains for the connector (build-this) dialog. */
-.veeTiles .openOverlay{position:fixed;inset:0;z-index:80;display:grid;place-items:center;padding:24px;
+/* top/left/right + height (not inset:0's implicit bottom:0) so the 100dvh
+   override actually controls sizing — mobile Safari's address bar can
+   otherwise leave a fixed inset:0 box taller than the visible viewport,
+   with the excess unreachable since fixed elements don't scroll with the
+   page (this is what made a tile's bottom feel un-scrollable on phones). */
+.veeTiles .openOverlay{position:fixed;top:0;left:0;right:0;height:100vh;height:100dvh;z-index:80;display:grid;place-items:center;padding:24px;
   background:rgba(0,0,0,.72);backdrop-filter:blur(6px);animation:openFade .22s var(--vease) both}
 .veeTiles .openCard{width:min(640px,100%);height:min(86vh,820px);display:flex;flex-direction:column;
   background:#000;border:1px solid rgba(220,222,228,.16);border-radius:22px;overflow:hidden;
