@@ -53,18 +53,18 @@
     animation:sway 7s ease-in-out infinite}
   @keyframes sway{0%,100%{transform:rotate(-3deg) translateY(0)}50%{transform:rotate(3deg) translateY(-2px)}}
   .mark svg{width:22px;height:22px}
-  .title{font-size:24px;font-weight:700;letter-spacing:-.01em;margin:0;text-transform:lowercase}
-  .subtitle{color:var(--muted);font-family:var(--font-mono);font-size:11px;letter-spacing:.12em;text-transform:lowercase;margin:6px 0 0}
+  .title{font-size:24px;font-weight:700;letter-spacing:-.01em;margin:0}
+  .subtitle{color:var(--muted);font-family:var(--font-mono);font-size:11px;letter-spacing:.12em;margin:6px 0 0}
   .card{position:relative;border:1px solid var(--border);border-radius:16px;background:var(--surface);padding:18px;margin-bottom:22px;
     -webkit-backdrop-filter:blur(20px) saturate(120%);backdrop-filter:blur(20px) saturate(120%);
     overflow:hidden;transition:border-color .2s var(--ease),box-shadow .2s var(--ease)}
   .card:hover{border-color:var(--brand-line);box-shadow:0 0 0 1px var(--brand-line) inset}
-  .cardName{font-family:var(--font-mono);font-size:11px;letter-spacing:.12em;text-transform:lowercase;color:var(--muted-strong);display:block;margin-bottom:14px}
+  .cardName{font-family:var(--font-display);font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#fff;display:block;margin-bottom:14px}
   .calHead{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;margin-bottom:14px}
   .calMath{display:flex;align-items:flex-end;gap:16px;flex-wrap:wrap}
   .calCell{display:flex;flex-direction:column;gap:2px}
   .calCell .n{font-weight:600;font-size:30px;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
-  .calCell .l{font-family:var(--font-mono);font-size:10px;letter-spacing:.12em;text-transform:lowercase;color:var(--muted)}
+  .calCell .l{font-family:var(--font-mono);font-size:10px;letter-spacing:.12em;color:var(--muted)}
   .calOp{font-size:22px;color:var(--muted)}
   .calCell.remain .n{color:var(--brand)}
   .calCell.remain.over .n{color:var(--neg)}
@@ -89,13 +89,13 @@
      guide, not a personalized target. */
   .macroBars{display:flex;flex-direction:column;gap:13px;margin-top:16px}
   .macroBarRow{display:flex;flex-direction:column;gap:6px}
-  .macroBarHead{display:flex;align-items:baseline;justify-content:space-between;font-size:13px;color:var(--muted-strong);text-transform:lowercase}
+  .macroBarHead{display:flex;align-items:baseline;justify-content:space-between;font-size:13px;color:var(--muted-strong)}
   .macroBarHead .v{font-family:var(--font-mono);font-size:11.5px;font-variant-numeric:tabular-nums;color:var(--fg)}
   .macroBarTrack{height:8px;border-radius:var(--radius-pill);background:var(--track);overflow:hidden}
   .macroBarFill{height:100%;border-radius:var(--radius-pill);transition:width var(--duration) ease}
   .macroBarFill.gold{background:var(--brand)}
   .macroBarFill.white{background:rgba(255,255,255,.78)}
-  .sectionTitle{font-weight:700;font-size:17px;margin:28px 0 0;text-transform:lowercase}
+  .sectionTitle{font-weight:700;font-size:17px;margin:28px 0 0}
   .search{margin:18px 0 10px}
   .search .fieldInput{width:100%}
   .results,.logList{display:flex;flex-direction:column;gap:6px;margin-top:10px}
@@ -112,15 +112,15 @@
   .hint{color:var(--neg);font-size:12px;font-family:var(--font-mono);min-height:14px;margin-top:4px}
   .row{display:flex;gap:10px;flex-wrap:wrap}
   .field{flex:1;min-width:110px}
-  .fieldLbl{display:block;font-size:11px;color:var(--muted);margin-bottom:6px;text-transform:lowercase}
-  .fieldNote{font-family:var(--font-mono);font-size:10px;letter-spacing:.06em;color:var(--muted);margin:8px 0 0;text-transform:lowercase}
+  .fieldLbl{display:block;font-size:11px;color:var(--muted);margin-bottom:6px}
+  .fieldNote{font-family:var(--font-mono);font-size:10px;letter-spacing:.06em;color:var(--muted);margin:8px 0 0}
   .mealGrid{display:grid;grid-template-columns:repeat(7,1fr);gap:8px}
   .mealDay{display:flex;flex-direction:column;gap:6px;min-width:0}
   .mealDayHead{text-align:center;font-family:var(--font-mono);font-size:10px;letter-spacing:.06em;color:var(--muted);
-    text-transform:lowercase;padding-bottom:6px;border-bottom:1px solid var(--border)}
+    padding-bottom:6px;border-bottom:1px solid var(--border)}
   .mealDay.today .mealDayHead{border-bottom-color:var(--brand);color:var(--brand)}
   .mealSlot{display:flex;flex-direction:column;gap:3px}
-  .mealSlotLbl{font-family:var(--font-mono);font-size:8.5px;letter-spacing:.08em;color:var(--muted);text-transform:lowercase}
+  .mealSlotLbl{font-family:var(--font-mono);font-size:8.5px;letter-spacing:.08em;color:var(--muted)}
   .mealInput{width:100%;background:var(--bg);border:1px solid var(--border);color:var(--fg);border-radius:8px;padding:6px 7px;font:inherit;font-size:11.5px}
   .mealInput:focus{outline:none;border-color:var(--brand)}
   .mealInput::placeholder{color:#4a4a50}
@@ -256,16 +256,16 @@ function summaryHtml(){
   const cPct=(t.c/carbsRef)*100;
   const fPct=(t.f/fatRef)*100;
   const cell=(cls,n,l)=>'<div class="calCell '+cls+'"><span class="n">'+round(n)+'</span><span class="l">'+l+'</span></div>';
-  const head='<div class="calHead"><div class="calMath">'+cell('',goal,'goal')+'<span class="calOp">−</span>'+cell('',t.cal,'food')+'<span class="calOp">=</span>'+cell('remain'+(over?' over':''),Math.abs(remaining),over?'over':'remaining')+'</div>'
+  const head='<div class="calHead"><div class="calMath">'+cell('',goal,'Goal')+'<span class="calOp">−</span>'+cell('',t.cal,'Food')+'<span class="calOp">=</span>'+cell('remain'+(over?' over':''),Math.abs(remaining),over?'Over':'Remaining')+'</div>'
     +'<div class="goalEdits">'
-    +'<div class="goalEdit"><span class="calCell"><span class="l">calorie goal</span></span><input class="fieldInput" id="goal" type="number" min="0" step="50" value="'+goal+'" /></div>'
-    +'<div class="goalEdit"><span class="calCell"><span class="l">protein goal (g)</span></span><input class="fieldInput" id="proteinGoal" type="number" min="0" step="5" value="'+pGoal+'" /></div>'
+    +'<div class="goalEdit"><span class="calCell"><span class="l">Calorie goal</span></span><input class="fieldInput" id="goal" type="number" min="0" step="50" value="'+goal+'" /></div>'
+    +'<div class="goalEdit"><span class="calCell"><span class="l">Protein goal (g)</span></span><input class="fieldInput" id="proteinGoal" type="number" min="0" step="5" value="'+pGoal+'" /></div>'
     +'</div></div>';
   const gauge=calGaugeHtml(calPct,t.cal,goal,over);
   const bars='<div class="macroBars">'
-    +macroBarRowHtml('protein',t.p,pGoal,pPct,'gold')
-    +macroBarRowHtml('carbs',t.c,null,cPct,'white')
-    +macroBarRowHtml('fat',t.f,null,fPct,'white')
+    +macroBarRowHtml('Protein',t.p,pGoal,pPct,'gold')
+    +macroBarRowHtml('Carbs',t.c,null,cPct,'white')
+    +macroBarRowHtml('Fat',t.f,null,fPct,'white')
     +'</div>';
   return '<section class="card"><span class="cardName">Today</span>'+head+gauge+bars+'</section>';
 }
@@ -293,15 +293,15 @@ function createFoodHtml(){
   const rows=list.length?'<div class="results">'+list.map(f=>'<div class="foodRow"><div><div class="foodName">'+esc(f.name)+'</div><div class="meta">'+f.cal+' kcal · '+f.p+'P / '+f.c+'C / '+f.f+'F per 100g</div></div><button class="xBtn" data-del-food="'+f.id+'" title="Remove">×</button></div>').join('')+'</div>':'';
   return '<h2 class="sectionTitle">Create a food</h2>'
     +'<div class="row">'
-    +'<div class="field" style="flex:2;min-width:160px"><label class="fieldLbl">name</label><input class="fieldInput" id="cfName" type="text" placeholder="e.g. protein shake" autocomplete="off" /></div>'
-    +'<div class="field"><label class="fieldLbl">calories</label><input class="fieldInput" id="cfCal" type="number" min="0" step="1" placeholder="165" /></div>'
+    +'<div class="field" style="flex:2;min-width:160px"><label class="fieldLbl">Name</label><input class="fieldInput" id="cfName" type="text" placeholder="e.g. protein shake" autocomplete="off" /></div>'
+    +'<div class="field"><label class="fieldLbl">Calories</label><input class="fieldInput" id="cfCal" type="number" min="0" step="1" placeholder="165" /></div>'
     +'</div>'
     +'<div class="row" style="margin-top:10px">'
-    +'<div class="field"><label class="fieldLbl">protein (g)</label><input class="fieldInput" id="cfP" type="number" min="0" step="0.1" placeholder="31" /></div>'
-    +'<div class="field"><label class="fieldLbl">carbs (g)</label><input class="fieldInput" id="cfC" type="number" min="0" step="0.1" placeholder="0" /></div>'
-    +'<div class="field"><label class="fieldLbl">fat (g)</label><input class="fieldInput" id="cfF" type="number" min="0" step="0.1" placeholder="3.6" /></div>'
+    +'<div class="field"><label class="fieldLbl">Protein (g)</label><input class="fieldInput" id="cfP" type="number" min="0" step="0.1" placeholder="31" /></div>'
+    +'<div class="field"><label class="fieldLbl">Carbs (g)</label><input class="fieldInput" id="cfC" type="number" min="0" step="0.1" placeholder="0" /></div>'
+    +'<div class="field"><label class="fieldLbl">Fat (g)</label><input class="fieldInput" id="cfF" type="number" min="0" step="0.1" placeholder="3.6" /></div>'
     +'</div>'
-    +'<p class="fieldNote">values per 100g — same convention as the built-in list, so grams entered when logging scale correctly</p>'
+    +'<p class="fieldNote">Values per 100g — same convention as the built-in list, so grams entered when logging scale correctly</p>'
     +'<div class="hint" id="cfHint"></div>'
     +'<div style="display:flex;justify-content:flex-end;margin-top:10px"><button class="btn btn-primary" id="cfAdd">Add to list</button></div>'
     +rows;
@@ -316,7 +316,7 @@ function logHtml(){
 function headerHtml(){
   return '<header class="header"><div class="markWrap"><div class="markGlow"></div><div class="mark" aria-hidden="true">'
     +'<svg viewBox="-12 -12 24 24" fill="none" stroke="#0a0a0c"><path d="M0 -2 C-1.5 -4 -4 -5 -6.5 -3.5 C-9 -2 -9.5 2 -7 5 C-5 7.5 -2 8 0 6.5 C2 8 5 7.5 7 5 C9.5 2 9 -2 6.5 -3.5 C4 -5 1.5 -4 0 -2 Z" stroke-width="1.6" stroke-linejoin="round"/><path d="M0 -2 C0 -4 0.5 -6 1.5 -7.5" stroke-width="1.6" stroke-linecap="round"/><path d="M1.5 -7 C3.5 -8.5 6 -7.5 5.5 -5.5 C4 -6 2 -6.5 1.5 -7 Z" stroke-width="1.6" stroke-linejoin="round"/></svg></div></div>'
-    +'<div><h1 class="title">Fuel</h1><p class="subtitle">protein · carbs · fat</p></div></header>';
+    +'<div><h1 class="title">Fuel</h1><p class="subtitle">Protein · Carbs · Fat</p></div></header>';
 }
 function render(){$('app').innerHTML=headerHtml()+summaryHtml()+mealPlanHtml()+searchHtml()+createFoodHtml()+logHtml();}
 document.addEventListener('input',e=>{

@@ -54,8 +54,8 @@
     animation:sway 7s ease-in-out infinite}
   @keyframes sway{0%,100%{transform:rotate(-3deg) translateY(0)}50%{transform:rotate(3deg) translateY(-2px)}}
   .mark svg{width:22px;height:22px}
-  .title{font-size:24px;font-weight:700;letter-spacing:-.01em;margin:0;text-transform:lowercase}
-  .subtitle{color:var(--muted);font-family:var(--font-mono);font-size:11px;letter-spacing:.12em;text-transform:lowercase;margin:5px 0 0}
+  .title{font-size:24px;font-weight:700;letter-spacing:-.01em;margin:0}
+  .subtitle{color:var(--muted);font-family:var(--font-mono);font-size:11px;letter-spacing:.12em;margin:5px 0 0}
   .stats{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:18px}
   .stat{position:relative;border:1px solid var(--border);border-radius:var(--radius-md);background:var(--surface);padding:14px 12px;text-align:center;
     -webkit-backdrop-filter:blur(18px);backdrop-filter:blur(18px);overflow:hidden;transition:border-color .2s var(--ease)}
@@ -64,19 +64,19 @@
   .statNum.brand{color:var(--brand)}
   .statNum.short{color:var(--short)}
   .statNum.long{color:var(--long)}
-  .statLbl{color:var(--muted);font-family:var(--font-mono);font-size:10px;letter-spacing:.1em;text-transform:lowercase;margin-top:4px}
+  .statLbl{color:var(--muted);font-family:var(--font-mono);font-size:10px;letter-spacing:.1em;margin-top:4px}
   .card{position:relative;border:1px solid var(--border);border-radius:16px;background:var(--surface);padding:18px;margin-bottom:22px;
     -webkit-backdrop-filter:blur(20px) saturate(120%);backdrop-filter:blur(20px) saturate(120%);
     overflow:hidden;transition:border-color .2s var(--ease)}
   .cardHead{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin-bottom:14px}
-  .cardName{font-family:var(--font-mono);font-size:11px;letter-spacing:.12em;text-transform:lowercase;color:var(--muted-strong)}
-  .count{font-family:var(--font-mono);font-size:10px;letter-spacing:.12em;text-transform:lowercase;color:var(--muted)}
+  .cardName{font-family:var(--font-display);font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#fff}
+  .count{font-family:var(--font-mono);font-size:10px;letter-spacing:.12em;color:var(--muted)}
   .row{display:flex;gap:10px;align-items:center;margin-bottom:14px}
   input[type=text]{width:100%;background:var(--bg);border:1px solid var(--border);color:var(--fg);
     border-radius:10px;padding:10px 12px;font:inherit}
   input:focus{outline:none;border-color:var(--brand)}
   input::placeholder{color:#55555c}
-  .btn-primary{background:var(--brand);color:#0a0a0c;border:none;font-weight:600;border-radius:10px;padding:10px 16px;font:inherit;cursor:pointer;white-space:nowrap;text-transform:lowercase}
+  .btn-primary{background:var(--brand);color:#0a0a0c;border:none;font-weight:600;border-radius:10px;padding:10px 16px;font:inherit;cursor:pointer;white-space:nowrap}
   .card.cardShort .cardName{color:var(--short)}
   .card.cardLong .cardName{color:var(--long)}
   .card.cardShort .btn-primary{background:var(--short);color:#1a1006}
@@ -103,7 +103,7 @@
   .goalText{font-size:14.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   .xBtn{background:transparent;border:1px solid var(--border);color:var(--muted);width:26px;height:26px;border-radius:50%;cursor:pointer;flex-shrink:0;line-height:1}
   .xBtn:hover{color:var(--neg);border-color:var(--neg-line)}
-  .empty{color:var(--muted);font-size:13px;padding:6px 0;text-transform:lowercase}
+  .empty{color:var(--muted);font-size:13px;padding:6px 0}
 </style>
 </head>
 <body>
@@ -145,19 +145,19 @@ function headerHtml(){
   return '<header class="header"><div class="markWrap"><div class="markGlow"></div><div class="mark" aria-hidden="true">'
     +'<svg viewBox="-12 -12 24 24" fill="none" stroke="#0a0a0c" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">'
     +'<path d="M-7 10 L-7 -9 L7 -6 L-2 -2 L7 2 L-7 5"/></svg></div></div>'
-    +'<div><h1 class="title">Goals</h1><p class="subtitle">short-term · long-term</p></div></header>';
+    +'<div><h1 class="title">Goals</h1><p class="subtitle">Short-term · Long-term</p></div></header>';
 }
 function statsHtml(){
   const openShort=store.shortTerm.filter(g=>!g.done).length;
   const openLong=store.longTerm.filter(g=>!g.done).length;
   return '<section class="stats">'
-    +'<div class="stat"><div class="statNum short">'+openShort+'</div><div class="statLbl">short-term open</div></div>'
-    +'<div class="stat"><div class="statNum long">'+openLong+'</div><div class="statLbl">long-term open</div></div>'
+    +'<div class="stat"><div class="statNum short">'+openShort+'</div><div class="statLbl">Short-term open</div></div>'
+    +'<div class="stat"><div class="statNum long">'+openLong+'</div><div class="statLbl">Long-term open</div></div>'
     +'</section>';
 }
 function listInner(key){
   const items=store[key];
-  if(!items.length)return '<p class="empty">nothing here yet.</p>';
+  if(!items.length)return '<p class="empty">Nothing here yet.</p>';
   const sorted=items.slice().sort((a,b)=>(a.done===b.done)?0:(a.done?1:-1));
   return sorted.map(g=>
     '<div class="goal'+(g.done?' done':'')+'">'
@@ -172,16 +172,16 @@ function sectionHtml(key,label,inputId,btnId){
   const items=store[key];
   const accentCls=key==='shortTerm'?'cardShort':'cardLong';
   return '<section class="card '+accentCls+'"><div class="cardHead"><span class="cardName">'+label+'</span>'
-    +'<span class="count">'+(items.length?items.length+(items.length===1?' goal':' goals'):'empty')+'</span></div>'
-    +'<div class="row"><input type="text" id="'+inputId+'" placeholder="add a '+label+' goal" autocomplete="off" />'
-    +'<button class="btn-primary" id="'+btnId+'">add</button></div>'
+    +'<span class="count">'+(items.length?items.length+(items.length===1?' goal':' goals'):'Empty')+'</span></div>'
+    +'<div class="row"><input type="text" id="'+inputId+'" placeholder="Add a '+label.toLowerCase()+' goal" autocomplete="off" />'
+    +'<button class="btn-primary" id="'+btnId+'">Add</button></div>'
     +'<div class="list">'+listInner(key)+'</div>'
     +'</section>';
 }
 function render(){
   $('app').innerHTML=headerHtml()+statsHtml()
-    +sectionHtml('shortTerm','short-term','shortInput','shortAdd')
-    +sectionHtml('longTerm','long-term','longInput','longAdd');
+    +sectionHtml('shortTerm','Short-term','shortInput','shortAdd')
+    +sectionHtml('longTerm','Long-term','longInput','longAdd');
 }
 
 function addGoal(key,inputId){

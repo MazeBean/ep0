@@ -52,31 +52,31 @@
     animation:sway 7s ease-in-out infinite}
   @keyframes sway{0%,100%{transform:rotate(-3deg) translateY(0)}50%{transform:rotate(3deg) translateY(-2px)}}
   .mark svg{width:22px;height:22px}
-  .title{font-size:24px;font-weight:700;letter-spacing:-.01em;margin:0;text-transform:lowercase}
-  .subtitle{color:var(--muted);font-family:var(--font-mono);font-size:11px;letter-spacing:.12em;text-transform:lowercase;margin:5px 0 0}
+  .title{font-size:24px;font-weight:700;letter-spacing:-.01em;margin:0}
+  .subtitle{color:var(--muted);font-family:var(--font-mono);font-size:11px;letter-spacing:.12em;margin:5px 0 0}
   .stats{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:18px}
   .stat{position:relative;border:1px solid var(--border);border-radius:var(--radius-md);background:var(--surface);padding:14px 12px;text-align:center;
     -webkit-backdrop-filter:blur(18px);backdrop-filter:blur(18px);overflow:hidden;transition:border-color .2s var(--ease)}
   .stat:hover,.card:hover{border-color:var(--brand-line);box-shadow:0 0 0 1px var(--brand-line) inset}
   .statNum{font-size:22px;font-weight:600;letter-spacing:-.01em}
   .statNum.brand{color:var(--today)}
-  .statLbl{color:var(--muted);font-family:var(--font-mono);font-size:10px;letter-spacing:.1em;text-transform:lowercase;margin-top:4px}
+  .statLbl{color:var(--muted);font-family:var(--font-mono);font-size:10px;letter-spacing:.1em;margin-top:4px}
   .card{position:relative;border:1px solid var(--border);border-radius:16px;background:var(--surface);padding:18px;margin-bottom:22px;
     -webkit-backdrop-filter:blur(20px) saturate(120%);backdrop-filter:blur(20px) saturate(120%);
     overflow:hidden;transition:border-color .2s var(--ease)}
-  .cardName{font-family:var(--font-mono);font-size:11px;letter-spacing:.12em;text-transform:lowercase;color:var(--muted-strong);display:block;margin-bottom:14px}
+  .cardName{font-family:var(--font-display);font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#fff;display:block;margin-bottom:14px}
   .row{display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap}
   .field{flex:1;min-width:140px}
-  .fieldLbl{display:block;font-size:11px;color:var(--muted);margin-bottom:6px;text-transform:lowercase}
+  .fieldLbl{display:block;font-size:11px;color:var(--muted);margin-bottom:6px}
   input[type=text]{width:100%;background:var(--bg);border:1px solid var(--border);color:var(--fg);
     border-radius:10px;padding:10px 12px;font:inherit}
   input:focus{outline:none;border-color:var(--brand)}
   input::placeholder{color:#55555c}
-  .btn-primary{background:var(--brand);color:#0a0a0c;border:none;font-weight:600;border-radius:10px;padding:10px 16px;font:inherit;cursor:pointer;white-space:nowrap;text-transform:lowercase}
+  .btn-primary{background:var(--brand);color:#0a0a0c;border:none;font-weight:600;border-radius:10px;padding:10px 16px;font:inherit;cursor:pointer;white-space:nowrap}
   .hint{color:var(--neg);font-size:12px;font-family:var(--font-mono);min-height:14px;margin:8px 2px 0}
   .logHead{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin:0 0 12px}
-  .sectionTitle{font-weight:700;font-size:17px;margin:0;text-transform:lowercase}
-  .count{font-family:var(--font-mono);font-size:10px;letter-spacing:.12em;text-transform:lowercase;color:var(--muted)}
+  .sectionTitle{font-weight:700;font-size:17px;margin:0}
+  .count{font-family:var(--font-mono);font-size:10px;letter-spacing:.12em;color:var(--muted)}
   .log{display:flex;flex-direction:column;gap:8px}
   .entry{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 15px;border:1px solid var(--border);
     border-left:3px solid var(--brand-line);border-radius:var(--radius-md);background:var(--surface)}
@@ -86,17 +86,17 @@
   .checkBtn:hover{border-color:var(--brand);background:var(--brand-soft)}
   .checkBtn svg{width:12px;height:12px}
   .entryContent{font-size:14.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-  .entryDue{font-family:var(--font-mono);font-size:10px;letter-spacing:.08em;text-transform:lowercase;color:var(--muted);white-space:nowrap;flex-shrink:0}
+  .entryDue{font-family:var(--font-mono);font-size:10px;letter-spacing:.08em;color:var(--muted);white-space:nowrap;flex-shrink:0}
   .xBtn{background:transparent;border:1px solid var(--border);color:var(--muted);width:26px;height:26px;border-radius:50%;cursor:pointer;flex-shrink:0;line-height:1}
   .xBtn:hover{color:var(--neg);border-color:var(--neg-line)}
-  .empty{color:var(--muted);font-size:13px;padding:14px 0;text-transform:lowercase}
+  .empty{color:var(--muted);font-size:13px;padding:14px 0}
   .notConnected{color:var(--muted-strong);font-size:13.5px;line-height:1.6}
   .notConnected code{font-family:var(--font-mono);background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:2px 6px;color:var(--fg)}
 
   .weekGrid{display:grid;grid-template-columns:repeat(7,1fr);gap:10px}
   .dayCol{display:flex;flex-direction:column;gap:8px;min-width:0}
   .dayHead{text-align:center;padding-bottom:9px;border-bottom:1px solid var(--border)}
-  .dayHead .wd{font-family:var(--font-mono);font-size:10.5px;letter-spacing:.06em;color:var(--muted);text-transform:lowercase;display:block}
+  .dayHead .wd{font-family:var(--font-mono);font-size:10.5px;letter-spacing:.06em;color:var(--muted);display:block}
   .dayHead .dn{font-size:19px;font-weight:700;margin-top:3px}
   .dayCol.today .dayHead{border-bottom-color:var(--today)}
   .dayCol.today .dn{color:var(--today)}
@@ -110,7 +110,7 @@
   .dayEmpty{color:#4a4a50;font-size:19px;text-align:center;padding:8px 0}
   .bucketRow{display:flex;flex-direction:column;gap:6px;margin-top:14px}
   .bucketRow:first-of-type{margin-top:0}
-  .bucketLbl{font-family:var(--font-mono);font-size:10px;letter-spacing:.1em;text-transform:lowercase;color:var(--muted)}
+  .bucketLbl{font-family:var(--font-mono);font-size:10px;letter-spacing:.1em;color:var(--muted)}
   .bucketList{display:flex;flex-wrap:wrap;gap:6px}
   .bucketChip{position:relative;background:var(--bg);border:1px solid var(--border);border-left:3px solid var(--muted);border-radius:8px;
     padding:6px 26px 6px 10px;font-size:12px;cursor:pointer;max-width:100%}
@@ -224,7 +224,7 @@ function weekGridHtml(){
       +'<span class="dn">'+d.getDate()+'</span></div>'
       +'<div class="dayChips">'+chips+'</div></div>';
   }).join('');
-  return '<section class="card"><span class="cardName">next 7 days</span><div class="weekGrid">'+cols+'</div></section>';
+  return '<section class="card"><span class="cardName">Next 7 days</span><div class="weekGrid">'+cols+'</div></section>';
 }
 function bucketsHtml(){
   const {overdue,later,undated}=groupTasks();
@@ -235,9 +235,9 @@ function bucketsHtml(){
       +items.map(t=>chipHtml(t,'bucketChip'+(cls?' '+cls:''))).join('')+'</div></div>';
   };
   return '<section class="card">'
-    +bucket('overdue',overdue,'overdue')
-    +bucket('later',later,'')
-    +bucket('no due date',undated,'')
+    +bucket('Overdue',overdue,'overdue')
+    +bucket('Later',later,'')
+    +bucket('No due date',undated,'')
     +'</section>';
 }
 
@@ -245,26 +245,26 @@ function headerHtml(){
   return '<header class="header"><div class="markWrap"><div class="markGlow"></div><div class="mark" aria-hidden="true">'
     +'<svg viewBox="-12 -12 24 24" fill="none" stroke="#0a0a0c" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">'
     +'<path d="M-8 -1 L-4 3 L8 -8"/></svg></div></div>'
-    +'<div><h1 class="title">Calendar</h1><p class="subtitle">tasks</p></div></header>';
+    +'<div><h1 class="title">Calendar</h1><p class="subtitle">Tasks</p></div></header>';
 }
 function statsHtml(){
   const todayCount=tasks.filter(t=>isToday(t.due)).length;
   const overdueCount=tasks.filter(t=>isOverdue(t.due)).length;
   return '<section class="stats">'
-    +'<div class="stat"><div class="statNum">'+tasks.length+'</div><div class="statLbl">open</div></div>'
-    +'<div class="stat"><div class="statNum'+(overdueCount?' brand':'')+'">'+todayCount+'</div><div class="statLbl">due today</div></div>'
+    +'<div class="stat"><div class="statNum">'+tasks.length+'</div><div class="statLbl">Open</div></div>'
+    +'<div class="stat"><div class="statNum'+(overdueCount?' brand':'')+'">'+todayCount+'</div><div class="statLbl">Due today</div></div>'
     +'</section>';
 }
 function formHtml(){
-  return '<section class="card"><span class="cardName">add a task</span>'
+  return '<section class="card"><span class="cardName">Add a task</span>'
     +'<div class="row"><div class="field"><input type="text" id="content" placeholder="e.g. buy milk" autocomplete="off" /></div>'
     +'<div class="field" style="flex:0 0 140px;min-width:110px"><input type="text" id="due" placeholder="due (e.g. today)" autocomplete="off" /></div>'
-    +'<button class="btn-primary" id="add">add</button></div>'
+    +'<button class="btn-primary" id="add">Add</button></div>'
     +'<div class="hint" id="hint"></div>'
     +'</section>';
 }
 function notConnectedHtml(){
-  return '<section class="card"><span class="cardName">todoist</span>'
+  return '<section class="card"><span class="cardName">Todoist</span>'
     +'<p class="notConnected">Not connected yet. Add <code>TODOIST_TOKEN</code> as an env var '
     +'(Todoist → Settings → Integrations → Developer for your token), then reload.</p>'
     +'</section>';

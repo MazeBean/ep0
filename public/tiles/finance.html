@@ -89,8 +89,8 @@
   @keyframes sway{0%,100%{transform:rotate(-3deg) translateY(0)}50%{transform:rotate(3deg) translateY(-2px)}}
   .mark svg{width:22px;height:22px}
   .headerRight { display:flex; flex-direction:column; align-items:flex-end; gap: var(--space-2); }
-  .title { font-family: var(--font-display); font-weight: 700; font-size: var(--text-3xl); line-height: 1.0; letter-spacing: -0.03em; color: var(--fg); margin: 0; text-transform: lowercase; }
-  .subtitle { font-family: var(--font-mono); font-size: 11px; text-transform: lowercase; letter-spacing: 0.18em; color: var(--muted); margin: 0; }
+  .title { font-family: var(--font-display); font-weight: 700; font-size: var(--text-3xl); line-height: 1.0; letter-spacing: -0.03em; color: var(--fg); margin: 0; }
+  .subtitle { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.18em; color: var(--muted); margin: 0; }
   .currencySeg { display:inline-flex; align-items:center; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-pill); padding: 3px; gap: 2px; }
   .currencyBtn { appearance:none; background: transparent; border:0; color: var(--muted); font-family: var(--font-mono); font-size: 11px; font-weight: 500; letter-spacing: 0.04em; padding: 5px 11px; border-radius: var(--radius-pill); cursor: pointer; transition: background var(--duration) var(--ease-premium), color var(--duration) var(--ease-premium); }
   .currencyBtn:hover { color: var(--muted-strong); }
@@ -98,15 +98,15 @@
 
   /* Section */
   .section { margin-bottom: var(--space-10); }
-  .sectionEyebrow { font-family: var(--font-display); font-weight: 700; font-size: var(--text-xl); letter-spacing: -0.02em; color: var(--fg); margin-bottom: var(--space-4); display:flex; align-items:baseline; justify-content:space-between; gap: var(--space-3); text-transform: lowercase; }
+  .sectionEyebrow { font-family: var(--font-display); font-weight: 700; font-size: var(--text-xl); letter-spacing: -0.02em; color: var(--fg); margin-bottom: var(--space-4); display:flex; align-items:baseline; justify-content:space-between; gap: var(--space-3); }
   .sectionEyebrow > span:first-child { display:inline-flex; align-items:center; gap: 10px; }
   .sectionEyebrow > span:first-child::before { content:''; width: 7px; height: 18px; border-radius: 3px; background: var(--brand); box-shadow: 0 0 12px -2px var(--brand-glow); }
-  .sectionCount { font-family: var(--font-mono); font-size: 11px; text-transform: lowercase; letter-spacing: 0.08em; color: var(--muted); }
+  .sectionCount { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.08em; color: var(--muted); }
   .sectionCountSep { color: var(--brand); font-weight: 600; }
 
   /* NW hero */
   .nwHero { display:flex; justify-content:space-between; align-items:flex-end; flex-wrap:wrap; gap: var(--space-4); margin-bottom: var(--space-5); }
-  .nwHeroLabel { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.16em; text-transform: lowercase; color: var(--muted); font-weight: 500; }
+  .nwHeroLabel { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.16em; color: var(--muted); font-weight: 500; }
   .nwHeroNum { font-family: var(--font-display); font-size: 46px; font-weight: 700; line-height: 1.0; letter-spacing: -0.03em; margin-top: 6px; font-variant-numeric: tabular-nums; }
   .nwHeroBreakdown { font-family: var(--font-mono); font-size: 11px; color: var(--muted); margin-top: 8px; font-variant-numeric: tabular-nums; letter-spacing: 0.02em; }
   .nwHeroMain { flex: 1; min-width: 0; }
@@ -117,7 +117,7 @@
   .dailyDelta.down { background: var(--neg-soft); border-color: var(--neg-line); color: var(--neg); }
   .dailyDelta.flat { color: var(--muted); font-style: italic; }
   .dailyDeltaPct { font-weight: 500; opacity: 0.8; }
-  .dailyDeltaWindow { font-family: var(--font-mono); font-size: 9px; font-weight: 400; letter-spacing: 0.08em; text-transform: lowercase; color: inherit; opacity: 0.6; }
+  .dailyDeltaWindow { font-family: var(--font-mono); font-size: 9px; font-weight: 400; letter-spacing: 0.08em; color: inherit; opacity: 0.6; }
 
   /* Overview grid */
   .overviewGrid { display:grid; grid-template-columns: 1.6fr 1fr; gap: var(--space-4); margin-bottom: var(--space-4); }
@@ -125,7 +125,7 @@
   .chartWrap, .donutWrap { position: relative; padding: var(--space-5); background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); box-shadow: var(--card-shadow); }
   .chartHead { display:flex; justify-content:space-between; align-items:baseline; margin-bottom: var(--space-4); gap: var(--space-3); flex-wrap: wrap; }
   .chartHeadLeft { display:inline-flex; align-items:baseline; gap: var(--space-3); }
-  .chartLabel { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.12em; text-transform: lowercase; color: var(--muted-strong); font-weight: 500; }
+  .chartLabel { font-family: var(--font-display); font-size: 12px; letter-spacing: 0.06em; text-transform: uppercase; color: #fff; font-weight: 700; }
   .chartDelta { font-family: var(--font-mono); font-size: 11px; color: var(--muted); font-variant-numeric: tabular-nums; }
   .chartDelta.up { color: var(--pos); } .chartDelta.down { color: var(--neg); }
   .periodSeg { display:inline-flex; align-items:center; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-pill); padding: 2px; gap: 1px; }
@@ -138,7 +138,7 @@
   .chartEmpty { text-align:center; color: var(--muted); font-size: var(--text-sm); padding: var(--space-6) 0; }
   .chartStatsRow { display:grid; grid-template-columns: repeat(4,1fr); gap: var(--space-3); margin-top: var(--space-4); padding-top: var(--space-4); border-top: 1px solid var(--border); }
   .chartStat { display:flex; flex-direction:column; gap: 3px; }
-  .chartStatLabel { font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.12em; text-transform: lowercase; color: var(--muted); }
+  .chartStatLabel { font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.12em; color: var(--muted); }
   .chartStatVal { font-size: 13px; font-weight: 600; font-variant-numeric: tabular-nums; color: var(--fg); }
 
   /* Donut */
@@ -146,7 +146,7 @@
   .donutSvg { width: 162px; height: 162px; }
   .donutCenter { position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; pointer-events:none; }
   .donutNum { font-family: var(--font-display); font-size: 19px; font-weight: 700; font-variant-numeric: tabular-nums; letter-spacing: -0.02em; }
-  .donutSub { font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.12em; text-transform: lowercase; color: var(--muted); margin-top: 4px; }
+  .donutSub { font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.12em; color: var(--muted); margin-top: 4px; }
   .donutEmpty { text-align:center; color: var(--muted); font-size: var(--text-sm); padding: var(--space-3) 0; }
   .donutLegend { display:flex; flex-direction:column; gap: 8px; margin-top: var(--space-3); }
   .donutLeg { display:grid; grid-template-columns: 12px 1fr auto; align-items:center; gap: 9px; font-size: 12px; color: var(--muted-strong); }
@@ -158,7 +158,7 @@
   @media (max-width: 720px) { .accountsGrid { grid-template-columns: 1fr; } }
   .accountCard { display:flex; flex-direction:column; gap: var(--space-3); padding: var(--space-5); background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); box-shadow: var(--card-shadow); }
   .accountHead { display:flex; align-items:baseline; justify-content:space-between; }
-  .accountLabel { font-family: var(--font-display); font-weight: 700; font-size: var(--text-base); letter-spacing: -0.01em; color: var(--fg); text-transform: lowercase; }
+  .accountLabel { font-family: var(--font-display); font-weight: 700; font-size: var(--text-base); letter-spacing: -0.01em; color: var(--fg); }
   .accountTotal { font-family: var(--font-mono); font-size: 13px; font-weight: 600; font-variant-numeric: tabular-nums; }
   .accountTotalPct { font-size: 10px; font-weight: 400; letter-spacing: 0.02em; color: var(--muted); margin-left: 6px; font-variant-numeric: tabular-nums; }
   .accountList { display:flex; flex-direction:column; gap: 2px; }
@@ -188,13 +188,13 @@
   .activityList { display:flex; flex-direction:column; gap:0; }
   .activityBucket { display:flex; flex-direction:column; }
   .activityBucket + .activityBucket { margin-top: var(--space-3); }
-  .activityBucketLabel { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.12em; text-transform: lowercase; color: var(--muted); font-weight: 500; padding: 4px 0 2px; }
+  .activityBucketLabel { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.12em; color: var(--muted); font-weight: 500; padding: 4px 0 2px; }
   .activityRow { display:grid; grid-template-columns: 4px 1fr auto auto; align-items:center; gap: var(--space-3); padding: 11px 0; border-bottom: 1px solid var(--border); }
   .activityRow:last-child { border-bottom:0; }
   .activityBar { width: 3px; height: 26px; border-radius: 2px; }
   .activityInfo { min-width:0; }
   .activityName { font-size: 13px; color: var(--fg); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-  .activityMeta { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.06em; text-transform: lowercase; color: var(--muted); margin-top: 3px; }
+  .activityMeta { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.06em; color: var(--muted); margin-top: 3px; }
   .activityAmt { font-family: var(--font-mono); font-size: 12px; font-weight: 600; font-variant-numeric: tabular-nums; }
   .activityAmt.up { color: var(--pos); } .activityAmt.down { color: var(--neg); }
   .activityDate { font-family: var(--font-mono); font-size: 11px; color: var(--muted); min-width: 50px; text-align:right; }
@@ -203,14 +203,14 @@
   /* Ticker */
   .ticker { display:flex; align-items:center; gap: var(--space-3); padding: 9px 15px; background: var(--brand-soft); border: 1px solid var(--brand-line); border-radius: var(--radius-pill); margin-bottom: var(--space-5); overflow:hidden; }
   .ticker.urgent { background: var(--warn-soft); border-color: var(--warn-line); }
-  .tickerTag { font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.16em; text-transform: lowercase; color: var(--brand); font-weight: 600; flex-shrink:0; }
+  .tickerTag { font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.16em; color: var(--brand); font-weight: 600; flex-shrink:0; }
   .ticker.urgent .tickerTag { color: var(--warn); }
   .tickerStream { position: relative; flex:1; height: 18px; overflow:hidden; }
   .tickerItem { position:absolute; inset:0; display:flex; align-items:center; gap: var(--space-3); opacity:0; transform: translateY(8px); transition: opacity 400ms var(--ease-premium), transform 400ms var(--ease-premium); font-size: 12px; }
   .tickerItem.active { opacity:1; transform: translateY(0); }
   .tickerItemName { color: var(--fg); font-weight: 500; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width: 50%; }
   .tickerItemAmt { font-family: var(--font-mono); color: var(--muted-strong); font-variant-numeric: tabular-nums; }
-  .tickerItemDays { margin-left:auto; font-family: var(--font-mono); color: var(--muted); font-size: 10px; letter-spacing: 0.06em; text-transform: lowercase; }
+  .tickerItemDays { margin-left:auto; font-family: var(--font-mono); color: var(--muted); font-size: 10px; letter-spacing: 0.06em; }
   .ticker.urgent .tickerItemDays { color: var(--warn); }
   .tickerDots { display:flex; gap: 4px; flex-shrink:0; }
   .tickerDot { width: 4px; height: 4px; border-radius: 50%; background: var(--border-strong); }
@@ -244,7 +244,7 @@
   /* Add card */
   .addCard { padding: var(--space-5); background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); margin-bottom: var(--space-4); box-shadow: var(--card-shadow); }
   .addCardHead { display:flex; align-items:center; justify-content:space-between; gap: var(--space-3); margin-bottom: var(--space-4); flex-wrap: wrap; }
-  .addEyebrow { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.14em; text-transform: lowercase; color: var(--muted); }
+  .addEyebrow { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.14em; color: var(--muted); }
   .modeSeg { display:inline-flex; align-items:center; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-pill); padding: 3px; gap: 2px; }
   .modeBtn { appearance:none; background: transparent; border:0; color: var(--muted); font-family: var(--font-ui); font-size: 12px; font-weight: 500; letter-spacing: 0.01em; padding: 6px 15px; border-radius: var(--radius-pill); cursor: pointer; transition: background var(--duration) var(--ease-premium), color var(--duration) var(--ease-premium); }
   .modeBtn:hover { color: var(--muted-strong); }
@@ -302,7 +302,7 @@
 
   /* Empty states */
   .emptyState { padding: var(--space-8) var(--space-5); text-align:center; background: var(--surface); border: 1px dashed var(--border-strong); border-radius: var(--radius-lg); margin-bottom: var(--space-4); }
-  .emptyTitle { font-family: var(--font-display); font-weight: 700; font-size: var(--text-lg); color: var(--muted-strong); margin-bottom: var(--space-2); text-transform: lowercase; }
+  .emptyTitle { font-family: var(--font-display); font-weight: 700; font-size: var(--text-lg); color: var(--muted-strong); margin-bottom: var(--space-2); }
   .emptyBody { font-size: 12px; color: var(--muted); max-width: 38ch; margin: 0 auto; line-height: 1.55; }
 
   /* Hover trim on the main surfaces (was a pointer-tracked 3D tilt — replaced
@@ -362,7 +362,7 @@ const ACTIVITY_MAX = 50;
 const NW_HISTORY_MAX = 500;
 const CURRENCIES = ['CHF', 'USD', 'EUR', 'GBP'];
 const TAB_KEYS = ['net', 'subs', 'orders', 'wish'];
-const TAB_LABELS = { net: 'net worth', subs: 'subs', orders: 'orders', wish: 'wishlist' };
+const TAB_LABELS = { net: 'Net worth', subs: 'Subs', orders: 'Orders', wish: 'Wishlist' };
 /* No live FX in a sealed tile — every currency is a display symbol at rate 1. */
 const DEFAULT_RATES = { CHF: 1, USD: 1, EUR: 1, GBP: 1 };
 
@@ -616,7 +616,7 @@ function tickerEntries() {
   out.sort((a, b) => a.days - b.days);
   return out;
 }
-function daysLabel(d) { if (d < 0) return Math.abs(d) + 'd late'; if (d === 0) return 'today'; if (d === 1) return 'tomorrow'; return 'in ' + d + 'd'; }
+function daysLabel(d) { if (d < 0) return Math.abs(d) + 'd late'; if (d === 0) return 'Today'; if (d === 1) return 'Tomorrow'; return 'in ' + d + 'd'; }
 
 function tickerHtml() {
   const entries = tickerEntries();
@@ -625,7 +625,7 @@ function tickerHtml() {
   const urgent = cur && cur.days <= 5;
   const items = entries.map((e, i) => '<div class="tickerItem ' + (i === (tickerIdx % entries.length) ? 'active' : '') + '"><span class="tickerItemName">' + esc(e.name) + '</span><span class="tickerItemAmt">' + esc(fmt(e.amountCHF)) + '</span><span class="tickerItemDays">' + daysLabel(e.days) + '</span></div>').join('');
   const dots = entries.map((e, i) => '<span class="tickerDot ' + (i === (tickerIdx % entries.length) ? 'active' : '') + '"></span>').join('');
-  return '<div class="ticker ' + (urgent ? 'urgent' : '') + '"><span class="tickerTag">renews</span><div class="tickerStream">' + items + '</div><div class="tickerDots">' + dots + '</div></div>';
+  return '<div class="ticker ' + (urgent ? 'urgent' : '') + '"><span class="tickerTag">Renews</span><div class="tickerStream">' + items + '</div><div class="tickerDots">' + dots + '</div></div>';
 }
 let tickerIdx = 0, tickerTimer = null;
 function mountTicker() {
@@ -737,7 +737,7 @@ function donutHtml(netWorth) {
   if (!slices.length || total <= 0) {
     return '<div class="donutWrap"><div class="chartHead"><span class="chartLabel">Allocation</span><span class="chartDelta">-</span></div>'
       + '<div class="donutStage"><svg class="donutSvg" viewBox="0 0 140 140" aria-hidden><circle cx="70" cy="70" r="60" fill="var(--track)"/><circle cx="70" cy="70" r="44" fill="var(--bg-elevated)"/></svg>'
-      + '<div class="donutCenter"><div class="donutNum">-</div><div class="donutSub">total</div></div></div><div class="donutEmpty">Add an account to see your breakdown</div></div>';
+      + '<div class="donutCenter"><div class="donutNum">-</div><div class="donutSub">Total</div></div></div><div class="donutEmpty">Add an account to see your breakdown</div></div>';
   }
   let angle = -Math.PI / 2; const arcs = [];
   slices.forEach(s => { const sa = (s.value/total)*Math.PI*2; const pad = slices.length > 1 ? 0.015 : 0; const a1 = angle + pad, a2 = angle + sa - pad; if (a2 > a1) arcs.push({ color: s.color, d: donutArcPath(70,70,60,44,a1,a2) }); angle += sa; });
@@ -745,7 +745,7 @@ function donutHtml(netWorth) {
   const legend = slices.map(s => '<div class="donutLeg"><span class="donutLegDot" style="background:' + s.color + '"></span><span>' + esc(s.name) + '</span><span class="donutLegPct">' + ((s.value/total)*100).toFixed(1) + '%</span></div>').join('');
   return '<div class="donutWrap"><div class="chartHead"><span class="chartLabel">Allocation</span><span class="chartDelta">' + slices.length + ' slice' + (slices.length === 1 ? '' : 's') + '</span></div>'
     + '<div class="donutStage"><svg class="donutSvg" viewBox="0 0 140 140" aria-hidden>' + arcs.map(a => '<path d="' + a.d + '" fill="' + a.color + '"/>').join('') + '</svg>'
-    + '<div class="donutCenter"><div class="donutNum">' + esc(centerNum) + '</div><div class="donutSub">total</div></div></div><div class="donutLegend">' + legend + '</div></div>';
+    + '<div class="donutCenter"><div class="donutNum">' + esc(centerNum) + '</div><div class="donutSub">Total</div></div></div><div class="donutLegend">' + legend + '</div></div>';
 }
 
 function accountRowHtml(acct) {
@@ -827,7 +827,7 @@ function daysToNext(s) { if (!s.renewal) return null; const next = nextRenewalDa
 function subsViewHtml() {
   const monthlyTotal = state.subscriptions.reduce((s, sub) => s + monthlyEquivalent(sub), 0);
   const d = ui.drafts.subAdd;
-  const addForm = '<div class="addCard"><div class="addEyebrow">+ new subscription</div><div class="addGrid">'
+  const addForm = '<div class="addCard"><div class="addEyebrow">+ New subscription</div><div class="addGrid">'
     + '<input class="quickAddInput" type="text" placeholder="Service (e.g. Netflix)" value="' + esc(d.name) + '" data-draft="subAdd.name" data-enter="addSub" />'
     + '<input class="quickAddInput" type="number" step="0.01" placeholder="Amount (' + state.currency + ')" value="' + esc(d.amount) + '" data-draft="subAdd.amount" data-enter="addSub" />'
     + '<select class="quickAddInput" data-draft="subAdd.period">' + periodOptions(d.period) + '</select>'
@@ -869,7 +869,7 @@ function subEditRowHtml(sub) {
     + '<input class="quickAddInput" type="date" value="' + esc(d.renewal) + '" data-draft="subEdit.renewal" />'
     + '<select class="quickAddInput" data-draft="subEdit.from">' + accountOptions(d.from) + '</select>'
     + '<label style="display:inline-flex;align-items:center;gap:6px;font-size:11px;color:var(--muted-strong)"><input type="checkbox" ' + (d.auto ? 'checked' : '') + ' data-draft="subEdit.auto" /> Auto-deduct</label>'
-    + '</div><div></div><div class="subRowActions"><button type="button" class="iconBtn" data-act="saveSub" data-id="' + sub.id + '">save</button><button type="button" class="iconBtn" data-act="cancelSub">cancel</button><button type="button" class="iconBtn" data-act="delSub" data-id="' + sub.id + '">delete</button></div></div>';
+    + '</div><div></div><div class="subRowActions"><button type="button" class="iconBtn" data-act="saveSub" data-id="' + sub.id + '">Save</button><button type="button" class="iconBtn" data-act="cancelSub">Cancel</button><button type="button" class="iconBtn" data-act="delSub" data-id="' + sub.id + '">Delete</button></div></div>';
 }
 
 /* ============================================================
@@ -907,7 +907,7 @@ function ordersViewHtml() {
   const netWorth = netWorthChf(state.accounts);
   const d = ui.drafts.order; const isBought = d.mode === 'bought'; const needsAccount = isBought && !d.from;
   const prev = orderPreviewText(netWorth);
-  const addForm = '<div class="addCard"><div class="addCardHead"><div class="addEyebrow">' + (isBought ? '+ today’s purchase' : '+ new order') + '</div>'
+  const addForm = '<div class="addCard"><div class="addCardHead"><div class="addEyebrow">' + (isBought ? '+ Today’s purchase' : '+ New order') + '</div>'
     + '<div class="modeSeg"><button type="button" class="modeBtn ' + (!isBought ? 'modeBtnActive' : '') + '" data-act="orderMode" data-mode="incoming">Incoming</button><button type="button" class="modeBtn ' + (isBought ? 'modeBtnActive' : '') + '" data-act="orderMode" data-mode="bought">Bought today</button></div></div>'
     + '<div class="addGrid ' + (isBought ? 'addGridBought' : '') + '">'
     + '<input class="quickAddInput" type="text" placeholder="' + (isBought ? 'What did you buy?' : 'Item (e.g. New iPhone)') + '" value="' + esc(d.name) + '" data-draft="order.name" data-enter="addOrder" />'
@@ -956,7 +956,7 @@ function wishViewHtml() {
   const heroClsName = heroCls === 'warn' ? 'warn' : heroCls === 'bad' ? 'bad' : '';
   const heroFill = heroPct == null ? 0 : Math.min(100, heroPct);
   const d = ui.drafts.wish;
-  const addForm = '<div class="addCard"><div class="addEyebrow">+ add to wishlist</div><div class="addGrid" style="grid-template-columns:2fr 1fr auto">'
+  const addForm = '<div class="addCard"><div class="addEyebrow">+ Add to wishlist</div><div class="addGrid" style="grid-template-columns:2fr 1fr auto">'
     + '<input class="quickAddInput" type="text" placeholder="Item name (e.g. New iPhone Pro Max)" value="' + esc(d.name) + '" data-draft="wish.name" data-enter="addWish" />'
     + '<input class="quickAddInput" type="number" step="0.01" placeholder="Cost (' + state.currency + ')" value="' + esc(d.amount) + '" data-draft="wish.amount" data-enter="addWish" />'
     + '<button type="button" class="quickAddBtn" data-act="addWish">+ Add</button></div></div>';

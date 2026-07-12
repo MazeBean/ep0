@@ -40,7 +40,7 @@ export default function AppSidebar({ activeId, onSelect }: AppSidebarProps) {
           onClick={() => onSelect(null)}
         >
           <span className={styles.navGlyph} aria-hidden="true">{HOME_GLYPH}</span>
-          <span className={styles.navLabel}>home</span>
+          <span className={styles.navLabel}>Home</span>
         </button>
 
         {NAV_TILES.map((id) => {
@@ -54,7 +54,7 @@ export default function AppSidebar({ activeId, onSelect }: AppSidebarProps) {
               onClick={() => onSelect(id)}
             >
               <span className={styles.navGlyph} aria-hidden="true">{tile.glyph}</span>
-              <span className={styles.navLabel}>{tile.label.toLowerCase()}</span>
+              <span className={styles.navLabel}>{tile.label}</span>
             </button>
           )
         })}

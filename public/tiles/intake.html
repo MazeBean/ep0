@@ -56,23 +56,23 @@
     animation:sway 7s ease-in-out infinite}
   @keyframes sway{0%,100%{transform:rotate(-3deg) translateY(0)}50%{transform:rotate(3deg) translateY(-2px)}}
   .mark svg{width:22px;height:22px}
-  .title{font-size:24px;font-weight:700;letter-spacing:-.01em;margin:0;text-transform:lowercase}
-  .subtitle{color:var(--muted);font-family:var(--font-mono);font-size:11px;letter-spacing:.12em;text-transform:lowercase;margin:6px 0 0}
+  .title{font-size:24px;font-weight:700;letter-spacing:-.01em;margin:0}
+  .subtitle{color:var(--muted);font-family:var(--font-mono);font-size:11px;letter-spacing:.12em;margin:6px 0 0}
   .card{position:relative;border:1px solid var(--border);border-radius:16px;background:var(--surface);padding:18px;margin-bottom:22px;
     -webkit-backdrop-filter:blur(20px) saturate(120%);backdrop-filter:blur(20px) saturate(120%);
     overflow:hidden;transition:border-color .2s var(--ease),box-shadow .2s var(--ease)}
   .card:hover{border-color:var(--brand-line);box-shadow:0 0 0 1px var(--brand-line) inset}
-  .cardName{font-family:var(--font-mono);font-size:11px;letter-spacing:.12em;text-transform:lowercase;color:var(--muted-strong);display:block;margin-bottom:14px}
+  .cardName{font-family:var(--font-display);font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#fff;display:block;margin-bottom:14px}
 
   /* -- Today (energy) -- */
   .nowRow{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap}
   .nowCell{display:flex;flex-direction:column;gap:2px}
   .nowCell .n{font-weight:600;font-size:40px;letter-spacing:-.02em;line-height:1;font-variant-numeric:tabular-nums;color:var(--brand)}
   .nowCell .n.dim{color:var(--warn)}
-  .nowCell .l{font-family:var(--font-mono);font-size:10px;letter-spacing:.12em;text-transform:lowercase;color:var(--muted)}
+  .nowCell .l{font-family:var(--font-mono);font-size:10px;letter-spacing:.12em;color:var(--muted)}
   .nowCell.r{text-align:right}
   .nowCell.r .n{font-size:24px}
-  .status{font-family:var(--font-mono);font-size:11px;letter-spacing:.1em;text-transform:lowercase;color:var(--muted-strong);margin:14px 0 4px}
+  .status{font-family:var(--font-mono);font-size:11px;letter-spacing:.1em;color:var(--muted-strong);margin:14px 0 4px}
   .legend{display:flex;gap:16px;flex-wrap:wrap;margin-top:10px}
   .legend span{font-family:var(--font-mono);font-size:10px;letter-spacing:.06em;color:var(--muted);display:inline-flex;align-items:center;gap:6px}
   .swatch{width:14px;height:0;border-top:2px solid var(--brand)}
@@ -80,7 +80,7 @@
   .fields{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
   @media(max-width:480px){.fields{grid-template-columns:1fr 1fr}}
   .field{display:flex;flex-direction:column;gap:6px}
-  .field .l{font-family:var(--font-mono);font-size:10px;letter-spacing:.12em;text-transform:lowercase;color:var(--muted)}
+  .field .l{font-family:var(--font-mono);font-size:10px;letter-spacing:.12em;color:var(--muted)}
   .fieldInput{background:var(--bg);border:1px solid var(--border);color:var(--fg);border-radius:10px;padding:9px 11px;font:inherit;width:100%}
   .fieldInput:focus{outline:none;border-color:var(--brand)}
 
@@ -120,7 +120,7 @@
   .decayRow{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;margin:16px 0 4px;flex-wrap:wrap}
   .decayNow{display:flex;flex-direction:column;gap:2px}
   .decayNow .n{font-weight:600;font-size:34px;letter-spacing:-.02em;line-height:1;font-variant-numeric:tabular-nums;color:var(--brand)}
-  .decayNow .l{font-family:var(--font-mono);font-size:10px;letter-spacing:.12em;text-transform:lowercase;color:var(--muted)}
+  .decayNow .l{font-family:var(--font-mono);font-size:10px;letter-spacing:.12em;color:var(--muted)}
   .decayHalf{text-align:right;font-family:var(--font-mono);font-size:11px;color:var(--muted-strong)}
   .logList{display:flex;flex-direction:column;gap:6px;margin-top:14px}
   .logRow{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 12px;border:1px solid var(--border);border-radius:var(--radius-md);background:var(--bg)}
@@ -299,18 +299,18 @@ function energyChartHtml(){
 function energyTodayHtml(){
   const curve=buildCurve(), peak=peakOf(curve), now=nowT(), nowE=Math.round(energyAt(now).e);
   const head='<div class="nowRow">'
-    +'<div class="nowCell"><span class="n">'+nowE+'</span><span class="l">energy now</span></div>'
-    +'<div class="nowCell r"><span class="n dim">'+Math.round(peak.e)+'</span><span class="l">peak · '+clockOf(peak.t)+'</span></div></div>';
+    +'<div class="nowCell"><span class="n">'+nowE+'</span><span class="l">Energy now</span></div>'
+    +'<div class="nowCell r"><span class="n dim">'+Math.round(peak.e)+'</span><span class="l">Peak · '+clockOf(peak.t)+'</span></div></div>';
   const status='<p class="status">'+clockOf(now)+' — '+statusOf(nowE)+'</p>';
-  const legend='<div class="legend"><span><i class="swatch"></i>with caffeine</span><span><i class="swatch base"></i>baseline rhythm</span></div>';
+  const legend='<div class="legend"><span><i class="swatch"></i>With caffeine</span><span><i class="swatch base"></i>Baseline rhythm</span></div>';
   return '<section class="card"><span class="cardName">Today</span>'+head+status+energyChartHtml()+legend+'</section>';
 }
 function rhythmHtml(){
   const slept=sleepToday().slept;
   return '<section class="card"><span class="cardName">Rhythm</span><div class="fields">'
-    +'<div class="field"><span class="l">wake</span><input class="fieldInput" id="wake" type="time" value="'+wakeStr()+'" /></div>'
-    +'<div class="field"><span class="l">bed</span><input class="fieldInput" id="bed" type="time" value="'+bedStr()+'" /></div>'
-    +'<div class="field"><span class="l">slept (h)</span><input class="fieldInput" id="slept" type="number" min="0" max="14" step="0.5" placeholder="7.5" value="'+(slept==null?'':slept)+'" /></div>'
+    +'<div class="field"><span class="l">Wake</span><input class="fieldInput" id="wake" type="time" value="'+wakeStr()+'" /></div>'
+    +'<div class="field"><span class="l">Bed</span><input class="fieldInput" id="bed" type="time" value="'+bedStr()+'" /></div>'
+    +'<div class="field"><span class="l">Slept (h)</span><input class="fieldInput" id="slept" type="number" min="0" max="14" step="0.5" placeholder="7.5" value="'+(slept==null?'':slept)+'" /></div>'
     +'</div></section>';
 }
 
@@ -412,7 +412,7 @@ function headerHtml(){
   return '<header class="header"><div class="markWrap"><div class="markGlow"></div><div class="mark" aria-hidden="true">'
     +'<svg viewBox="-12 -12 24 24" fill="none" stroke="#0a0a0c" stroke-width="1.4" stroke-linejoin="round" stroke-linecap="round">'
     +'<g transform="rotate(45)"><rect x="-9" y="-4.5" width="18" height="9" rx="4.5"/><line x1="0" y1="-4.5" x2="0" y2="4.5"/></g></svg></div></div>'
-    +'<div><h1 class="title">Intake</h1><p class="subtitle">energy · caffeine · daily stack</p></div></header>';
+    +'<div><h1 class="title">Intake</h1><p class="subtitle">Energy · Caffeine · Daily stack</p></div></header>';
 }
 function render(){ $('app').innerHTML=headerHtml()+energyTodayHtml()+rhythmHtml()+caffeineHtml()+stackHtml(); }
 

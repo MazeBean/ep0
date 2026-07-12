@@ -20,67 +20,13 @@ function workoutDayKey(ts: number): string {
   return `${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()}`
 }
 
-/* ---- Intake's own circadian + caffeine math, copied verbatim from
-   public/tiles/intake.html so the overview's "energy now" gauge matches the
-   real tile exactly. Keep these two in sync if the source ever changes. ---- */
 function clamp(x: number, a: number, b: number) {
   return Math.max(a, Math.min(b, x))
-}
-const KA = 4.0, HALF_LIFE = 5, KE = Math.LN2 / HALF_LIFE
-function doseAmount(mg: number, h: number) {
-  if (h < 0) return 0
-  if (Math.abs(KA - KE) < 1e-9) return 0
-  return Math.max(0, (mg * KA) / (KA - KE) * (Math.exp(-KE * h) - Math.exp(-KA * h)))
-}
-function parseHM(s?: string) {
-  if (!s) return null
-  const m = String(s).match(/(\d{1,2}):(\d{2})/)
-  if (!m) return null
-  return Number(m[1]) + Number(m[2]) / 60
-}
-function shape(t: number, wake: number, bed: number) {
-  const L = (((bed - wake) % 24) + 24) % 24 || 16
-  const aw = (((t - wake) % 24) + 24) % 24
-  if (aw > L) {
-    const into = aw - L, sleepLen = 24 - L || 8, mid = sleepLen / 2
-    return 0.12 - 0.07 * (1 - Math.abs(into - mid) / mid)
-  }
-  const inertia = 0.55 + 0.45 * (1 - Math.exp(-aw / 1.0))
-  const decline = 1 - 0.16 * (aw / L)
-  const winddown = 1 - 0.4 * clamp((aw - (L - 1.5)) / 1.5, 0, 1)
-  const dip = 0.13 * Math.exp(-Math.pow(aw - L * 0.45, 2) / (2 * 1.7 * 1.7))
-  const eve = 0.07 * Math.exp(-Math.pow(aw - (L - 4), 2) / (2 * 2.0 * 2.0))
-  return Math.max(0.04, 0.92 * inertia * decline * winddown - dip + eve)
-}
-function energyNow(store: Record<string, unknown>): { value: number; status: string } {
-  const wake = parseHM(store.wake as string | undefined) ?? 7
-  const bed = parseHM(store.bed as string | undefined) ?? 23
-  const now = new Date()
-  const t = now.getHours() + now.getMinutes() / 60
-  const dayKey = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`
-  const sleepLog = asRecord(store.sleep)
-  const sleepToday = asRecord(sleepLog[dayKey])
-  const slept = typeof sleepToday.slept === 'number' ? sleepToday.slept : null
-  const recScale = 0.58 + 0.42 * (slept == null ? 0.78 : clamp(slept / 8, 0.3, 1))
-  const base = clamp(shape(t, wake, bed) * 100 * recScale, 1, 100)
-  const caffLog = asRecord(store.caff)
-  const caffToday = asRecord(caffLog[dayKey])
-  const caff = asArray<{ mg?: number; t?: number }>(caffToday.doses)
-  const bodyAt = (hh: number) => caff.reduce((s, l) => s + doseAmount(Number(l.mg) || 0, hh - (Number(l.t) || 0)), 0)
-  const cur = bodyAt(t)
-  let mx = cur
-  for (let dt = 0.5; dt <= 5; dt += 0.5) mx = Math.max(mx, bodyAt(t - dt))
-  const boost = Math.min(22, cur * 0.14)
-  const rebound = Math.min(13, Math.max(0, mx - cur) * 0.1)
-  const value = Math.round(clamp(base + boost - rebound, 1, 100))
-  const status = value >= 80 ? 'peak zone' : value >= 62 ? 'dialed in' : value >= 45 ? 'steady' : value >= 28 ? 'running low' : 'depleted'
-  return { value, status }
 }
 
 interface Widgets {
   fuel: { kcal: number; kcalGoal: number; protein: number; proteinGoal: number } | null
   finance: { netWorth: number; history: { t: number; v: number }[] } | null
-  energy: { value: number; status: string } | null
   workout: { prsThisMonth: number; sessionsThisWeek: number } | null
   goals: { shortDone: number; shortTotal: number; longDone: number; longTotal: number } | null
   calendar: { dueToday: number; overdue: number; connected: boolean } | null
@@ -109,6 +55,40 @@ function RadialGauge({ pct, label, sub }: { pct: number; label: string; sub: str
         <span className={styles.gaugeSub}>{sub}</span>
       </div>
       <span className={styles.gaugeLabel}>{label}</span>
+    </div>
+  )
+}
+
+/* ---- counterclockwise arc gauge geometry, ported verbatim from
+   public/tiles/fuel.html's polarPt/arcPathCCW so this wheel matches Fuel's
+   calorie gauge exactly rather than approximating it with stroke-dasharray. ---- */
+function polarPt(cx: number, cy: number, r: number, deg: number) {
+  const rad = ((deg - 90) * Math.PI) / 180
+  return { x: cx + r * Math.cos(rad), y: cy + r * Math.sin(rad) }
+}
+function arcPathCCW(cx: number, cy: number, r: number, pct: number) {
+  const clamped = Math.max(0, Math.min(0.9999, pct))
+  const sweepDeg = -360 * clamped
+  const start = polarPt(cx, cy, r, 0)
+  const end = polarPt(cx, cy, r, sweepDeg)
+  const largeArc = Math.abs(sweepDeg) > 180 ? 1 : 0
+  return `M ${start.x.toFixed(2)} ${start.y.toFixed(2)} A ${r} ${r} 0 ${largeArc} 0 ${end.x.toFixed(2)} ${end.y.toFixed(2)}`
+}
+function WheelGauge({ pct, num, sub, label, over }: { pct: number; num: number; sub: string; label: string; over?: boolean }) {
+  const cx = 50, cy = 50, r = 42
+  const clamped = clamp(pct, 0, 100) / 100
+  const d = clamped > 0 ? arcPathCCW(cx, cy, r, clamped) : ''
+  return (
+    <div className={styles.wheelWrap}>
+      <svg viewBox="0 0 100 100" className={styles.wheelSvg}>
+        <circle cx={cx} cy={cy} r={r} className={styles.wheelTrack} />
+        {d && <path d={d} className={over ? `${styles.wheelFill} ${styles.wheelFillOver}` : styles.wheelFill} />}
+      </svg>
+      <div className={styles.wheelCenter}>
+        <span className={styles.wheelNum}>{num}</span>
+        <span className={styles.wheelSub}>{sub}</span>
+      </div>
+      <span className={styles.wheelLabel}>{label}</span>
     </div>
   )
 }
@@ -151,11 +131,10 @@ export default function OverviewWidgets({ userId }: { userId: string }) {
   useEffect(() => {
     let alive = true
     ;(async () => {
-      const [fuelRaw, workoutRaw, goalsRaw, intakeRaw, financeRaw] = await Promise.all([
+      const [fuelRaw, workoutRaw, goalsRaw, financeRaw] = await Promise.all([
         tileStore.loadData(userId, 'fuel'),
         tileStore.loadData(userId, 'workout'),
         tileStore.loadData(userId, 'goals'),
-        tileStore.loadData(userId, 'intake'),
         tileStore.loadData(userId, 'finance'),
       ])
 
@@ -199,9 +178,6 @@ export default function OverviewWidgets({ userId }: { userId: string }) {
         longTotal: longTerm.length,
       }
 
-      const intakeStore = asRecord(intakeRaw)
-      const energy = energyNow(intakeStore)
-
       const financeStore = asRecord(financeRaw)
       const accounts = asArray<{ amountCHF?: number }>(financeStore.accounts)
       const netWorth = Math.round(accounts.reduce((s, a) => s + (Number(a.amountCHF) || 0), 0))
@@ -232,7 +208,7 @@ export default function OverviewWidgets({ userId }: { userId: string }) {
         /* Todoist not configured — calendar widget shows a quiet "not connected" line */
       }
 
-      if (alive) setW({ fuel, workout, goals, energy, finance, calendar })
+      if (alive) setW({ fuel, workout, goals, finance, calendar })
     })()
     return () => {
       alive = false
@@ -245,13 +221,24 @@ export default function OverviewWidgets({ userId }: { userId: string }) {
     <div className={styles.grid}>
       <div className={styles.card}>
         <div className={styles.cardHead}>
-          <span className={styles.cardTitle}>today&rsquo;s intake</span>
-          <span className={styles.cardTag}>fuel</span>
+          <span className={styles.cardTitle}>Today&rsquo;s intake</span>
+          <span className={styles.cardTag}>Fuel</span>
         </div>
         {w.fuel ? (
-          <div className={styles.bars}>
-            <Bar label="calories" pct={(w.fuel.kcal / (w.fuel.kcalGoal || 1)) * 100} value={`${w.fuel.kcal.toLocaleString()} / ${w.fuel.kcalGoal.toLocaleString()} kcal`} />
-            <Bar label="protein" pct={(w.fuel.protein / (w.fuel.proteinGoal || 1)) * 100} value={`${w.fuel.protein}g / ${w.fuel.proteinGoal}g`} />
+          <div className={styles.wheels}>
+            <WheelGauge
+              pct={(w.fuel.kcal / (w.fuel.kcalGoal || 1)) * 100}
+              num={w.fuel.kcal}
+              sub={`of ${w.fuel.kcalGoal} kcal`}
+              label="Calories"
+              over={w.fuel.kcal > w.fuel.kcalGoal}
+            />
+            <WheelGauge
+              pct={(w.fuel.protein / (w.fuel.proteinGoal || 1)) * 100}
+              num={w.fuel.protein}
+              sub={`of ${w.fuel.proteinGoal}g`}
+              label="Protein"
+            />
           </div>
         ) : (
           <p className={styles.emptyNote}>Log a meal in Fuel to see today&rsquo;s numbers.</p>
@@ -260,16 +247,8 @@ export default function OverviewWidgets({ userId }: { userId: string }) {
 
       <div className={styles.card}>
         <div className={styles.cardHead}>
-          <span className={styles.cardTitle}>energy now</span>
-          <span className={styles.cardTag}>intake</span>
-        </div>
-        {w.energy && <RadialGauge pct={w.energy.value} label={w.energy.status} sub="/ 100" />}
-      </div>
-
-      <div className={styles.card}>
-        <div className={styles.cardHead}>
-          <span className={styles.cardTitle}>net worth</span>
-          <span className={styles.cardTag}>finance</span>
+          <span className={styles.cardTitle}>Net worth</span>
+          <span className={styles.cardTag}>Finance</span>
         </div>
         {w.finance && (
           <>
@@ -281,26 +260,26 @@ export default function OverviewWidgets({ userId }: { userId: string }) {
 
       <div className={styles.card}>
         <div className={styles.cardHead}>
-          <span className={styles.cardTitle}>consistency</span>
-          <span className={styles.cardTag}>workout</span>
+          <span className={styles.cardTitle}>Consistency</span>
+          <span className={styles.cardTag}>Workout</span>
         </div>
         {w.workout && <RadialGauge pct={(w.workout.sessionsThisWeek / 7) * 100} label={`${w.workout.prsThisMonth} PRs this mo.`} sub="/ wk" />}
       </div>
 
       <div className={styles.card}>
         <div className={styles.cardHead}>
-          <span className={styles.cardTitle}>goals progress</span>
-          <span className={styles.cardTag}>goals</span>
+          <span className={styles.cardTitle}>Goals progress</span>
+          <span className={styles.cardTag}>Goals</span>
         </div>
         {w.goals && (
           <div className={styles.bars}>
             <Bar
-              label="short-term"
+              label="Short-term"
               pct={w.goals.shortTotal ? (w.goals.shortDone / w.goals.shortTotal) * 100 : 0}
               value={`${w.goals.shortDone} / ${w.goals.shortTotal}`}
             />
             <Bar
-              label="long-term"
+              label="Long-term"
               pct={w.goals.longTotal ? (w.goals.longDone / w.goals.longTotal) * 100 : 0}
               value={`${w.goals.longDone} / ${w.goals.longTotal}`}
             />
@@ -310,13 +289,13 @@ export default function OverviewWidgets({ userId }: { userId: string }) {
 
       <div className={styles.card}>
         <div className={styles.cardHead}>
-          <span className={styles.cardTitle}>this week</span>
-          <span className={styles.cardTag}>calendar</span>
+          <span className={styles.cardTitle}>This week</span>
+          <span className={styles.cardTag}>Calendar</span>
         </div>
         {w.calendar?.connected ? (
           <>
             <span className={styles.bigNum}>{w.calendar.dueToday}</span>
-            <span className={styles.smallLabel}>due today{w.calendar.overdue ? ` · ${w.calendar.overdue} overdue` : ''}</span>
+            <span className={styles.smallLabel}>Due today{w.calendar.overdue ? ` · ${w.calendar.overdue} overdue` : ''}</span>
           </>
         ) : (
           <p className={styles.emptyNote}>Connect Todoist to see this here.</p>

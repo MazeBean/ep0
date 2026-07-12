@@ -37,18 +37,17 @@
 
 .cardTitle {
   font-family: var(--font-hanken), system-ui, sans-serif;
-  font-weight: 600;
-  font-size: 0.9375rem;
-  letter-spacing: -0.01em;
-  color: var(--fg);
-  text-transform: lowercase;
+  font-weight: 700;
+  font-size: 0.75rem;
+  letter-spacing: 0.06em;
+  color: #fff;
+  text-transform: uppercase;
 }
 
 .cardTag {
   font-family: var(--font-mono), ui-monospace, monospace;
   font-size: 0.625rem;
   letter-spacing: 0.1em;
-  text-transform: lowercase;
   color: rgba(224, 177, 60, 0.8);
 }
 
@@ -94,7 +93,6 @@
   justify-content: space-between;
   font-size: 0.8125rem;
   color: var(--muted-strong);
-  text-transform: lowercase;
 }
 
 .barValue {
@@ -178,7 +176,78 @@
 .gaugeLabel {
   font-size: 0.75rem;
   color: var(--muted-strong);
-  text-transform: lowercase;
+}
+
+/* ---- wheel gauges (calorie + protein, matching Fuel's counterclockwise arc) ---- */
+.wheels {
+  display: flex;
+  gap: var(--space-4);
+  justify-content: center;
+  align-items: center;
+  flex: 1;
+}
+
+.wheelWrap {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+.wheelSvg {
+  width: 92px;
+  height: 92px;
+}
+
+.wheelTrack {
+  fill: none;
+  stroke: rgba(255, 255, 255, 0.07);
+  stroke-width: 7;
+}
+
+.wheelFill {
+  fill: none;
+  stroke: #e0b13c;
+  stroke-width: 7;
+  stroke-linecap: round;
+}
+
+.wheelFillOver {
+  stroke: var(--red);
+}
+
+.wheelCenter {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 92px;
+  height: 92px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.wheelNum {
+  font-family: var(--font-hanken), system-ui, sans-serif;
+  font-weight: 700;
+  font-size: 1.25rem;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+  color: var(--fg);
+}
+
+.wheelSub {
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 0.5625rem;
+  color: var(--muted);
+  text-align: center;
+}
+
+.wheelLabel {
+  font-size: 0.6875rem;
+  color: var(--muted-strong);
 }
 
 /* ---- sparkline ---- */

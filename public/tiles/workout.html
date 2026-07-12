@@ -59,28 +59,28 @@
     animation:sway 7s ease-in-out infinite}
   @keyframes sway{0%,100%{transform:rotate(-3deg) translateY(0)}50%{transform:rotate(3deg) translateY(-2px)}}
   .mark svg{width:22px;height:22px}
-  .title{font-size:24px;font-weight:700;letter-spacing:-.01em;margin:0;text-transform:lowercase}
-  .subtitle{color:var(--muted);font-family:var(--font-mono);font-size:11px;letter-spacing:.12em;text-transform:lowercase;margin:5px 0 0}
+  .title{font-size:24px;font-weight:700;letter-spacing:-.01em;margin:0}
+  .subtitle{color:var(--muted);font-family:var(--font-mono);font-size:11px;letter-spacing:.12em;margin:5px 0 0}
   .stats{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:18px}
   .stat{position:relative;border:1px solid var(--border);border-radius:var(--radius-md);background:var(--surface);padding:14px 12px;text-align:center;
     -webkit-backdrop-filter:blur(18px);backdrop-filter:blur(18px);overflow:hidden;transition:border-color .2s var(--ease)}
   .stat:hover,.card:hover{border-color:var(--brand-line);box-shadow:0 0 0 1px var(--brand-line) inset}
   .statNum{font-size:22px;font-weight:600;letter-spacing:-.01em}
   .statNum.brand{color:var(--brand)}
-  .statLbl{color:var(--muted);font-family:var(--font-mono);font-size:10px;letter-spacing:.1em;text-transform:lowercase;margin-top:4px}
+  .statLbl{color:var(--muted);font-family:var(--font-mono);font-size:10px;letter-spacing:.1em;margin-top:4px}
   .card{position:relative;border:1px solid var(--border);border-radius:16px;background:var(--surface);padding:18px;margin-bottom:22px;
     -webkit-backdrop-filter:blur(20px) saturate(120%);backdrop-filter:blur(20px) saturate(120%);
     overflow:hidden;transition:border-color .2s var(--ease)}
-  .cardName{font-family:var(--font-mono);font-size:11px;letter-spacing:.12em;text-transform:lowercase;color:var(--muted-strong);display:block;margin-bottom:14px}
+  .cardName{font-family:var(--font-display);font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#fff;display:block;margin-bottom:14px}
   .row{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end}
   .field{flex:1;min-width:100px}
-  .fieldLbl{display:block;font-size:11px;color:var(--muted);margin-bottom:6px;text-transform:lowercase}
+  .fieldLbl{display:block;font-size:11px;color:var(--muted);margin-bottom:6px}
   select,input[type=text],input[type=number]{width:100%;background:var(--bg);border:1px solid var(--border);color:var(--fg);
     border-radius:10px;padding:10px 12px;font:inherit}
   select:focus,input:focus{outline:none;border-color:var(--brand)}
   input::placeholder{color:#55555c}
-  .btn-primary{background:var(--brand);color:#0a0a0c;border:none;font-weight:600;border-radius:10px;padding:10px 16px;font:inherit;cursor:pointer;white-space:nowrap;text-transform:lowercase}
-  .btn-ghost{background:transparent;border:1px solid var(--border);color:var(--muted-strong);font-weight:500;border-radius:10px;padding:8px 13px;font:inherit;font-size:12.5px;cursor:pointer;white-space:nowrap;text-transform:lowercase;transition:border-color .15s var(--ease),color .15s var(--ease)}
+  .btn-primary{background:var(--brand);color:#0a0a0c;border:none;font-weight:600;border-radius:10px;padding:10px 16px;font:inherit;cursor:pointer;white-space:nowrap}
+  .btn-ghost{background:transparent;border:1px solid var(--border);color:var(--muted-strong);font-weight:500;border-radius:10px;padding:8px 13px;font:inherit;font-size:12.5px;cursor:pointer;white-space:nowrap;transition:border-color .15s var(--ease),color .15s var(--ease)}
   .btn-ghost:hover{border-color:var(--brand-line);color:var(--fg)}
   .hint{color:var(--neg);font-size:12px;font-family:var(--font-mono);min-height:14px;margin-top:8px}
 
@@ -95,19 +95,19 @@
   .weightVal{min-width:110px;text-align:center}
   .weightVal .n{font-size:34px;font-weight:700;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
   .weightVal .u{font-family:var(--font-mono);font-size:11px;letter-spacing:.08em;color:var(--muted);margin-left:4px}
-  .repRow{display:flex;gap:8px}
-  .repBtn{flex:1;padding:14px 0;border-radius:12px;border:1px solid var(--border);background:var(--bg);color:var(--fg);
-    font-size:18px;font-weight:700;font-family:inherit;cursor:pointer;font-variant-numeric:tabular-nums;
+  .repRow{display:flex;flex-wrap:wrap;gap:7px}
+  .repBtn{flex:1 1 44px;min-width:44px;padding:13px 0;border-radius:12px;border:1px solid var(--border);background:var(--bg);color:var(--fg);
+    font-size:17px;font-weight:700;font-family:inherit;cursor:pointer;font-variant-numeric:tabular-nums;
     transition:border-color .15s var(--ease),background .15s var(--ease),transform .1s var(--ease)}
   .repBtn:hover{border-color:var(--brand-line);background:var(--brand-soft)}
   .repBtn:active{transform:scale(.95)}
-  .repHint{text-align:center;font-family:var(--font-mono);font-size:10px;letter-spacing:.1em;text-transform:lowercase;color:var(--muted);margin-top:10px}
+  .repHint{text-align:center;font-family:var(--font-mono);font-size:10px;letter-spacing:.1em;color:var(--muted);margin-top:10px}
 
   .prRow{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:14px;flex-wrap:wrap}
   .prSelect{max-width:220px}
   .prBadge{text-align:right}
   .prNum{font-size:26px;font-weight:700;letter-spacing:-.01em;color:var(--gold)}
-  .prLbl{font-family:var(--font-mono);font-size:10px;letter-spacing:.1em;color:var(--muted);text-transform:lowercase;margin-top:2px}
+  .prLbl{font-family:var(--font-mono);font-size:10px;letter-spacing:.1em;color:var(--muted);margin-top:2px}
   .chart{width:100%;height:auto;display:block;margin-top:4px}
   .chart .grid{stroke:var(--border);stroke-width:1}
   .chart .eline{fill:none;stroke:var(--lift);stroke-width:2;stroke-linejoin:round;stroke-linecap:round}
@@ -118,28 +118,28 @@
   .chart .bwdot{fill:var(--brand)}
   .chart .axl{fill:var(--muted);font-family:var(--font-mono);font-size:9px;letter-spacing:.06em}
   .logHead{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin:0 0 12px;flex-wrap:wrap}
-  .sectionTitle{font-weight:700;font-size:17px;margin:0;text-transform:lowercase}
-  .count{font-family:var(--font-mono);font-size:10px;letter-spacing:.12em;text-transform:lowercase;color:var(--muted)}
+  .sectionTitle{font-weight:700;font-size:17px;margin:0}
+  .count{font-family:var(--font-mono);font-size:10px;letter-spacing:.12em;color:var(--muted)}
   .log{display:flex;flex-direction:column;gap:8px}
   .entry{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 15px;border:1px solid var(--border);
     border-left:3px solid var(--brand-line);border-radius:var(--radius-md);background:var(--surface)}
   .entry.pr{border-left-color:var(--gold)}
   .entryLeft{min-width:0}
   .entryTop{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
-  .exBadge{font-family:var(--font-mono);font-size:10px;letter-spacing:.08em;text-transform:lowercase;color:var(--brand);
+  .exBadge{font-family:var(--font-mono);font-size:10px;letter-spacing:.08em;color:var(--brand);
     border:1px solid var(--brand-line);background:var(--brand-soft);border-radius:var(--radius-pill);padding:3px 9px}
-  .prTag{font-family:var(--font-mono);font-size:9px;letter-spacing:.08em;text-transform:lowercase;color:var(--gold);
+  .prTag{font-family:var(--font-mono);font-size:9px;letter-spacing:.08em;color:var(--gold);
     border:1px solid rgba(232,200,120,.4);background:rgba(232,200,120,.08);border-radius:var(--radius-pill);padding:3px 8px}
   .entryStats{font-size:14px;color:var(--muted-strong);margin-top:6px}
-  .entryMeta{display:block;margin-top:6px;font-family:var(--font-mono);font-size:10px;letter-spacing:.1em;text-transform:lowercase;color:var(--muted)}
+  .entryMeta{display:block;margin-top:6px;font-family:var(--font-mono);font-size:10px;letter-spacing:.1em;color:var(--muted)}
   .xBtn{background:transparent;border:1px solid var(--border);color:var(--muted);width:26px;height:26px;border-radius:50%;cursor:pointer;flex-shrink:0;line-height:1}
   .xBtn:hover{color:var(--neg);border-color:var(--neg-line)}
-  .empty{color:var(--muted);font-size:13px;padding:14px 0;text-transform:lowercase}
+  .empty{color:var(--muted);font-size:13px;padding:14px 0}
 
   /* -- bodyweight -- */
   .bwNow{display:flex;align-items:baseline;gap:8px;margin-bottom:14px}
   .bwNow .n{font-size:30px;font-weight:700;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
-  .bwNow .l{font-family:var(--font-mono);font-size:10.5px;letter-spacing:.1em;text-transform:lowercase;color:var(--muted)}
+  .bwNow .l{font-family:var(--font-mono);font-size:10.5px;letter-spacing:.1em;color:var(--muted)}
   .bwAdd{margin-bottom:14px}
 
   /* -- PR toast (transitions-dev "success check", ported verbatim) -- */
@@ -320,7 +320,7 @@ function bodyweightHtml(){
   const data=bwSorted();
   const latest=data.length?data[data.length-1].lb:null;
   return '<section class="card"><span class="cardName">Bodyweight</span>'
-    +(latest!=null?'<div class="bwNow"><span class="n">'+latest+'</span><span class="l">lb · latest</span></div>':'')
+    +(latest!=null?'<div class="bwNow"><span class="n">'+latest+'</span><span class="l">lb · Latest</span></div>':'')
     +'<div class="row bwAdd"><div class="field"><input class="fieldInput" type="number" id="bwInput" min="0" step="0.1" placeholder="e.g. 172.5" /></div>'
     +'<button class="btn-primary" id="bwAdd">Log</button></div>'
     +bwChartHtml()+'</section>';
@@ -333,19 +333,19 @@ function headerHtml(){
     +'<rect x="-10" y="-3" width="2.8" height="6" rx="0.6" stroke-width="1.6"/>'
     +'<rect x="7.2" y="-3" width="2.8" height="6" rx="0.6" stroke-width="1.6"/>'
     +'<line x1="-7.2" y1="0" x2="7.2" y2="0" stroke-width="1.6"/></svg></div></div>'
-    +'<div><h1 class="title">Workout</h1><p class="subtitle">reps · weight · PRs</p></div></header>';
+    +'<div><h1 class="title">Workout</h1><p class="subtitle">Reps · Weight · PRs</p></div></header>';
 }
 function statsHtml(){
   return '<section class="stats">'
-    +'<div class="stat"><div class="statNum">'+thisWeekCount()+'</div><div class="statLbl">sessions this week</div></div>'
+    +'<div class="stat"><div class="statNum">'+thisWeekCount()+'</div><div class="statLbl">Sessions this week</div></div>'
     +'<div class="stat"><div class="statNum brand">'+prsThisMonth()+'</div><div class="statLbl">PRs this month</div></div>'
     +'</section>';
 }
 function formHtml(){
   const exList=exercises();
   const datalist=exList.map(x=>'<option value="'+esc(x)+'">').join('');
-  return '<section class="card"><span class="cardName">log a set</span>'
-    +'<div class="exField"><label class="fieldLbl">exercise</label>'
+  return '<section class="card"><span class="cardName">Log a set</span>'
+    +'<div class="exField"><label class="fieldLbl">Exercise</label>'
     +'<input type="text" id="exercise" list="exerciseList" placeholder="e.g. bench press" autocomplete="off" />'
     +'<datalist id="exerciseList">'+datalist+'</datalist></div>'
     +'<div class="weightStepper">'
@@ -354,9 +354,9 @@ function formHtml(){
     +'<button type="button" class="stepBtn" id="wPlus" aria-label="Add 5 lb">+</button>'
     +'</div>'
     +'<div class="repRow">'
-    +[4,6,8,10,12].map(r=>'<button type="button" class="repBtn" data-reps="'+r+'">'+r+'</button>').join('')
+    +[4,5,6,7,8,9,10,11,12].map(r=>'<button type="button" class="repBtn" data-reps="'+r+'">'+r+'</button>').join('')
     +'</div>'
-    +'<p class="repHint">tap a rep count to log the set</p>'
+    +'<p class="repHint">Tap a rep count to log the set</p>'
     +'<div class="hint" id="hint"></div>'
     +'</section>';
 }
@@ -368,13 +368,13 @@ function prChartHtml(){
   const opts=exList.map(x=>'<option value="'+esc(x)+'"'+(x===selectedExercise?' selected':'')+'>'+esc(x)+'</option>').join('');
   return '<section class="card"><div class="prRow">'
     +'<select class="prSelect" id="exSelect">'+opts+'</select>'
-    +'<div class="prBadge"><div class="prNum">'+(pr?pr.weight:0)+'</div><div class="prLbl">personal record'+(pr?' · '+pr.reps+' reps':'')+'</div></div>'
+    +'<div class="prBadge"><div class="prNum">'+(pr?pr.weight:0)+'</div><div class="prLbl">Personal record'+(pr?' · '+pr.reps+' reps':'')+'</div></div>'
     +'</div>'+chartHtml(selectedExercise)+'</section>';
 }
 /* Only the most recent logged day shows by default — a quick glance, not
    the whole history. The full history is one click away as a download. */
 function logInner(){
-  if(!store.entries.length)return '<p class="empty">no sets logged yet. add one above.</p>';
+  if(!store.entries.length)return '<p class="empty">No sets logged yet. Add one above.</p>';
   const prMarks=prAtLogTime();
   const sorted=store.entries.slice().sort((a,b)=>b.ts-a.ts);
   const mostRecentKey=dayKey(sorted[0].ts);
@@ -382,17 +382,17 @@ function logInner(){
   return dayEntries.map(e=>{
     const isPR=!!prMarks[e.id];
     return '<div class="entry'+(isPR?' pr':'')+'"><div class="entryLeft">'
-      +'<div class="entryTop"><span class="exBadge">'+esc(e.exercise)+'</span>'+(isPR?'<span class="prTag">pr</span>':'')+'</div>'
+      +'<div class="entryTop"><span class="exBadge">'+esc(e.exercise)+'</span>'+(isPR?'<span class="prTag">PR</span>':'')+'</div>'
       +'<div class="entryStats">'+e.weight+' lb × '+e.reps+' reps</div>'
       +'<span class="entryMeta">'+new Date(e.ts).toLocaleTimeString([],{hour:'numeric',minute:'2-digit'})+'</span></div>'
       +'<button class="xBtn" data-del="'+e.id+'" title="Remove">×</button></div>';
   }).join('');
 }
 function logHtml(){
-  const label=store.entries.length?dayLabel(store.entries.slice().sort((a,b)=>b.ts-a.ts)[0].ts):'history';
+  const label=store.entries.length?dayLabel(store.entries.slice().sort((a,b)=>b.ts-a.ts)[0].ts):'History';
   return '<div class="logHead"><h2 class="sectionTitle">'+label+'</h2>'
     +'<div style="display:flex;align-items:center;gap:10px">'
-    +'<span class="count">'+(store.entries.length?store.entries.length+(store.entries.length===1?' set total':' sets total'):'empty')+'</span>'
+    +'<span class="count">'+(store.entries.length?store.entries.length+(store.entries.length===1?' set total':' sets total'):'Empty')+'</span>'
     +(store.entries.length?'<button type="button" class="btn-ghost" id="downloadLog">Download full log</button>':'')
     +'</div></div>'
     +'<div class="log" id="log">'+logInner()+'</div>';
