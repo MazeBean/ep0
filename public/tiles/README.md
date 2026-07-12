@@ -23,8 +23,8 @@ shows the "how to build this" panel instead.
 | `todoist`| Todoist  | `public/tiles/todoist.html`|
 | `goals`  | Goals    | `public/tiles/goals.html`  |
 | `workout`| Workout  | `public/tiles/workout.html`|
-| `peak`   | Peak     | `public/tiles/peak.html`   |
 | `finance`| Finance  | `public/tiles/finance.html`|
+| `intake` | Intake   | `public/tiles/intake.html` |
 
 ## The tile format
 

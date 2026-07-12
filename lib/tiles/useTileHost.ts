@@ -165,6 +165,26 @@ export function useTileHost(
 
       if (msg.type === 'ready') {
         ready.current?.(tileId)
+        return
+      }
+
+      if (msg.type === 'download') {
+        // The tile is sandboxed with no allow-downloads permission, so it
+        // can't trigger this itself — the host page (not sandboxed) does the
+        // actual Blob/anchor-click download on its behalf.
+        try {
+          const blob = new Blob([String(msg.content ?? '')], { type: String(msg.mime || 'text/plain') })
+          const url = URL.createObjectURL(blob)
+          const a = document.createElement('a')
+          a.href = url
+          a.download = String(msg.filename || 'download.txt')
+          document.body.appendChild(a)
+          a.click()
+          document.body.removeChild(a)
+          URL.revokeObjectURL(url)
+        } catch {
+          /* ignore — a failed download shouldn't crash the host */
+        }
       }
     }
 

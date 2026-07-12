@@ -51,6 +51,13 @@ const SHIM = `<script>
     ready: function () {
       parent.postMessage({ source: 'vitality-tile', type: 'ready' }, '*');
     },
+    // A sealed tile is sandboxed with no allow-downloads permission, so a
+    // download triggered INSIDE the iframe is silently blocked in most
+    // browsers. The host page isn't sandboxed, so it does the actual
+    // Blob/anchor-click download on the tile's behalf.
+    download: function (filename, content, mime) {
+      parent.postMessage({ source: 'vitality-tile', type: 'download', filename: filename, content: content, mime: mime || 'text/plain' }, '*');
+    },
     todoist: {
       list: function () { return call('todoist:list', {}); },
       add: function (content, due) { return call('todoist:add', { content: content, due: due }); },

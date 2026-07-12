@@ -20,8 +20,8 @@ function workoutDayKey(ts: number): string {
   return `${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()}`
 }
 
-/* ---- Peak's own circadian + caffeine math, copied verbatim from
-   public/tiles/peak.html so the overview's "energy now" gauge matches the
+/* ---- Intake's own circadian + caffeine math, copied verbatim from
+   public/tiles/intake.html so the overview's "energy now" gauge matches the
    real tile exactly. Keep these two in sync if the source ever changes. ---- */
 function clamp(x: number, a: number, b: number) {
   return Math.max(a, Math.min(b, x))
@@ -58,12 +58,14 @@ function energyNow(store: Record<string, unknown>): { value: number; status: str
   const now = new Date()
   const t = now.getHours() + now.getMinutes() / 60
   const dayKey = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`
-  const log = asRecord(store.log)
-  const today = asRecord(log[dayKey])
-  const slept = typeof today.slept === 'number' ? today.slept : null
+  const sleepLog = asRecord(store.sleep)
+  const sleepToday = asRecord(sleepLog[dayKey])
+  const slept = typeof sleepToday.slept === 'number' ? sleepToday.slept : null
   const recScale = 0.58 + 0.42 * (slept == null ? 0.78 : clamp(slept / 8, 0.3, 1))
   const base = clamp(shape(t, wake, bed) * 100 * recScale, 1, 100)
-  const caff = asArray<{ mg?: number; t?: number }>(today.caff)
+  const caffLog = asRecord(store.caff)
+  const caffToday = asRecord(caffLog[dayKey])
+  const caff = asArray<{ mg?: number; t?: number }>(caffToday.doses)
   const bodyAt = (hh: number) => caff.reduce((s, l) => s + doseAmount(Number(l.mg) || 0, hh - (Number(l.t) || 0)), 0)
   const cur = bodyAt(t)
   let mx = cur
@@ -78,8 +80,8 @@ function energyNow(store: Record<string, unknown>): { value: number; status: str
 interface Widgets {
   fuel: { kcal: number; kcalGoal: number; protein: number; proteinGoal: number } | null
   finance: { netWorth: number; history: { t: number; v: number }[] } | null
-  peak: { value: number; status: string } | null
-  workout: { streak: number; sessionsThisWeek: number } | null
+  energy: { value: number; status: string } | null
+  workout: { prsThisMonth: number; sessionsThisWeek: number } | null
   goals: { shortDone: number; shortTotal: number; longDone: number; longTotal: number } | null
   calendar: { dueToday: number; overdue: number; connected: boolean } | null
 }
@@ -149,11 +151,11 @@ export default function OverviewWidgets({ userId }: { userId: string }) {
   useEffect(() => {
     let alive = true
     ;(async () => {
-      const [fuelRaw, workoutRaw, goalsRaw, peakRaw, financeRaw] = await Promise.all([
+      const [fuelRaw, workoutRaw, goalsRaw, intakeRaw, financeRaw] = await Promise.all([
         tileStore.loadData(userId, 'fuel'),
         tileStore.loadData(userId, 'workout'),
         tileStore.loadData(userId, 'goals'),
-        tileStore.loadData(userId, 'peak'),
+        tileStore.loadData(userId, 'intake'),
         tileStore.loadData(userId, 'finance'),
       ])
 
@@ -167,21 +169,25 @@ export default function OverviewWidgets({ userId }: { userId: string }) {
       }
 
       const workoutStore = asRecord(workoutRaw)
-      const entries = asArray<{ ts: number }>(workoutStore.entries)
-      const days = new Set(entries.map((e) => workoutDayKey(e.ts)))
-      let streak = 0
-      if (days.size) {
-        const d = new Date()
-        d.setHours(0, 0, 0, 0)
-        if (!days.has(workoutDayKey(d.getTime()))) d.setDate(d.getDate() - 1)
-        while (days.has(workoutDayKey(d.getTime()))) {
-          streak++
-          d.setDate(d.getDate() - 1)
-        }
-      }
+      const entries = asArray<{ id?: string; exercise?: string; weight?: number; ts: number }>(workoutStore.entries)
       const weekCutoff = Date.now() - 7 * 24 * 60 * 60 * 1000
       const sessionsThisWeek = new Set(entries.filter((e) => e.ts >= weekCutoff).map((e) => workoutDayKey(e.ts))).size
-      const workout = { streak, sessionsThisWeek }
+      // Running max per exercise across chronological entries — same PR
+      // definition as the Workout tile itself (heaviest weight logged so far).
+      const running: Record<string, number> = {}
+      const prIds = new Set<string>()
+      for (const e of entries.slice().sort((a, b) => a.ts - b.ts)) {
+        const k = (e.exercise || '').toLowerCase()
+        const prev = running[k] || 0
+        const weight = Number(e.weight) || 0
+        if (weight >= prev && weight > 0) {
+          if (e.id) prIds.add(e.id)
+          running[k] = weight
+        } else if (running[k] == null) running[k] = weight
+      }
+      const monthStart = new Date(new Date().getFullYear(), new Date().getMonth(), 1).getTime()
+      const prsThisMonth = entries.filter((e) => e.id && prIds.has(e.id) && e.ts >= monthStart).length
+      const workout = { prsThisMonth, sessionsThisWeek }
 
       const goalsStore = asRecord(goalsRaw)
       const shortTerm = asArray<{ done?: boolean }>(goalsStore.shortTerm)
@@ -193,8 +199,8 @@ export default function OverviewWidgets({ userId }: { userId: string }) {
         longTotal: longTerm.length,
       }
 
-      const peakStore = asRecord(peakRaw)
-      const peak = energyNow(peakStore)
+      const intakeStore = asRecord(intakeRaw)
+      const energy = energyNow(intakeStore)
 
       const financeStore = asRecord(financeRaw)
       const accounts = asArray<{ amountCHF?: number }>(financeStore.accounts)
@@ -226,7 +232,7 @@ export default function OverviewWidgets({ userId }: { userId: string }) {
         /* Todoist not configured — calendar widget shows a quiet "not connected" line */
       }
 
-      if (alive) setW({ fuel, workout, goals, peak, finance, calendar })
+      if (alive) setW({ fuel, workout, goals, energy, finance, calendar })
     })()
     return () => {
       alive = false
@@ -255,9 +261,9 @@ export default function OverviewWidgets({ userId }: { userId: string }) {
       <div className={styles.card}>
         <div className={styles.cardHead}>
           <span className={styles.cardTitle}>energy now</span>
-          <span className={styles.cardTag}>peak</span>
+          <span className={styles.cardTag}>intake</span>
         </div>
-        {w.peak && <RadialGauge pct={w.peak.value} label={w.peak.status} sub="/ 100" />}
+        {w.energy && <RadialGauge pct={w.energy.value} label={w.energy.status} sub="/ 100" />}
       </div>
 
       <div className={styles.card}>
@@ -278,7 +284,7 @@ export default function OverviewWidgets({ userId }: { userId: string }) {
           <span className={styles.cardTitle}>consistency</span>
           <span className={styles.cardTag}>workout</span>
         </div>
-        {w.workout && <RadialGauge pct={(w.workout.sessionsThisWeek / 7) * 100} label={`${w.workout.streak}d streak`} sub="/ wk" />}
+        {w.workout && <RadialGauge pct={(w.workout.sessionsThisWeek / 7) * 100} label={`${w.workout.prsThisMonth} PRs this mo.`} sub="/ wk" />}
       </div>
 
       <div className={styles.card}>

@@ -5,9 +5,10 @@
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>Intake</title>
 <style>
-  /* Vitality Intake tile — caffeine log (400mg ceiling + one-compartment
-     half-life decay, same pharmacokinetic model as Peak's caffeine card) and
-     a daily med/supplement stack checklist. Sealed & bridge-backed. */
+  /* Vitality Intake tile — daily energy-curve prediction + circadian rhythm
+     (ported from the retired Peak tile), a caffeine log (400mg ceiling +
+     one-compartment half-life decay), and a daily med/supplement stack
+     checklist. Sealed & bridge-backed. */
   :root{
     --bg:#0a0a0c;--surface:rgba(255,255,255,.045);--border:rgba(255,255,255,.11);--brand:#e0b13c;
     --brand-soft:rgba(224,177,60,.08);--brand-line:rgba(224,177,60,.3);
@@ -62,6 +63,43 @@
     overflow:hidden;transition:border-color .2s var(--ease),box-shadow .2s var(--ease)}
   .card:hover{border-color:var(--brand-line);box-shadow:0 0 0 1px var(--brand-line) inset}
   .cardName{font-family:var(--font-mono);font-size:11px;letter-spacing:.12em;text-transform:lowercase;color:var(--muted-strong);display:block;margin-bottom:14px}
+
+  /* -- Today (energy) -- */
+  .nowRow{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap}
+  .nowCell{display:flex;flex-direction:column;gap:2px}
+  .nowCell .n{font-weight:600;font-size:40px;letter-spacing:-.02em;line-height:1;font-variant-numeric:tabular-nums;color:var(--brand)}
+  .nowCell .n.dim{color:var(--warn)}
+  .nowCell .l{font-family:var(--font-mono);font-size:10px;letter-spacing:.12em;text-transform:lowercase;color:var(--muted)}
+  .nowCell.r{text-align:right}
+  .nowCell.r .n{font-size:24px}
+  .status{font-family:var(--font-mono);font-size:11px;letter-spacing:.1em;text-transform:lowercase;color:var(--muted-strong);margin:14px 0 4px}
+  .legend{display:flex;gap:16px;flex-wrap:wrap;margin-top:10px}
+  .legend span{font-family:var(--font-mono);font-size:10px;letter-spacing:.06em;color:var(--muted);display:inline-flex;align-items:center;gap:6px}
+  .swatch{width:14px;height:0;border-top:2px solid var(--brand)}
+  .swatch.base{border-top:2px dashed var(--muted)}
+  .fields{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+  @media(max-width:480px){.fields{grid-template-columns:1fr 1fr}}
+  .field{display:flex;flex-direction:column;gap:6px}
+  .field .l{font-family:var(--font-mono);font-size:10px;letter-spacing:.12em;text-transform:lowercase;color:var(--muted)}
+  .fieldInput{background:var(--bg);border:1px solid var(--border);color:var(--fg);border-radius:10px;padding:9px 11px;font:inherit;width:100%}
+  .fieldInput:focus{outline:none;border-color:var(--brand)}
+
+  /* -- shared chart chrome -- */
+  .chart{width:100%;height:auto;display:block;margin-top:6px}
+  .chart .grid{stroke:var(--border);stroke-width:1}
+  .chart .axl{fill:var(--muted);font-family:var(--font-mono);font-size:9px;letter-spacing:.08em}
+  /* energy chart (e-prefixed to keep it distinct from the caffeine decay chart below) */
+  .chart .eline{fill:none;stroke:var(--brand);stroke-width:2;stroke-linejoin:round;stroke-linecap:round}
+  .chart .ebline{fill:none;stroke:var(--muted);stroke-width:1.25;stroke-dasharray:3 4;opacity:.55}
+  .chart .enowl{stroke:var(--fg);stroke-width:1;opacity:.5;stroke-dasharray:2 3}
+  .chart .enowd{fill:var(--fg)}
+  .chart .epeakd{fill:var(--warn);stroke:var(--bg);stroke-width:1.5}
+  /* caffeine decay chart */
+  .chart .dline{fill:none;stroke:var(--brand);stroke-width:2;stroke-linejoin:round;stroke-linecap:round}
+  .chart .darea{opacity:.6}
+  .chart .nowd{fill:var(--brand);stroke:var(--bg);stroke-width:1.5}
+
+  /* -- caffeine -- */
   .caffHead{display:flex;align-items:baseline;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:4px}
   .caffTotal{font-weight:600;font-size:26px;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
   .caffTotal.over{color:var(--neg)}
@@ -76,8 +114,6 @@
   .chip:hover{border-color:var(--brand-line)}
   .chip .mg{color:var(--muted);font-family:var(--font-mono);font-size:10px;margin-left:5px}
   .customAdd{display:flex;gap:8px;align-items:center;margin-bottom:6px}
-  .fieldInput{background:var(--bg);border:1px solid var(--border);color:var(--fg);border-radius:10px;padding:9px 11px;font:inherit}
-  .fieldInput:focus{outline:none;border-color:var(--brand)}
   .customAdd .fieldInput{width:92px}
   .btn-primary{background:var(--brand);color:#0a0a0c;border:none;border-radius:10px;padding:9px 14px;font:inherit;font-weight:600;cursor:pointer}
   .hint{color:var(--neg);font-size:12px;font-family:var(--font-mono);min-height:14px;margin-top:6px}
@@ -86,12 +122,6 @@
   .decayNow .n{font-weight:600;font-size:34px;letter-spacing:-.02em;line-height:1;font-variant-numeric:tabular-nums;color:var(--brand)}
   .decayNow .l{font-family:var(--font-mono);font-size:10px;letter-spacing:.12em;text-transform:lowercase;color:var(--muted)}
   .decayHalf{text-align:right;font-family:var(--font-mono);font-size:11px;color:var(--muted-strong)}
-  .chart{width:100%;height:auto;display:block;margin-top:6px}
-  .chart .grid{stroke:var(--border);stroke-width:1}
-  .chart .axl{fill:var(--muted);font-family:var(--font-mono);font-size:9px;letter-spacing:.08em}
-  .chart .dline{fill:none;stroke:var(--brand);stroke-width:2;stroke-linejoin:round;stroke-linecap:round}
-  .chart .darea{opacity:.6}
-  .chart .nowd{fill:var(--brand);stroke:var(--bg);stroke-width:1.5}
   .logList{display:flex;flex-direction:column;gap:6px;margin-top:14px}
   .logRow{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 12px;border:1px solid var(--border);border-radius:var(--radius-md);background:var(--bg)}
   .logRow .nm{font-weight:600;font-size:14px}
@@ -99,6 +129,8 @@
   .xBtn{background:transparent;border:1px solid var(--border);color:var(--muted);width:26px;height:26px;border-radius:50%;cursor:pointer;flex-shrink:0}
   .xBtn:hover{color:var(--neg);border-color:var(--neg-line)}
   .empty{color:var(--muted);font-size:13px;padding:10px 0}
+
+  /* -- daily stack -- */
   .stackList{display:flex;flex-direction:column;gap:8px}
   .stackRow{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 15px;border:1px solid var(--border);
     border-left:3px solid var(--brand-line);border-radius:var(--radius-md);background:var(--surface)}
@@ -132,11 +164,11 @@
 </div>
 <main><div class="shell" id="app"></div></main>
 <script>
-/* Intake — caffeine log (400mg ceiling + one-compartment half-life decay,
-   same pharmacokinetic model Peak's caffeine card uses) and a daily
-   med/supplement stack checklist. No network: persists through the
-   dashboard bridge (window.Vitality). Independent of Peak's own caffeine
-   log — each sealed tile keeps its own store. */
+/* Intake — daily energy-curve prediction (ported from the retired Peak
+   tile: circadian shape + caffeine pharmacokinetics), a caffeine log
+   (400mg ceiling + half-life decay), and a daily med/supplement stack
+   checklist. No network: persists through the dashboard bridge
+   (window.Vitality). */
 let store={};
 const $=id=>document.getElementById(id);
 const REDUCED=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -155,6 +187,11 @@ function spawnStars(){
   wrap.innerHTML=html;
 }
 
+/* ---- shared math helpers ---- */
+function clamp(x,a,b){return Math.max(a,Math.min(b,x));}
+function nowT(){ const d=new Date(); return d.getHours()+d.getMinutes()/60; }
+function clockOf(t){ t=((t%24)+24)%24; let hh=Math.floor(t); const mm=Math.round((t-hh)*60); let m2=mm; if(m2===60){hh+=1;m2=0;} const ap=hh<12?'AM':'PM'; let h12=hh%12; if(h12===0)h12=12; return h12+(m2?':'+String(m2).padStart(2,'0'):'')+' '+ap; }
+
 /* ---- caffeine: today's dose log, keyed by date (resets daily) ---- */
 function today(){
   if(!store.caff||typeof store.caff!=='object')store.caff={};
@@ -166,14 +203,11 @@ function today(){
 const PRESETS=[['Coffee',95],['Diet Coke',46]];
 const CAFF_CEIL=400; // FDA-cited safe daily ceiling (mg)
 
-/* ---- one-compartment pharmacokinetic model — same constants as Peak's
-   caffeine card, so "mg in your system" reads the same way across tiles. ---- */
+/* one-compartment pharmacokinetic model — the energy curve's caffeine
+   boost/rebound (below) reuses bodyAt() rather than re-deriving it. */
 const KA=4.0,HALF_LIFE=5,KE=Math.LN2/HALF_LIFE;
-function clamp(x,a,b){return Math.max(a,Math.min(b,x));}
 function doseAmount(mg,h){ if(h<0)return 0; if(Math.abs(KA-KE)<1e-9)return 0;
   const a=mg*KA/(KA-KE)*(Math.exp(-KE*h)-Math.exp(-KA*h)); return Math.max(0,a); }
-function nowT(){ const d=new Date(); return d.getHours()+d.getMinutes()/60; }
-function clockOf(t){ t=((t%24)+24)%24; let hh=Math.floor(t); const mm=Math.round((t-hh)*60); let m2=mm; if(m2===60){hh+=1;m2=0;} const ap=hh<12?'AM':'PM'; let h12=hh%12; if(h12===0)h12=12; return h12+(m2?':'+String(m2).padStart(2,'0'):'')+' '+ap; }
 function bodyAt(t){ return today().doses.reduce((s,l)=>s+doseAmount(+l.mg||0,t-(+l.t||0)),0); }
 function caffTotal(){ return today().doses.reduce((s,l)=>s+(+l.mg||0),0); }
 
@@ -186,8 +220,102 @@ function deleteDose(id){
   const d=today(); d.doses=d.doses.filter(l=>String(l.id)!==id); persist(); render();
 }
 
-/* ---- decay chart: mg remaining from now out to +10h, assuming no more
-   doses — the visual half-life tracker. ---- */
+/* ---- rhythm: wake/bed/last-night's-sleep, ported from Peak ---- */
+function wakeStr(){return store.wake||'07:00';}
+function bedStr(){return store.bed||'23:00';}
+function parseHM(s){ if(!s)return null; const m=String(s).match(/(\d{1,2}):(\d{2})/); if(!m)return null; return (+m[1])+(+m[2])/60; }
+function wakeBed(){ let wake=parseHM(wakeStr()),bed=parseHM(bedStr()); if(wake==null)wake=7; if(bed==null)bed=23; return {wake,bed}; }
+function sleepToday(){
+  if(!store.sleep||typeof store.sleep!=='object')store.sleep={};
+  let d=store.sleep[todayKey()];
+  if(!d||typeof d!=='object'){d={slept:null};store.sleep[todayKey()]=d;}
+  return d;
+}
+
+/* ---- caffeine coaching: ceiling + bed-time cut-off (ported from Peak,
+   now that rhythm data lives in this same tile) ---- */
+const CLEAR_HRS=HALF_LIFE*1.6; // ~time to fall to a sleep-safe level
+function caffCutoff(){ const {bed}=wakeBed(); return ((bed-CLEAR_HRS)%24+24)%24; }
+function pastCutoff(){ const {bed}=wakeBed(); const hrsToBed=((bed-nowT())+24)%24; return hrsToBed>0&&hrsToBed<CLEAR_HRS; }
+function coachInfo(){
+  const total=caffTotal();
+  if(total>=CAFF_CEIL) return {warn:true,txt:'At your '+CAFF_CEIL+' mg ceiling — more now risks jitters + a rough crash.'};
+  if(pastCutoff()) return {warn:true,txt:'Past cut-off ('+clockOf(caffCutoff())+') — caffeine now costs you deep sleep.'};
+  return {warn:false,txt:'Cut-off '+clockOf(caffCutoff())+' · '+Math.round(CAFF_CEIL-total)+' mg left today'};
+}
+
+/* ---- circadian energy shape (ported from Peak) ---- */
+function recScale(){ const s=sleepToday().slept; const r=(s==null)?0.78:clamp(s/8,0.3,1); return 0.58+0.42*r; }
+function shape(t,wake,bed){
+  const L=(((bed-wake)%24)+24)%24 || 16;
+  let aw=(((t-wake)%24)+24)%24;
+  if(aw>L){ const into=aw-L, sleepLen=24-L||8, mid=sleepLen/2; return 0.12-0.07*(1-Math.abs(into-mid)/mid); }
+  const inertia=0.55+0.45*(1-Math.exp(-aw/1.0));
+  const decline=1-0.16*(aw/L);
+  const winddown=1-0.40*clamp((aw-(L-1.5))/1.5,0,1);
+  const dip=0.13*Math.exp(-Math.pow(aw-L*0.45,2)/(2*1.7*1.7));
+  const eve=0.07*Math.exp(-Math.pow(aw-(L-4),2)/(2*2.0*2.0));
+  return Math.max(0.04,0.92*inertia*decline*winddown-dip+eve);
+}
+/* net caffeine effect on energy: a boost while it's in your system, then a
+   rebound dip below baseline as it clears (adenosine rebound = the crash). */
+function caffNet(t){
+  const cur=bodyAt(t); let mx=cur;
+  for(let dt=0.5;dt<=5;dt+=0.5){ const b=bodyAt(t-dt); if(b>mx)mx=b; }
+  const boost=Math.min(22,cur*0.14);
+  const rebound=Math.min(13,Math.max(0,mx-cur)*0.10);
+  return boost-rebound;
+}
+function energyAt(t){ const {wake,bed}=wakeBed(); const base=clamp(shape(t,wake,bed)*100*recScale(),1,100); const caf=caffNet(t); return {base,caf,e:clamp(base+caf,1,100)}; }
+function buildCurve(){ const a=[]; for(let t=0;t<=24;t+=0.25)a.push(Object.assign({t},energyAt(t))); return a; }
+function peakOf(c){ const {wake,bed}=wakeBed(); let best=c[0];
+  for(const p of c){ const inDay=bed>wake?(p.t>=wake&&p.t<=bed):(p.t>=wake||p.t<=bed); if(inDay&&p.e>best.e)best=p; }
+  if(best.e<=2)for(const p of c)if(p.e>best.e)best=p; return best; }
+function statusOf(e){ return e>=80?'Peak zone':e>=62?'Dialed in':e>=45?'Steady':e>=28?'Running low':'Depleted'; }
+
+/* ---- energy chart geometry ---- */
+const EW=560,ECX0=10,ECX1=550,ECY0=14,ECY1=130;
+function exOf(t){ return ECX0+(clamp(t,0,24)/24)*(ECX1-ECX0); }
+function eyOf(e){ return ECY1-(clamp(e,0,100)/100)*(ECY1-ECY0); }
+function energyChartHtml(){
+  const curve=buildCurve(), peak=peakOf(curve), now=nowT(), nowE=energyAt(now).e;
+  const eline=curve.map((p,i)=>(i?'L':'M')+exOf(p.t).toFixed(1)+' '+eyOf(p.e).toFixed(1)).join(' ');
+  const bline=curve.map((p,i)=>(i?'L':'M')+exOf(p.t).toFixed(1)+' '+eyOf(p.base).toFixed(1)).join(' ');
+  const area=eline+' L '+exOf(24).toFixed(1)+' '+ECY1+' L '+exOf(0).toFixed(1)+' '+ECY1+' Z';
+  const grid=[6,12,18].map(h=>'<line x1="'+exOf(h)+'" y1="'+ECY0+'" x2="'+exOf(h)+'" y2="'+ECY1+'" class="grid"/>').join('');
+  const labels=[[3,'3a'],[9,'9a'],[15,'3p'],[21,'9p']].map(a=>'<text x="'+exOf(a[0])+'" y="'+(ECY1+15)+'" class="axl" text-anchor="middle">'+a[1]+'</text>').join('');
+  return '<svg viewBox="0 0 '+EW+' '+(ECY1+22)+'" class="chart" role="img" aria-label="Predicted energy through the day">'
+    +'<defs><linearGradient id="efill" x1="0" y1="0" x2="0" y2="1">'
+    +'<stop offset="0" stop-color="#e0b13c" stop-opacity=".24"/><stop offset="1" stop-color="#e0b13c" stop-opacity="0"/></linearGradient></defs>'
+    +grid
+    +'<path d="'+area+'" fill="url(#efill)"/>'
+    +'<path d="'+bline+'" class="ebline"/>'
+    +'<path d="'+eline+'" class="eline"/>'
+    +'<line x1="'+exOf(now).toFixed(1)+'" y1="'+ECY0+'" x2="'+exOf(now).toFixed(1)+'" y2="'+ECY1+'" class="enowl"/>'
+    +'<circle cx="'+exOf(peak.t).toFixed(1)+'" cy="'+eyOf(peak.e).toFixed(1)+'" r="4" class="epeakd"/>'
+    +'<circle cx="'+exOf(now).toFixed(1)+'" cy="'+eyOf(nowE).toFixed(1)+'" r="3.5" class="enowd"/>'
+    +labels+'</svg>';
+}
+function energyTodayHtml(){
+  const curve=buildCurve(), peak=peakOf(curve), now=nowT(), nowE=Math.round(energyAt(now).e);
+  const head='<div class="nowRow">'
+    +'<div class="nowCell"><span class="n">'+nowE+'</span><span class="l">energy now</span></div>'
+    +'<div class="nowCell r"><span class="n dim">'+Math.round(peak.e)+'</span><span class="l">peak · '+clockOf(peak.t)+'</span></div></div>';
+  const status='<p class="status">'+clockOf(now)+' — '+statusOf(nowE)+'</p>';
+  const legend='<div class="legend"><span><i class="swatch"></i>with caffeine</span><span><i class="swatch base"></i>baseline rhythm</span></div>';
+  return '<section class="card"><span class="cardName">Today</span>'+head+status+energyChartHtml()+legend+'</section>';
+}
+function rhythmHtml(){
+  const slept=sleepToday().slept;
+  return '<section class="card"><span class="cardName">Rhythm</span><div class="fields">'
+    +'<div class="field"><span class="l">wake</span><input class="fieldInput" id="wake" type="time" value="'+wakeStr()+'" /></div>'
+    +'<div class="field"><span class="l">bed</span><input class="fieldInput" id="bed" type="time" value="'+bedStr()+'" /></div>'
+    +'<div class="field"><span class="l">slept (h)</span><input class="fieldInput" id="slept" type="number" min="0" max="14" step="0.5" placeholder="7.5" value="'+(slept==null?'':slept)+'" /></div>'
+    +'</div></section>';
+}
+
+/* ---- caffeine decay chart: mg remaining from now out to +10h, assuming no
+   more doses — the visual half-life tracker. ---- */
 const CW=560,CX0=10,CX1=550,CY0=14,CY1=110;
 function decayChartHtml(){
   const now=nowT(), nowMg=bodyAt(now);
@@ -214,7 +342,7 @@ function decayChartHtml(){
 function caffeineHtml(){
   const total=caffTotal(), over=total>=CAFF_CEIL, nowMg=Math.round(bodyAt(nowT()));
   const pct=Math.min(100,(total/CAFF_CEIL)*100);
-  const coachTxt=over?'At your '+CAFF_CEIL+' mg ceiling — more now risks jitters + a rough crash.':Math.round(CAFF_CEIL-total)+' mg left today';
+  const c=coachInfo();
   const chips=PRESETS.map((p,i)=>'<button class="chip" data-preset="'+i+'">'+p[0]+'<span class="mg">'+p[1]+'mg</span></button>').join('');
   const log=today().doses.slice().sort((a,b)=>a.t-b.t);
   const rows=log.length
@@ -223,7 +351,7 @@ function caffeineHtml(){
   return '<section class="card"><span class="cardName">Caffeine</span>'
     +'<div class="caffHead"><span class="caffTotal'+(over?' over':'')+'">'+Math.round(total)+' mg</span><span class="caffCeil">of '+CAFF_CEIL+' mg limit</span></div>'
     +'<div class="caffBarTrack"><div class="caffBarFill'+(over?' over':'')+'" style="width:'+pct+'%"></div></div>'
-    +'<p class="coach'+(over?' warn':'')+'">'+coachTxt+'</p>'
+    +'<p class="coach'+(c.warn?' warn':'')+'">'+c.txt+'</p>'
     +'<div class="presets">'+chips+'</div>'
     +'<div class="customAdd"><input class="fieldInput" id="caffMg" type="number" min="1" step="5" placeholder="mg" /><button class="btn-primary" id="caffAdd">Add now</button></div>'
     +'<div class="hint" id="hint"></div>'
@@ -284,10 +412,15 @@ function headerHtml(){
   return '<header class="header"><div class="markWrap"><div class="markGlow"></div><div class="mark" aria-hidden="true">'
     +'<svg viewBox="-12 -12 24 24" fill="none" stroke="#0a0a0c" stroke-width="1.4" stroke-linejoin="round" stroke-linecap="round">'
     +'<g transform="rotate(45)"><rect x="-9" y="-4.5" width="18" height="9" rx="4.5"/><line x1="0" y1="-4.5" x2="0" y2="4.5"/></g></svg></div></div>'
-    +'<div><h1 class="title">Intake</h1><p class="subtitle">caffeine · daily stack</p></div></header>';
+    +'<div><h1 class="title">Intake</h1><p class="subtitle">energy · caffeine · daily stack</p></div></header>';
 }
-function render(){ $('app').innerHTML=headerHtml()+caffeineHtml()+stackHtml(); }
+function render(){ $('app').innerHTML=headerHtml()+energyTodayHtml()+rhythmHtml()+caffeineHtml()+stackHtml(); }
 
+document.addEventListener('change',e=>{
+  if(e.target.id==='wake'){ store.wake=e.target.value||'07:00'; persist(); render(); }
+  if(e.target.id==='bed'){ store.bed=e.target.value||'23:00'; persist(); render(); }
+  if(e.target.id==='slept'){ const v=e.target.value.trim(); const n=Number(v); sleepToday().slept=(v===''||!isFinite(n))?null:clamp(n,0,14); persist(); render(); }
+});
 document.addEventListener('click',e=>{
   const preset=e.target.closest('[data-preset]');
   if(preset){ const p=PRESETS[Number(preset.getAttribute('data-preset'))]; if(p)addDose(p[1],p[0]); return; }

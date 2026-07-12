@@ -24,7 +24,6 @@ export type CoreTileId =
   | 'train'
   | 'fuel'
   | 'vitals'
-  | 'peak'
   | 'brand'
   | 'water'
   | 'todoist'
@@ -128,25 +127,6 @@ export const CORE_TILES: Record<CoreTileId, CoreTile> = {
       <svg className="art" viewBox="0 0 210 118">
         <path className="mot" d="M38 47 L74 47 L89 27 L104 70 L119 47 L172 47" />
         <g className="orb"><circle className="glow" r="8" /><circle className="node" r="3.2" /></g>
-      </svg>
-    ),
-  },
-  peak: {
-    id: 'peak',
-    href: '/app/starter',
-    index: '03',
-    label: 'Peak',
-    orb: { mode: 'still', roam: 'ring', pt: '105,125' },
-    defaultSize: 'tall',
-    glyph: (
-      <svg viewBox="-12 -12 24 24" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round" strokeLinecap="round">
-        <path d="M2 -10 L-5 1 L0 1 L-2 10 L5 -1 L0 -1 L2 -10 Z" />
-      </svg>
-    ),
-    art: (
-      <svg className="art" viewBox="0 0 210 250">
-        <circle className="mot" cx="105" cy="125" r="40" />
-        <g className="orb"><circle className="glow" r="12" /><circle className="node" r="3.4" /></g>
       </svg>
     ),
   },
@@ -373,7 +353,6 @@ export const DEFAULT_HOME_ORDER: HomeTileId[] = [
   'todoist',
   'goals',
   'workout',
-  'peak',
   'finance',
   'intake',
 ]
