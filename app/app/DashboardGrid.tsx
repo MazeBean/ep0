@@ -545,6 +545,17 @@ export default function DashboardGrid({ userId, openId, onOpenIdChange, hidePost
       return
     }
     setStack((prev) => (prev.some((e) => e.id === openId) ? prev : [...prev, { id: openId, crossfade: prev.length > 0 }]))
+    // Every genuine transition INTO openId spins up a brand-new iframe (a
+    // fresh document, fresh in-tile state) — even if this same tile id was
+    // ready on a PREVIOUS visit this session, that flag describes an iframe
+    // that no longer exists. Clear it so the new instance has to earn its
+    // own reveal, same as a tile opened for the first time.
+    setReadyIds((prev) => {
+      if (!prev.has(openId)) return prev
+      const next = new Set(prev)
+      next.delete(openId)
+      return next
+    })
   }, [openId])
 
   // Once the newest stacked tile has actually rendered, drop any older ones
