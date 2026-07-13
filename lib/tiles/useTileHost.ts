@@ -38,6 +38,10 @@ export function useTileHost(
    *  real data, not the initial empty/loading paint. Lets the host reveal a
    *  tile only once its true final layout is known. */
   onReady?: (tileId: string) => void,
+  /** Fired whenever a tile's own content height changes, so the host can
+   *  size its iframe to fit exactly and let a normal scrollable div do the
+   *  scrolling instead of the iframe's own (mobile-unreliable) document. */
+  onResize?: (tileId: string, height: number) => void,
 ) {
   const reg = useRef<WeakMap<Window, string>>(new WeakMap())
 
@@ -56,6 +60,9 @@ export function useTileHost(
 
   const ready = useRef(onReady)
   ready.current = onReady
+
+  const resize = useRef(onResize)
+  resize.current = onResize
 
   const register = useCallback((win: Window | null, tileId: string) => {
     if (win) reg.current.set(win, tileId)
@@ -165,6 +172,12 @@ export function useTileHost(
 
       if (msg.type === 'ready') {
         ready.current?.(tileId)
+        return
+      }
+
+      if (msg.type === 'resize') {
+        const height = Number(msg.height)
+        if (Number.isFinite(height) && height > 0) resize.current?.(tileId, height)
         return
       }
 

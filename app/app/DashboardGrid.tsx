@@ -140,6 +140,7 @@ function OpenTileOverlay({
   onClose,
   dataReady,
   crossfade,
+  height,
 }: {
   slot: { id: string; name: string; html: string }
   register: (w: Window | null, id: string) => void
@@ -147,6 +148,11 @@ function OpenTileOverlay({
   onClose: () => void
   dataReady: boolean
   crossfade: boolean
+  /** The tile's own reported content height (px) — sizes the iframe to fit
+   *  exactly so .openStage's normal div-scroll shows all of it. Undefined
+   *  until the tile's first report lands, so the iframe just fills the
+   *  stage in the meantime. */
+  height?: number
 }) {
   const winRef = useRef<Window | null>(null)
   const [fallback, setFallback] = useState(false)
@@ -156,35 +162,64 @@ function OpenTileOverlay({
   }, [])
   const ready = dataReady || fallback
   const overlayClass = crossfade ? `openOverlay openFull entering${ready ? ' ready' : ''}` : 'openOverlay openFull'
+
+  // .openStage is meant to be "openCard's height minus openTop's height" via
+  // flex:1 — but with a real tile's own (much larger) stylesheet loaded into
+  // the iframe next to it, that flex sizing has proven unreliable: the stage
+  // grows to match the iframe's content instead of staying capped, so
+  // scrolling never reaches a real bottom. Measuring both boxes directly and
+  // setting the stage's height as a plain number sidesteps flex sizing
+  // (and whatever about a large sibling stylesheet confuses it) entirely.
+  const cardRef = useRef<HTMLDivElement>(null)
+  const topRef = useRef<HTMLDivElement>(null)
+  const [stageHeight, setStageHeight] = useState<number | null>(null)
+  useEffect(() => {
+    const card = cardRef.current
+    const top = topRef.current
+    if (!card || !top) return
+    const recompute = () => setStageHeight(card.clientHeight - top.clientHeight)
+    recompute()
+    const ro = new ResizeObserver(recompute)
+    ro.observe(card)
+    ro.observe(top)
+    return () => ro.disconnect()
+  }, [])
   return (
     <div className={overlayClass} role="dialog" aria-modal="true" aria-label={slot.name}>
-      <div className="openCard">
-        <div className="openTop">
+      <div className="openCard" ref={cardRef}>
+        <div className="openTop" ref={topRef}>
           <button type="button" className="openBack" onClick={onClose}>
             <span aria-hidden="true">←</span> Dashboard
           </button>
           <span className="openSlotName">{slot.name}</span>
         </div>
-        <div className="openStage">
-          <iframe
-            ref={(el) => {
-              if (el) {
-                winRef.current = el.contentWindow
-                register(el.contentWindow, slot.id)
-              } else if (winRef.current) {
-                unregister(winRef.current)
-                winRef.current = null
-              }
-            }}
-            onLoad={(e) => {
-              winRef.current = e.currentTarget.contentWindow
-              register(e.currentTarget.contentWindow, slot.id)
-            }}
-            className={ready ? 'openFrame openFrameReady' : 'openFrame'}
-            srcDoc={withBridge(slot.html)}
-            sandbox="allow-scripts"
-            title={slot.name}
-          />
+        <div className="openStage" style={stageHeight != null ? { height: stageHeight } : undefined}>
+          {/* An iframe given an explicit height directly as a flex child makes
+              the flex parent grow to match it instead of clipping/scrolling
+              around it (a plain div with the same height does not) — this
+              wrapper is a plain div carrying the reported height, so the
+              iframe itself can just stay height:100% of it. */}
+          <div className="openFrameWrap" style={{ height: height ? `${height}px` : '100%' }}>
+            <iframe
+              ref={(el) => {
+                if (el) {
+                  winRef.current = el.contentWindow
+                  register(el.contentWindow, slot.id)
+                } else if (winRef.current) {
+                  unregister(winRef.current)
+                  winRef.current = null
+                }
+              }}
+              onLoad={(e) => {
+                winRef.current = e.currentTarget.contentWindow
+                register(e.currentTarget.contentWindow, slot.id)
+              }}
+              className={ready ? 'openFrame openFrameReady' : 'openFrame'}
+              srcDoc={withBridge(slot.html)}
+              sandbox="allow-scripts"
+              title={slot.name}
+            />
+          </div>
         </div>
       </div>
     </div>
@@ -537,7 +572,14 @@ export default function DashboardGrid({ userId, openId, onOpenIdChange, hidePost
   const handleTileReady = (tileId: string) => {
     setReadyIds((prev) => (prev.has(tileId) ? prev : new Set(prev).add(tileId)))
   }
-  const { register, unregister } = useTileHost(userId, undefined, () => {}, handleTileReady)
+  // Each open tile's own reported content height — sizing the iframe to fit
+  // it exactly lets .openStage (a normal div) do the scrolling instead of
+  // the iframe's own document, which mobile Safari scrolls unreliably.
+  const [heights, setHeights] = useState<Record<string, number>>({})
+  const handleTileResize = (tileId: string, height: number) => {
+    setHeights((prev) => (prev[tileId] === height ? prev : { ...prev, [tileId]: height }))
+  }
+  const { register, unregister } = useTileHost(userId, undefined, () => {}, handleTileReady, handleTileResize)
 
   useEffect(() => {
     if (openId == null) {
@@ -706,6 +748,7 @@ export default function DashboardGrid({ userId, openId, onOpenIdChange, hidePost
               onClose={() => onOpenIdChange(null)}
               dataReady={readyIds.has(entry.id)}
               crossfade={entry.crossfade}
+              height={heights[entry.id]}
             />
           ),
       )}

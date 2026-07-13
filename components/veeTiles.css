@@ -374,11 +374,30 @@
   border-radius:10px;cursor:pointer;transition:all .18s var(--vease)}
 .veeTiles .openClose:hover{border-color:var(--mint);color:var(--mint)}
 .veeTiles .openClose svg{width:17px;height:17px}
-.veeTiles .openStage{flex:1;min-height:0;position:relative;overflow:hidden;background:#000}
+/* Scrolls itself (overflow-y, not the iframe's own document) — sandboxed
+   iframes have proven unreliable for touch-scrolling their own content on
+   mobile Safari, so the tile reports its real height (see tileBridge.ts's
+   resize report) and the iframe is sized to fit it exactly via inline
+   style; this plain div does the scrolling instead, the same mechanism
+   the Home screen already relies on successfully. */
+/* flex:1 (flex-basis:0%) here proved unreliable once a real tile's own
+   (much larger) stylesheet loaded into the child iframe — the stage grew to
+   match the iframe's content instead of staying capped, so scrolling never
+   reached a real bottom. flex:none + an explicit JS-measured height (see
+   OpenTileOverlay's stageHeight state) makes flex-basis:auto defer to that
+   height exactly, with no grow/shrink math for a large sibling stylesheet
+   to confuse. min-height:0 stays as a fallback for the brief instant before
+   the height is measured. */
+.veeTiles .openStage{flex:none;min-height:0;position:relative;overflow-y:auto;-webkit-overflow-scrolling:touch;background:#000}
+/* A plain div carrying the tile's reported height — giving the IFRAME
+   itself an explicit height here instead made .openStage grow to match it
+   rather than clipping/scrolling around it (a plain div with the same
+   height does not); see OpenTileOverlay in DashboardGrid.tsx. */
+.veeTiles .openFrameWrap{width:100%}
 /* Starts invisible over the already-opaque black stage above, and only
    cross-fades in once the tile has actually finished loading its data (see
    OpenTileOverlay's ready state) — nothing behind it to flash past either way. */
-.veeTiles .openFrame{position:absolute;inset:0;width:100%;height:100%;border:0;background:transparent;
+.veeTiles .openFrame{display:block;width:100%;height:100%;border:0;background:transparent;
   opacity:0;transition:opacity .22s var(--vease)}
 .veeTiles .openFrame.openFrameReady{opacity:1}
 @keyframes openFade{from{opacity:0}to{opacity:1}}

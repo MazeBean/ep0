@@ -65,6 +65,39 @@ const SHIM = `<script>
       remove: function (id) { return call('todoist:delete', { id: id }); }
     }
   };
+  // Report this tile's real content height so the host can size the iframe
+  // to fit it exactly and let the OUTER page scroll instead of the iframe's
+  // own document. Sandboxed iframes have been unreliable for touch-scrolling
+  // their own internal content on mobile Safari; a plain scrollable div in
+  // the host (the same mechanism the Home screen already uses successfully)
+  // sidesteps that entirely.
+  //
+  // IMPORTANT: every sealed tile sets html,body{height:100%} — so
+  // document.documentElement's own height is self-referential to whatever
+  // the HOST just set the iframe's box to. Watching it with a
+  // ResizeObserver (as this once did) means applying a report triggers the
+  // very "resize" that observer reacts to, feeding back on itself. Content
+  // CHANGES (not the iframe's own box changing) are the real signal, so a
+  // MutationObserver is used instead — it can't fire from the host resizing
+  // the iframe, only from the tile's own DOM changing. It observes
+  // documentElement, not body: this shim runs before <body> exists (it's
+  // injected right after <head>), so document.body is still null here —
+  // observing it would throw and silently abort everything below.
+  var lastSent = 0;
+  function reportHeight() {
+    var h = document.documentElement.scrollHeight;
+    if (h === lastSent) return;
+    lastSent = h;
+    parent.postMessage({ source: 'vitality-tile', type: 'resize', height: h }, '*');
+  }
+  if (window.MutationObserver) {
+    new MutationObserver(reportHeight).observe(document.documentElement, { childList: true, subtree: true, attributes: true, characterData: true });
+  } else {
+    setInterval(reportHeight, 500);
+  }
+  window.addEventListener('load', reportHeight);
+  // Late reflows (webfonts, images, first async render) land after 'load'.
+  [50, 200, 500, 1000, 2000].forEach(function (ms) { setTimeout(reportHeight, ms); });
 })();
 </script>`
 
