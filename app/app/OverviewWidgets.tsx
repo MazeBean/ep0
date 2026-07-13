@@ -260,10 +260,17 @@ export default function OverviewWidgets({ userId }: { userId: string }) {
 
       <div className={styles.card}>
         <div className={styles.cardHead}>
-          <span className={styles.cardTitle}>Consistency</span>
-          <span className={styles.cardTag}>Workout</span>
+          <span className={styles.cardTitle}>This week</span>
+          <span className={styles.cardTag}>Calendar</span>
         </div>
-        {w.workout && <RadialGauge pct={(w.workout.sessionsThisWeek / 7) * 100} label={`${w.workout.prsThisMonth} PRs this mo.`} sub="/ wk" />}
+        {w.calendar?.connected ? (
+          <>
+            <span className={styles.bigNum}>{w.calendar.dueToday}</span>
+            <span className={styles.smallLabel}>Due today{w.calendar.overdue ? ` · ${w.calendar.overdue} overdue` : ''}</span>
+          </>
+        ) : (
+          <p className={styles.emptyNote}>Connect Todoist to see this here.</p>
+        )}
       </div>
 
       <div className={styles.card}>
@@ -287,19 +294,14 @@ export default function OverviewWidgets({ userId }: { userId: string }) {
         )}
       </div>
 
-      <div className={styles.card}>
+      {/* Pinned to the narrow column via .consistencyCard, right after Goals
+          progress — see that class for why explicit placement is needed. */}
+      <div className={`${styles.card} ${styles.consistencyCard}`}>
         <div className={styles.cardHead}>
-          <span className={styles.cardTitle}>This week</span>
-          <span className={styles.cardTag}>Calendar</span>
+          <span className={styles.cardTitle}>Consistency</span>
+          <span className={styles.cardTag}>Workout</span>
         </div>
-        {w.calendar?.connected ? (
-          <>
-            <span className={styles.bigNum}>{w.calendar.dueToday}</span>
-            <span className={styles.smallLabel}>Due today{w.calendar.overdue ? ` · ${w.calendar.overdue} overdue` : ''}</span>
-          </>
-        ) : (
-          <p className={styles.emptyNote}>Connect Todoist to see this here.</p>
-        )}
+        {w.workout && <RadialGauge pct={(w.workout.sessionsThisWeek / 7) * 100} label={`${w.workout.prsThisMonth} PRs this mo.`} sub="/ wk" />}
       </div>
     </div>
   )

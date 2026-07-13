@@ -199,6 +199,7 @@ let currentWeight=50; // lb — the stepper's live value, not persisted between 
 let prToast=null; // {exercise, weight} while the toast is showing
 let prToastTimer=null;
 let historyOpen=false; // "view past weights" panel under the PR chart
+let bwHistoryOpen=false; // "view past weigh-ins" panel under the bodyweight chart
 const $=id=>document.getElementById(id);
 const REDUCED=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
@@ -319,6 +320,18 @@ function bwChartHtml(){
     +'<stop offset="0" stop-color="#e0b13c" stop-opacity=".22"/><stop offset="1" stop-color="#e0b13c" stop-opacity="0"/></linearGradient></defs>'
     +'<path d="'+area+'" fill="url(#bwfill)" class="area"/><path d="'+line+'" class="bwline"/>'+dots+labels+'</svg>';
 }
+/* Newest-first list of every weigh-in, each removable — in case one was
+   typed in wrong, the chart/latest-value alone give no way to fix it. */
+function bwHistoryListHtml(){
+  const list=bwSorted().slice().reverse();
+  if(!list.length)return '<p class="empty">No weigh-ins logged yet.</p>';
+  return '<div class="log">'+list.map(b=>
+    '<div class="entry"><div class="entryLeft">'
+    +'<div class="entryStats">'+b.lb+' lb</div>'
+    +'<span class="entryMeta">'+new Date(b.ts).toLocaleDateString(undefined,{month:'short',day:'numeric',year:'numeric'})+'</span></div>'
+    +'<button class="xBtn" data-del-bw="'+b.id+'" title="Remove">×</button></div>'
+  ).join('')+'</div>';
+}
 function bodyweightHtml(){
   const data=bwSorted();
   const latest=data.length?data[data.length-1].lb:null;
@@ -326,7 +339,10 @@ function bodyweightHtml(){
     +(latest!=null?'<div class="bwNow"><span class="n">'+latest+'</span><span class="l">lb · Latest</span></div>':'')
     +'<div class="row bwAdd"><div class="field"><input class="fieldInput" type="number" id="bwInput" min="0" step="0.1" placeholder="e.g. 172.5" /></div>'
     +'<button class="btn-primary" id="bwAdd">Log</button></div>'
-    +bwChartHtml()+'</section>';
+    +bwChartHtml()
+    +'<div style="margin-top:14px"><button type="button" class="btn-ghost" id="toggleBwHistory">'+(bwHistoryOpen?'Hide past weigh-ins':'View past weigh-ins')+'</button></div>'
+    +(bwHistoryOpen?'<div style="margin-top:12px">'+bwHistoryListHtml()+'</div>':'')
+    +'</section>';
 }
 
 /* ---- render ---- */
@@ -486,6 +502,7 @@ document.addEventListener('click',e=>{
   if(rep){logSet(Number(rep.getAttribute('data-reps')));return;}
   if(e.target.closest('#downloadLog')){downloadLog();return;}
   if(e.target.closest('#toggleHistory')){historyOpen=!historyOpen;render();return;}
+  if(e.target.closest('#toggleBwHistory')){bwHistoryOpen=!bwHistoryOpen;render();return;}
   if(e.target.closest('#bwAdd')){
     const el=$('bwInput'), lb=Number(el&&el.value);
     if(!isFinite(lb)||lb<=0)return;
