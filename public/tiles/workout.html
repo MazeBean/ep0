@@ -193,9 +193,12 @@
    with `entries` and `bodyweight` arrays. */
 let store={entries:[],bodyweight:[]};
 let selectedExercise=null;
+let currentExercise=''; // the exercise field's live text — kept in JS so incidental
+                         // re-renders (weight stepper, delete, add-bodyweight) don't wipe it
 let currentWeight=50; // lb — the stepper's live value, not persisted between visits
 let prToast=null; // {exercise, weight} while the toast is showing
 let prToastTimer=null;
+let historyOpen=false; // "view past weights" panel under the PR chart
 const $=id=>document.getElementById(id);
 const REDUCED=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
@@ -346,7 +349,7 @@ function formHtml(){
   const datalist=exList.map(x=>'<option value="'+esc(x)+'">').join('');
   return '<section class="card"><span class="cardName">Log a set</span>'
     +'<div class="exField"><label class="fieldLbl">Exercise</label>'
-    +'<input type="text" id="exercise" list="exerciseList" placeholder="e.g. bench press" autocomplete="off" />'
+    +'<input type="text" id="exercise" list="exerciseList" placeholder="e.g. bench press" autocomplete="off" value="'+esc(currentExercise)+'" />'
     +'<datalist id="exerciseList">'+datalist+'</datalist></div>'
     +'<div class="weightStepper">'
     +'<button type="button" class="stepBtn" id="wMinus" aria-label="Subtract 5 lb">−</button>'
@@ -360,6 +363,19 @@ function formHtml(){
     +'<div class="hint" id="hint"></div>'
     +'</section>';
 }
+/* Newest-first list of every set logged for one exercise, each removable —
+   the per-day log below only ever shows the most recent day, so this is the
+   only way to reach (and delete from) anything older. */
+function historyListHtml(exercise){
+  const list=entriesFor(exercise).slice().reverse();
+  if(!list.length)return '<p class="empty">No past weights logged for this exercise yet.</p>';
+  return '<div class="log">'+list.map(e=>
+    '<div class="entry"><div class="entryLeft">'
+    +'<div class="entryStats">'+e.weight+' lb × '+e.reps+' reps</div>'
+    +'<span class="entryMeta">'+new Date(e.ts).toLocaleDateString(undefined,{month:'short',day:'numeric',year:'numeric'})+'</span></div>'
+    +'<button class="xBtn" data-del="'+e.id+'" title="Remove">×</button></div>'
+  ).join('')+'</div>';
+}
 function prChartHtml(){
   const exList=exercises();
   if(!exList.length)return '';
@@ -369,7 +385,10 @@ function prChartHtml(){
   return '<section class="card"><div class="prRow">'
     +'<select class="prSelect" id="exSelect">'+opts+'</select>'
     +'<div class="prBadge"><div class="prNum">'+(pr?pr.weight:0)+'</div><div class="prLbl">Personal record'+(pr?' · '+pr.reps+' reps':'')+'</div></div>'
-    +'</div>'+chartHtml(selectedExercise)+'</section>';
+    +'</div>'+chartHtml(selectedExercise)
+    +'<div style="margin-top:14px"><button type="button" class="btn-ghost" id="toggleHistory">'+(historyOpen?'Hide past weights':'View past weights')+'</button></div>'
+    +(historyOpen?'<div style="margin-top:12px">'+historyListHtml(selectedExercise)+'</div>':'')
+    +'</section>';
 }
 /* Only the most recent logged day shows by default — a quick glance, not
    the whole history. The full history is one click away as a download. */
@@ -409,9 +428,16 @@ function render(){
 }
 
 /* ---- interactions ---- */
+/* Patches just the weight number instead of a full render(): a full
+   re-render replaces #exercise (wiping whatever the user was mid-typing —
+   its value isn't tracked anywhere else, just the live DOM) and recreates
+   the header's .mark/.markGlow nodes, which restarts their CSS animations
+   from frame zero (a brand new element, even if visually identical). Both
+   read as "the weight buttons reset everything". */
 function adjustWeight(delta){
   currentWeight=Math.max(0,currentWeight+delta);
-  render();
+  const el=document.querySelector('.weightVal .n');
+  if(el)el.textContent=currentWeight;
 }
 function showPRToast(exercise,weight){
   prToast={exercise,weight};
@@ -427,6 +453,7 @@ function logSet(reps){
   const entry={id:newId(),exercise,weight:currentWeight,reps,ts:Date.now()};
   store.entries.push(entry);
   selectedExercise=exercise;
+  currentExercise='';
   persist();
   $('hint').textContent='';
   const isNewPR=!prevPR||entry.weight>prevPR.weight;
@@ -458,6 +485,7 @@ document.addEventListener('click',e=>{
   const rep=e.target.closest('[data-reps]');
   if(rep){logSet(Number(rep.getAttribute('data-reps')));return;}
   if(e.target.closest('#downloadLog')){downloadLog();return;}
+  if(e.target.closest('#toggleHistory')){historyOpen=!historyOpen;render();return;}
   if(e.target.closest('#bwAdd')){
     const el=$('bwInput'), lb=Number(el&&el.value);
     if(!isFinite(lb)||lb<=0)return;
@@ -473,7 +501,10 @@ document.addEventListener('change',e=>{
   if(e.target.id==='exSelect'){selectedExercise=e.target.value;render();}
 });
 document.addEventListener('input',e=>{
-  if(e.target.id==='exercise'){const h=$('hint');if(h&&h.textContent)h.textContent='';}
+  if(e.target.id==='exercise'){
+    currentExercise=e.target.value;
+    const h=$('hint');if(h&&h.textContent)h.textContent='';
+  }
 });
 document.addEventListener('keydown',e=>{
   if(e.target.id==='exercise'&&e.key==='Enter'){e.preventDefault();}

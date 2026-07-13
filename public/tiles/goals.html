@@ -71,12 +71,15 @@
   .cardHead{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin-bottom:14px}
   .cardName{font-family:var(--font-display);font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#fff}
   .count{font-family:var(--font-mono);font-size:10px;letter-spacing:.12em;color:var(--muted)}
-  .row{display:flex;gap:10px;align-items:center;margin-bottom:14px}
-  input[type=text]{width:100%;background:var(--bg);border:1px solid var(--border);color:var(--fg);
+  .row{display:flex;gap:10px;align-items:center;margin-bottom:14px;flex-wrap:wrap}
+  .field{flex:1;min-width:90px}
+  .fieldLbl{display:block;font-size:11px;color:var(--muted);margin-bottom:6px}
+  input[type=text],input[type=number]{width:100%;background:var(--bg);border:1px solid var(--border);color:var(--fg);
     border-radius:10px;padding:10px 12px;font:inherit}
   input:focus{outline:none;border-color:var(--brand)}
   input::placeholder{color:#55555c}
   .btn-primary{background:var(--brand);color:#0a0a0c;border:none;font-weight:600;border-radius:10px;padding:10px 16px;font:inherit;cursor:pointer;white-space:nowrap}
+  @media(max-width:640px){.row.durRow{flex-direction:column;align-items:stretch}}
   .card.cardShort .cardName{color:var(--short)}
   .card.cardLong .cardName{color:var(--long)}
   .card.cardShort .btn-primary{background:var(--short);color:#1a1006}
@@ -100,7 +103,11 @@
   .card.cardLong .checkBtn:hover{border-color:var(--long);background:var(--long-soft)}
   .card.cardLong .goal.done .checkBtn{color:var(--long);border-color:var(--long)}
   .checkBtn svg{width:12px;height:12px}
+  .goalTextWrap{display:flex;flex-direction:column;gap:2px;min-width:0}
   .goalText{font-size:14.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .goalDue{font-family:var(--font-mono);font-size:10px;letter-spacing:.06em;color:var(--muted)}
+  .card.cardShort .goalDue.overdue{color:var(--neg)}
+  .card.cardLong .goalDue.overdue{color:var(--neg)}
   .xBtn{background:transparent;border:1px solid var(--border);color:var(--muted);width:26px;height:26px;border-radius:50%;cursor:pointer;flex-shrink:0;line-height:1}
   .xBtn:hover{color:var(--neg);border-color:var(--neg-line)}
   .empty{color:var(--muted);font-size:13px;padding:6px 0}
@@ -155,26 +162,49 @@ function statsHtml(){
     +'<div class="stat"><div class="statNum long">'+openLong+'</div><div class="statLbl">Long-term open</div></div>'
     +'</section>';
 }
+/* Goals can carry an optional target deadline: short-term ones are set as a
+   days+weeks span from today, long-term ones as a months+years span (see
+   addGoal) — this turns that stored timestamp back into a compact label. */
+function dueLabel(due){
+  if(!due)return '';
+  const now=new Date();now.setHours(0,0,0,0);
+  const diffDays=Math.round((due-now.getTime())/86400000);
+  const dateStr=new Date(due).toLocaleDateString(undefined,{month:'short',day:'numeric',year:'numeric'});
+  if(diffDays<0)return 'Overdue · '+dateStr;
+  if(diffDays===0)return 'Due today';
+  if(diffDays===1)return 'Due tomorrow';
+  if(diffDays<30)return 'Due in '+diffDays+' days';
+  return 'Due '+dateStr;
+}
 function listInner(key){
   const items=store[key];
   if(!items.length)return '<p class="empty">Nothing here yet.</p>';
   const sorted=items.slice().sort((a,b)=>(a.done===b.done)?0:(a.done?1:-1));
-  return sorted.map(g=>
-    '<div class="goal'+(g.done?' done':'')+'">'
+  return sorted.map(g=>{
+    const due=!g.done&&g.due?dueLabel(g.due):'';
+    return '<div class="goal'+(g.done?' done':'')+'">'
     +'<div class="goalLeft"><button class="checkBtn" data-complete="'+key+':'+g.id+'" title="Toggle done">'
     +'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12l5 5L20 6"/></svg></button>'
-    +'<span class="goalText">'+esc(g.text)+'</span></div>'
+    +'<div class="goalTextWrap"><span class="goalText">'+esc(g.text)+'</span>'
+    +(due?'<span class="goalDue'+(due.indexOf('Overdue')===0?' overdue':'')+'">'+due+'</span>':'')
+    +'</div></div>'
     +'<button class="xBtn" data-del="'+key+':'+g.id+'" title="Remove">×</button>'
-    +'</div>'
-  ).join('');
+    +'</div>';
+  }).join('');
 }
 function sectionHtml(key,label,inputId,btnId){
   const items=store[key];
   const accentCls=key==='shortTerm'?'cardShort':'cardLong';
+  const isShort=key==='shortTerm';
+  const durFields=isShort
+    ? '<div class="field"><label class="fieldLbl">Days</label><input type="number" id="'+inputId+'Days" min="0" placeholder="0" /></div>'
+     +'<div class="field"><label class="fieldLbl">Weeks</label><input type="number" id="'+inputId+'Weeks" min="0" placeholder="0" /></div>'
+    : '<div class="field"><label class="fieldLbl">Months</label><input type="number" id="'+inputId+'Months" min="0" placeholder="0" /></div>'
+     +'<div class="field"><label class="fieldLbl">Years</label><input type="number" id="'+inputId+'Years" min="0" placeholder="0" /></div>';
   return '<section class="card '+accentCls+'"><div class="cardHead"><span class="cardName">'+label+'</span>'
     +'<span class="count">'+(items.length?items.length+(items.length===1?' goal':' goals'):'Empty')+'</span></div>'
-    +'<div class="row"><input type="text" id="'+inputId+'" placeholder="Add a '+label.toLowerCase()+' goal" autocomplete="off" />'
-    +'<button class="btn-primary" id="'+btnId+'">Add</button></div>'
+    +'<div class="row"><input type="text" id="'+inputId+'" placeholder="Add a '+label.toLowerCase()+' goal" autocomplete="off" style="flex:1 1 100%" /></div>'
+    +'<div class="row durRow">'+durFields+'<button class="btn-primary" id="'+btnId+'">Add</button></div>'
     +'<div class="list">'+listInner(key)+'</div>'
     +'</section>';
 }
@@ -184,13 +214,36 @@ function render(){
     +sectionHtml('longTerm','Long-term','longInput','longAdd');
 }
 
+/* Short-term goals get a days+weeks span from today; long-term ones get a
+   months+years span (calendar-correct via setMonth/setFullYear, not a flat
+   30/365-day approximation). Both are optional — leaving every field at 0
+   (the default) stores no deadline at all. */
+function dueFromInputs(key,inputId){
+  const d=new Date();d.setHours(0,0,0,0);
+  if(key==='shortTerm'){
+    const days=Number($(inputId+'Days').value)||0;
+    const weeks=Number($(inputId+'Weeks').value)||0;
+    if(days<=0&&weeks<=0)return null;
+    d.setDate(d.getDate()+days+weeks*7);
+  } else {
+    const months=Number($(inputId+'Months').value)||0;
+    const years=Number($(inputId+'Years').value)||0;
+    if(months<=0&&years<=0)return null;
+    d.setMonth(d.getMonth()+months);
+    d.setFullYear(d.getFullYear()+years);
+  }
+  return d.getTime();
+}
 function addGoal(key,inputId){
   const el=$(inputId);
   const text=(el.value||'').trim();
   if(!text)return;
-  store[key].push({id:newId(),text,done:false,ts:Date.now()});
+  const due=dueFromInputs(key,inputId);
+  store[key].push({id:newId(),text,done:false,ts:Date.now(),due});
   persist();
   el.value='';
+  const durIds=key==='shortTerm'?[inputId+'Days',inputId+'Weeks']:[inputId+'Months',inputId+'Years'];
+  durIds.forEach(id=>{const f=$(id);if(f)f.value='';});
   render();
 }
 function toggleGoal(key,id){
