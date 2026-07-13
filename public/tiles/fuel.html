@@ -72,11 +72,21 @@
   .calOp{font-size:30px;line-height:1;color:var(--muted);align-self:flex-start}
   .calCell.remain .n{color:var(--brand)}
   .calCell.remain.over .n{color:var(--neg)}
-  .goalEdits{display:flex;flex-direction:column;gap:8px}
-  .goalEdit{display:flex;align-items:center;gap:8px}
+  .goalEdits{display:flex;flex-direction:column;gap:10px}
+  .goalEdit{display:flex;align-items:center;gap:10px}
   .fieldInput{background:var(--bg);border:1px solid var(--border);color:var(--fg);border-radius:10px;padding:9px 11px;font:inherit}
   .fieldInput:focus{outline:none;border-color:var(--brand)}
   .goalEdit .fieldInput{width:92px}
+  /* Goal steppers: same +/- pattern as Workout's weight stepper, just sized
+     down to fit inline in this label+value row instead of its own big
+     centered block. */
+  .goalStepper{display:flex;align-items:center;gap:8px}
+  .miniStepBtn{width:28px;height:28px;flex-shrink:0;border-radius:50%;border:1px solid var(--border);background:var(--bg);
+    color:var(--fg);font-size:15px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;
+    transition:border-color .15s var(--ease),background .15s var(--ease),transform .1s var(--ease)}
+  .miniStepBtn:hover{border-color:var(--brand-line);background:var(--brand-soft)}
+  .miniStepBtn:active{transform:scale(.9)}
+  .goalStepVal{min-width:56px;text-align:center;font-size:16px;font-weight:600;font-variant-numeric:tabular-nums}
   /* Calorie gauge: a counterclockwise-filling ring (see arcPathCCW in the
      script — a hand-built SVG arc, not a mirrored stroke-dasharray trick,
      so the sweep direction is exact rather than guessed). */
@@ -145,8 +155,6 @@
     .calGaugeWrap{margin-top:6px}
     .calGaugeSvg{width:172px;height:172px}
     .goalEdits{width:100%}
-    .goalEdit{flex-direction:column;align-items:flex-start;gap:4px}
-    .goalEdit .fieldInput{width:100%}
   }
 </style>
 </head>
@@ -199,10 +207,12 @@ function todayKey(){const d=new Date();return d.getFullYear()+'-'+String(d.getMo
 function persist(){window.Vitality.save(store);}
 function todaysLog(){return store[todayKey()]||[];}
 function setTodaysLog(l){store[todayKey()]=l;persist();}
-function goalCal(){return store.goalCal!=null?store.goalCal:2000;}
+function goalCal(){return store.goalCal!=null?store.goalCal:3000;}
 function setGoalCal(n){store.goalCal=n;persist();}
 function goalProtein(){return store.goalProtein!=null?store.goalProtein:150;}
 function setGoalProtein(n){store.goalProtein=n;persist();}
+function stepGoalCal(delta){setGoalCal(Math.max(0,goalCal()+delta));render();}
+function stepGoalProtein(delta){setGoalProtein(Math.max(0,goalProtein()+delta));render();}
 function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 const round=n=>Math.round(n);
 let query='',matches=[];
@@ -280,10 +290,13 @@ function summaryHtml(){
   const fPct=(t.f/fatRef)*100;
   const cell=(cls,n,l)=>'<div class="calCell '+cls+'"><span class="n">'+round(n)+'</span><span class="l">'+l+'</span></div>';
   const gauge=calGaugeHtml(calPct,t.cal,goal,over);
+  const stepper=(key,val,dir,label)=>'<button type="button" class="miniStepBtn" data-goal-step="'+key+'" data-dir="'+dir+'" aria-label="'+label+'">'+(dir<0?'−':'+')+'</button>';
   const head='<div class="calTopRow"><div class="calLeftCol"><div class="calMath">'+cell('',goal,'Goal')+'<span class="calOp">−</span>'+cell('',t.cal,'Food')+'<span class="calOp">=</span>'+cell('remain'+(over?' over':''),Math.abs(remaining),over?'Over':'Remaining')+'</div>'
     +'<div class="goalEdits">'
-    +'<div class="goalEdit"><span class="calCell"><span class="l">Calorie goal</span></span><input class="fieldInput" id="goal" type="number" min="0" step="50" value="'+goal+'" /></div>'
-    +'<div class="goalEdit"><span class="calCell"><span class="l">Protein goal (g)</span></span><input class="fieldInput" id="proteinGoal" type="number" min="0" step="5" value="'+pGoal+'" /></div>'
+    +'<div class="goalEdit"><span class="calCell"><span class="l">Calorie goal</span></span><div class="goalStepper">'
+    +stepper('cal',goal,-1,'Subtract 50 kcal')+'<span class="goalStepVal">'+goal+'</span>'+stepper('cal',goal,1,'Add 50 kcal')+'</div></div>'
+    +'<div class="goalEdit"><span class="calCell"><span class="l">Protein goal (g)</span></span><div class="goalStepper">'
+    +stepper('protein',pGoal,-1,'Subtract 5g protein')+'<span class="goalStepVal">'+pGoal+'</span>'+stepper('protein',pGoal,1,'Add 5g protein')+'</div></div>'
     +'</div></div>'
     +gauge+'</div>';
   const bars='<div class="macroBars">'
@@ -346,13 +359,18 @@ function render(){$('app').innerHTML=headerHtml()+summaryHtml()+mealPlanHtml()+s
 document.addEventListener('input',e=>{
   if(e.target.id==='q'){query=e.target.value;$('results').innerHTML=resultsInner();$('hint').textContent='';}
   if(['cfName','cfCal','cfP','cfC','cfF'].includes(e.target.id)){const h=$('cfHint');if(h&&h.textContent)h.textContent='';}
-  if(e.target.id==='goal'){const n=Number(e.target.value);setGoalCal(isFinite(n)&&n>=0?n:0);render();$('goal').focus();}
-  if(e.target.id==='proteinGoal'){const n=Number(e.target.value);setGoalProtein(isFinite(n)&&n>=0?n:0);render();$('proteinGoal').focus();}
   if(e.target.hasAttribute&&e.target.hasAttribute('data-meal-day')){
     setMeal(e.target.getAttribute('data-meal-day'),e.target.getAttribute('data-meal-slot'),e.target.value);
   }
 });
 document.addEventListener('click',e=>{
+  const gStep=e.target.closest('[data-goal-step]');
+  if(gStep){
+    const dir=Number(gStep.getAttribute('data-dir'));
+    if(gStep.getAttribute('data-goal-step')==='cal')stepGoalCal(50*dir);
+    else stepGoalProtein(5*dir);
+    return;
+  }
   const add=e.target.closest('[data-add]');
   if(add){
     const f=matches[Number(add.getAttribute('data-add'))];
