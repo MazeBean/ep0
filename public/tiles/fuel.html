@@ -60,24 +60,28 @@
     overflow:hidden;transition:border-color .2s var(--ease),box-shadow .2s var(--ease)}
   .card:hover{border-color:var(--brand-line);box-shadow:0 0 0 1px var(--brand-line) inset}
   .cardName{font-family:var(--font-display);font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#fff;display:block;margin-bottom:14px}
-  .calHead{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;margin-bottom:14px}
-  .calMath{display:flex;align-items:flex-end;gap:16px;flex-wrap:wrap}
+  /* The calc row + goal-edit inputs sit in a fixed-width left column, level
+     with the gauge to their right — previously the gauge sat in its own
+     centered row below everything, leaving a tall gap of empty space. */
+  .calTopRow{display:flex;align-items:center;justify-content:space-between;gap:28px;flex-wrap:wrap;margin-bottom:16px}
+  .calLeftCol{display:flex;flex-direction:column;gap:18px;flex:1;min-width:240px}
+  .calMath{display:flex;align-items:flex-start;gap:16px;flex-wrap:wrap}
   .calCell{display:flex;flex-direction:column;gap:2px}
-  .calCell .n{font-weight:600;font-size:30px;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+  .calCell .n{font-weight:600;font-size:30px;line-height:1;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
   .calCell .l{font-family:var(--font-mono);font-size:10px;letter-spacing:.12em;color:var(--muted)}
-  .calOp{font-size:22px;color:var(--muted)}
+  .calOp{font-size:30px;line-height:1;color:var(--muted);align-self:flex-start}
   .calCell.remain .n{color:var(--brand)}
   .calCell.remain.over .n{color:var(--neg)}
   .goalEdits{display:flex;flex-direction:column;gap:8px}
-  .goalEdit{display:flex;align-items:center;justify-content:flex-end;gap:8px}
+  .goalEdit{display:flex;align-items:center;gap:8px}
   .fieldInput{background:var(--bg);border:1px solid var(--border);color:var(--fg);border-radius:10px;padding:9px 11px;font:inherit}
   .fieldInput:focus{outline:none;border-color:var(--brand)}
   .goalEdit .fieldInput{width:92px}
   /* Calorie gauge: a counterclockwise-filling ring (see arcPathCCW in the
      script — a hand-built SVG arc, not a mirrored stroke-dasharray trick,
      so the sweep direction is exact rather than guessed). */
-  .calGaugeWrap{display:flex;justify-content:center;margin:18px 0 6px}
-  .calGaugeSvg{width:172px;height:172px}
+  .calGaugeWrap{display:flex;justify-content:center;flex-shrink:0}
+  .calGaugeSvg{width:230px;height:230px}
   .calGaugeTrack{fill:none;stroke:var(--track);stroke-width:12}
   .calGaugeFill{fill:none;stroke:var(--brand);stroke-width:12;stroke-linecap:round}
   .calGaugeFill.over{stroke:var(--neg)}
@@ -91,7 +95,9 @@
   .macroBarRow{display:flex;flex-direction:column;gap:6px}
   .macroBarHead{display:flex;align-items:baseline;justify-content:space-between;font-size:13px;color:var(--muted-strong)}
   .macroBarHead .v{font-family:var(--font-mono);font-size:11.5px;font-variant-numeric:tabular-nums;color:var(--fg)}
-  .macroBarTrack{height:8px;border-radius:var(--radius-pill);background:var(--track);overflow:hidden}
+  /* A plain var(--track) here read as almost the same color as the card
+     surface behind it — too dark to register as an empty progress track. */
+  .macroBarTrack{height:8px;border-radius:var(--radius-pill);background:rgba(255,255,255,.12);overflow:hidden}
   .macroBarFill{height:100%;border-radius:var(--radius-pill);transition:width var(--duration) ease}
   .macroBarFill.gold{background:var(--brand)}
   .macroBarFill.white{background:rgba(255,255,255,.78)}
@@ -134,7 +140,10 @@
        narrow phone neither shrinks below its own min-content, so the row
        (and everything centered under it) was quietly forced wider than the
        viewport instead of wrapping. Stack them instead of relying on wrap. */
-    .calHead{flex-direction:column;align-items:stretch}
+    .calTopRow{flex-direction:column;align-items:stretch}
+    .calLeftCol{min-width:0}
+    .calGaugeWrap{margin-top:6px}
+    .calGaugeSvg{width:172px;height:172px}
     .goalEdits{width:100%}
     .goalEdit{flex-direction:column;align-items:flex-start;gap:4px}
     .goalEdit .fieldInput{width:100%}
@@ -270,18 +279,19 @@ function summaryHtml(){
   const cPct=(t.c/carbsRef)*100;
   const fPct=(t.f/fatRef)*100;
   const cell=(cls,n,l)=>'<div class="calCell '+cls+'"><span class="n">'+round(n)+'</span><span class="l">'+l+'</span></div>';
-  const head='<div class="calHead"><div class="calMath">'+cell('',goal,'Goal')+'<span class="calOp">−</span>'+cell('',t.cal,'Food')+'<span class="calOp">=</span>'+cell('remain'+(over?' over':''),Math.abs(remaining),over?'Over':'Remaining')+'</div>'
+  const gauge=calGaugeHtml(calPct,t.cal,goal,over);
+  const head='<div class="calTopRow"><div class="calLeftCol"><div class="calMath">'+cell('',goal,'Goal')+'<span class="calOp">−</span>'+cell('',t.cal,'Food')+'<span class="calOp">=</span>'+cell('remain'+(over?' over':''),Math.abs(remaining),over?'Over':'Remaining')+'</div>'
     +'<div class="goalEdits">'
     +'<div class="goalEdit"><span class="calCell"><span class="l">Calorie goal</span></span><input class="fieldInput" id="goal" type="number" min="0" step="50" value="'+goal+'" /></div>'
     +'<div class="goalEdit"><span class="calCell"><span class="l">Protein goal (g)</span></span><input class="fieldInput" id="proteinGoal" type="number" min="0" step="5" value="'+pGoal+'" /></div>'
-    +'</div></div>';
-  const gauge=calGaugeHtml(calPct,t.cal,goal,over);
+    +'</div></div>'
+    +gauge+'</div>';
   const bars='<div class="macroBars">'
     +macroBarRowHtml('Protein',t.p,pGoal,pPct,'gold')
     +macroBarRowHtml('Carbs',t.c,null,cPct,'white')
     +macroBarRowHtml('Fat',t.f,null,fPct,'white')
     +'</div>';
-  return '<section class="card"><span class="cardName">Today</span>'+head+gauge+bars+'</section>';
+  return '<section class="card"><span class="cardName">Today</span>'+head+bars+'</section>';
 }
 function mealPlanHtml(){
   const todayIdx=new Date().getDay();
