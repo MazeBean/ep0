@@ -39,62 +39,62 @@
      columns; the header and the three hero sections (quick-log row, Peak card,
      Today's Plan) stay full-width banners above them. */
   @media(min-width:820px){
-    .shell{column-count:2;column-gap:22px}
+    .shell{column-count:2;column-gap:16px}
     .header{column-span:all}
     .doseGrid{column-span:all}
     .peakCard{column-span:all}
     .planCard{column-span:all}
   }
   .card{break-inside:avoid}
-  .header{display:flex;align-items:center;gap:14px;margin-bottom:22px}
-  .markWrap{position:relative;width:44px;height:44px;flex-shrink:0}
+  .header{display:flex;align-items:center;gap:12px;margin-bottom:10px}
+  .markWrap{position:relative;width:40px;height:40px;flex-shrink:0}
   .markGlow{position:absolute;inset:-10px;border-radius:50%;background:var(--brand);filter:blur(14px);opacity:.4;
     animation:glowBreathe 4.5s ease-in-out infinite}
   @keyframes glowBreathe{0%,100%{opacity:.28;transform:scale(.92)}50%{opacity:.5;transform:scale(1.06)}}
-  .mark{position:relative;width:44px;height:44px;flex-shrink:0;border-radius:50%;display:flex;align-items:center;justify-content:center;
+  .mark{position:relative;width:40px;height:40px;flex-shrink:0;border-radius:50%;display:flex;align-items:center;justify-content:center;
     background:radial-gradient(circle at 35% 30%,#e4e5ea,var(--brand) 46%,#6d6f76 100%);box-shadow:0 0 26px rgba(0,0,0,.5);
     animation:sway 7s ease-in-out infinite}
   @keyframes sway{0%,100%{transform:rotate(-3deg) translateY(0)}50%{transform:rotate(3deg) translateY(-2px)}}
-  .mark svg{width:22px;height:22px}
-  .title{font-size:24px;font-weight:700;letter-spacing:-.01em;margin:0}
-  .subtitle{color:var(--muted);font-family:var(--font-mono);font-size:11px;letter-spacing:.12em;margin:6px 0 0}
-  .card{position:relative;border:1px solid var(--border);border-radius:16px;background:var(--surface);padding:18px;margin-bottom:22px;
+  .mark svg{width:20px;height:20px}
+  .title{font-size:21px;font-weight:700;letter-spacing:-.01em;margin:0}
+  .subtitle{color:var(--muted);font-family:var(--font-mono);font-size:11px;letter-spacing:.12em;margin:4px 0 0}
+  .card{position:relative;border:1px solid var(--border);border-radius:16px;background:var(--surface);padding:12px;margin-bottom:10px;
     -webkit-backdrop-filter:blur(20px) saturate(120%);backdrop-filter:blur(20px) saturate(120%);
     overflow:hidden;transition:border-color .2s var(--ease),box-shadow .2s var(--ease)}
   .card:hover{border-color:var(--brand-line);box-shadow:0 0 0 1px var(--brand-line) inset}
-  .cardName{font-family:var(--font-display);font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#fff;display:block;margin-bottom:14px}
+  .cardName{font-family:var(--font-mono);font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#fff;display:block;margin-bottom:10px}
 
   /* -- quick-log dose cards -- */
-  .doseGrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:22px}
-  .doseCard{position:relative;border:1px solid var(--border);border-radius:16px;background:var(--surface);padding:16px;
-    display:flex;flex-direction:column;gap:12px;-webkit-backdrop-filter:blur(20px) saturate(120%);backdrop-filter:blur(20px) saturate(120%);
+  .doseGrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:10px}
+  .doseCard{position:relative;border:1px solid var(--border);border-radius:14px;background:var(--surface);padding:12px;
+    display:flex;flex-direction:column;gap:8px;-webkit-backdrop-filter:blur(20px) saturate(120%);backdrop-filter:blur(20px) saturate(120%);
     transition:border-color .2s var(--ease),box-shadow .2s var(--ease)}
   .doseCard:hover{border-color:var(--dose-accent);box-shadow:0 0 0 1px var(--dose-accent) inset}
-  .doseIconBadge{width:34px;height:34px;border-radius:10px;display:flex;align-items:center;justify-content:center;color:var(--dose-accent)}
-  .doseIconBadge svg{width:18px;height:18px}
-  .doseInfo{display:flex;flex-direction:column;gap:2px}
-  .doseName{font-weight:600;font-size:14px}
-  .doseMg{font-family:var(--font-mono);font-size:11px;color:var(--muted)}
-  .doseLogBtn{margin-top:auto;background:var(--dose-accent);color:#06110c;border:none;border-radius:var(--radius-pill);padding:9px 0;
-    font:inherit;font-weight:700;font-size:13px;cursor:pointer;transition:transform .15s var(--ease),box-shadow .15s var(--ease)}
+  .doseIconBadge{width:28px;height:28px;border-radius:9px;display:flex;align-items:center;justify-content:center;color:var(--dose-accent)}
+  .doseIconBadge svg{width:15px;height:15px}
+  .doseInfo{display:flex;flex-direction:column;gap:1px}
+  .doseName{font-weight:600;font-size:13.5px}
+  .doseMg{font-family:var(--font-mono);font-size:10.5px;color:var(--muted)}
+  .doseLogBtn{margin-top:auto;background:var(--dose-accent);color:#06110c;border:none;border-radius:var(--radius-pill);padding:7px 0;
+    font:inherit;font-weight:700;font-size:12.5px;cursor:pointer;transition:transform .15s var(--ease),box-shadow .15s var(--ease)}
   .doseLogBtn:hover{transform:translateY(-1px);box-shadow:0 4px 16px rgba(0,0,0,.35)}
   .doseLogBtn:active{transform:translateY(0)}
   .doseUnderline{height:2px;border-radius:2px;background:linear-gradient(90deg,transparent,var(--dose-accent),transparent);opacity:.55}
 
   /* -- Peak (energy curve) card -- */
-  .peakCard{padding:22px}
-  .peakTop{display:flex;align-items:center;gap:20px;flex-wrap:wrap;margin-bottom:18px}
-  .peakGauge{position:relative;width:88px;height:88px;flex-shrink:0}
+  .peakCard{padding:13px}
+  .peakTop{display:flex;align-items:center;gap:16px;flex-wrap:wrap;margin-bottom:6px}
+  .peakGauge{position:relative;width:68px;height:68px;flex-shrink:0}
   .peakGauge svg{width:100%;height:100%;transform:rotate(-90deg)}
   .peakGauge .gaugeTrack{fill:none;stroke:var(--border);stroke-width:6}
   .peakGauge .gaugeFill{fill:none;stroke:var(--brand);stroke-width:6;stroke-linecap:round;
     filter:drop-shadow(0 0 6px rgba(110,231,183,.6));transition:stroke-dashoffset .4s var(--ease)}
   .peakGaugeNum{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
-    font-family:var(--font-serif);font-style:italic;font-weight:600;font-size:25px;color:var(--brand)}
-  .peakTitleBlock{display:flex;flex-direction:column;gap:3px}
-  .peakTitle{font-family:var(--font-serif);font-style:italic;font-weight:600;font-size:27px;margin:0;letter-spacing:-.01em}
-  .peakSub{font-family:var(--font-mono);font-size:10px;letter-spacing:.12em;color:var(--muted)}
-  .peakHint{font-size:11.5px;color:var(--muted-strong)}
+    font-family:var(--font-serif);font-style:italic;font-weight:600;font-size:20px;color:var(--brand)}
+  .peakTitleBlock{display:flex;flex-direction:column;gap:2px}
+  .peakTitle{font-family:var(--font-serif);font-style:italic;font-weight:600;font-size:22px;margin:0;letter-spacing:-.01em}
+  .peakSub{font-family:var(--font-mono);font-size:9.5px;letter-spacing:.12em;color:var(--muted)}
+  .peakHint{font-size:11px;color:var(--muted-strong)}
   .peakDesc{flex:1;min-width:190px}
   .peakDescLabel{font-family:var(--font-mono);font-size:10px;letter-spacing:.12em;color:var(--muted);text-transform:uppercase;display:block;margin-bottom:4px}
   .peakDescText{font-size:13px;color:var(--muted-strong);margin:0;line-height:1.5}
@@ -135,77 +135,87 @@
   .chart .dline{fill:none;stroke:var(--brand);stroke-width:2;stroke-linejoin:round;stroke-linecap:round}
   .chart .darea{opacity:.6}
   .chart .nowd{fill:var(--brand);stroke:var(--bg);stroke-width:1.5}
-  .legend{display:flex;gap:16px;flex-wrap:wrap;margin-top:10px}
+  .legend{display:flex;gap:16px;flex-wrap:wrap;margin-top:4px}
   .legend span{font-family:var(--font-mono);font-size:10px;letter-spacing:.06em;color:var(--muted);display:inline-flex;align-items:center;gap:6px}
   .swatch{width:14px;height:0;border-top:2px solid var(--brand)}
   .swatch.base{border-top:2px dashed var(--muted)}
 
   /* -- Today's Plan -- */
-  .planCard{padding:18px}
-  .planEmpty{border:1.5px dashed var(--border);border-radius:14px;padding:20px;text-align:center;color:var(--muted);
+  .planCard{padding:11px}
+  .planEmpty{border:1.5px dashed var(--border);border-radius:12px;padding:13px;text-align:center;color:var(--muted);
     font-family:var(--font-mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;
     transition:border-color .15s var(--ease),color .15s var(--ease)}
   .planEmpty:hover{border-color:var(--brand-line);color:var(--muted-strong)}
   .planEmpty .dot{margin:0 8px;opacity:.5}
-  .planList{display:flex;flex-direction:column;gap:8px}
-  .planRow{display:flex;align-items:center;gap:12px;padding:10px 12px;border:1px solid var(--border);border-radius:var(--radius-md);background:var(--bg)}
+  .planList{display:flex;flex-direction:column;gap:6px}
+  .planRow{display:flex;align-items:center;gap:12px;padding:8px 12px;border:1px solid var(--border);border-radius:var(--radius-md);background:var(--bg)}
   .planTime{font-family:var(--font-mono);font-size:11px;color:var(--brand);min-width:64px}
   .planText{flex:1;font-size:13.5px}
-  .planAddRow{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+  .planAddRow{display:flex;gap:8px;margin-top:8px;flex-wrap:wrap}
   .planAddRow .fieldInput{flex:1;min-width:120px}
   .planAddRow input[type=time]{width:110px;flex:none}
 
-  .fields{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+  .fields{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
   @media(max-width:480px){.fields{grid-template-columns:1fr 1fr}}
-  .field{display:flex;flex-direction:column;gap:6px}
+  .field{display:flex;flex-direction:column;gap:4px}
   .field .l{font-family:var(--font-mono);font-size:10px;letter-spacing:.12em;color:var(--muted)}
-  .fieldInput{background:var(--bg);border:1px solid var(--border);color:var(--fg);border-radius:10px;padding:9px 11px;font:inherit;width:100%}
+  .fieldInput{background:var(--bg);border:1px solid var(--border);color:var(--fg);border-radius:10px;padding:7px 10px;font:inherit;width:100%}
   .fieldInput:focus{outline:none;border-color:var(--brand)}
+  /* hide native number-input spin arrows — replaced everywhere with mint stepper buttons */
+  .fieldInput[type=number]{-moz-appearance:textfield;appearance:textfield}
+  .fieldInput[type=number]::-webkit-inner-spin-button,.fieldInput[type=number]::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
+  .stepperRow{display:flex;align-items:center;gap:6px}
+  .stepperRow .fieldInput{text-align:center}
+  .miniStepBtn{width:26px;height:26px;flex-shrink:0;border-radius:50%;border:1px solid var(--border);background:var(--bg);
+    color:var(--brand);font-size:15px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;
+    transition:border-color .15s var(--ease),background .15s var(--ease),transform .1s var(--ease)}
+  .miniStepBtn:hover{border-color:var(--brand-line);background:var(--brand-soft)}
+  .miniStepBtn:active{transform:scale(.9)}
 
   /* -- caffeine -- */
   .caffHead{display:flex;align-items:baseline;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:4px}
-  .caffTotal{font-weight:600;font-size:26px;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+  .caffTotal{font-weight:600;font-size:22px;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
   .caffTotal.over{color:var(--neg)}
   .caffCeil{font-family:var(--font-mono);font-size:11px;letter-spacing:.08em;color:var(--muted)}
   /* A plain var(--track) here read as almost the same color as the card
      surface behind it — too dark to register as an empty progress track
      (same fix as Fuel's macro bars). */
-  .caffBarTrack{height:8px;border-radius:var(--radius-pill);background:rgba(255,255,255,.12);overflow:hidden;margin:10px 0 4px}
+  .caffBarTrack{height:8px;border-radius:var(--radius-pill);background:rgba(255,255,255,.12);overflow:hidden;margin:8px 0 4px}
   .caffBarFill{height:100%;border-radius:var(--radius-pill);background:var(--brand);transition:width var(--duration) ease}
   .caffBarFill.over{background:var(--neg)}
-  .coach{font-family:var(--font-mono);font-size:11px;letter-spacing:.02em;color:var(--muted-strong);margin:8px 0 14px}
+  .coach{font-family:var(--font-mono);font-size:11px;letter-spacing:.02em;color:var(--muted-strong);margin:4px 0 8px}
   .coach.warn{color:var(--warn)}
   .customAdd{display:flex;gap:8px;align-items:center;margin-bottom:6px}
-  .customAdd .fieldInput{width:92px}
-  .btn-primary{background:var(--brand);color:#06110c;border:none;border-radius:10px;padding:9px 14px;font:inherit;font-weight:700;cursor:pointer}
+  .customAdd .stepperRow{width:120px}
+  .btn-primary{background:var(--brand);color:#06110c;border:none;border-radius:10px;padding:7px 14px;font:inherit;font-weight:700;cursor:pointer}
   .hint{color:var(--neg);font-size:12px;font-family:var(--font-mono);min-height:14px;margin-top:6px}
-  .decayRow{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;margin:16px 0 4px;flex-wrap:wrap}
+  .decayRow{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;margin:6px 0 2px;flex-wrap:wrap}
   .decayNow{display:flex;flex-direction:column;gap:2px}
-  .decayNow .n{font-weight:600;font-size:34px;letter-spacing:-.02em;line-height:1;font-variant-numeric:tabular-nums;color:var(--brand)}
+  .decayNow .n{font-weight:600;font-size:28px;letter-spacing:-.02em;line-height:1;font-variant-numeric:tabular-nums;color:var(--brand)}
   .decayNow .l{font-family:var(--font-mono);font-size:10px;letter-spacing:.12em;color:var(--muted)}
   .decayHalf{text-align:right;font-family:var(--font-mono);font-size:11px;color:var(--muted-strong)}
-  .logList{display:flex;flex-direction:column;gap:6px;margin-top:14px}
-  .logRow{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 12px;border:1px solid var(--border);border-radius:var(--radius-md);background:var(--bg)}
+  .logList{display:flex;flex-direction:column;gap:5px;margin-top:6px}
+  .logRow{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:8px 12px;border:1px solid var(--border);border-radius:var(--radius-md);background:var(--bg)}
   .logRow .nm{font-weight:600;font-size:14px}
   .logRow .meta{font-family:var(--font-mono);font-size:11px;color:var(--muted)}
   .xBtn{background:transparent;border:1px solid var(--border);color:var(--muted);width:26px;height:26px;border-radius:50%;cursor:pointer;flex-shrink:0}
   .xBtn:hover{color:var(--neg);border-color:var(--neg-line)}
-  .empty{color:var(--muted);font-size:13px;padding:10px 0}
+  .empty{color:var(--muted);font-size:13px;padding:8px 0}
 
   /* -- daily stack -- */
-  .stackList{display:flex;flex-direction:column;gap:8px}
-  .stackRow{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 15px;border:1px solid var(--border);
+  .stackList{display:flex;flex-direction:column;gap:6px}
+  .stackRow{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:9px 12px;border:1px solid var(--border);
     border-left:3px solid var(--brand-line);border-radius:var(--radius-md);background:var(--surface)}
   .stackRow.checked{opacity:.55}
   .stackRow.checked .stackName{text-decoration:line-through}
   .stackLeft{display:flex;align-items:center;gap:12px;min-width:0}
-  .checkBtn{background:transparent;border:1.5px solid var(--border);color:transparent;width:24px;height:24px;border-radius:50%;
+  .checkBtn{background:transparent;border:1.5px solid var(--border);color:transparent;width:22px;height:22px;border-radius:50%;
     cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:border-color .15s,background .15s,color .15s}
   .checkBtn:hover{border-color:var(--brand)}
   .checkBtn.checked{background:var(--brand);border-color:var(--brand);color:#06110c}
-  .checkBtn svg{width:13px;height:13px}
-  .stackName{font-size:14.5px}
-  .stackAdd{display:flex;gap:8px;margin-top:12px}
+  .checkBtn svg{width:12px;height:12px}
+  .stackName{font-size:14px}
+  .stackAdd{display:flex;gap:8px;margin-top:10px}
   .stackAdd .fieldInput{flex:1}
 </style>
 </head>
@@ -357,7 +367,7 @@ function setFeelToday(v){
 }
 
 /* ---- energy chart geometry ---- */
-const EW=560,ECX0=10,ECX1=550,ECY0=14,ECY1=130;
+const EW=560,ECX0=10,ECX1=550,ECY0=8,ECY1=76;
 function exOf(t){ return ECX0+(clamp(t,0,24)/24)*(ECX1-ECX0); }
 function eyOf(e){ return ECY1-(clamp(e,0,100)/100)*(ECY1-ECY0); }
 
@@ -444,7 +454,11 @@ function rhythmHtml(){
   return '<section class="card"><span class="cardName">Rhythm</span><div class="fields">'
     +'<div class="field"><span class="l">Wake</span><input class="fieldInput" id="wake" type="time" value="'+wakeStr()+'" /></div>'
     +'<div class="field"><span class="l">Bed</span><input class="fieldInput" id="bed" type="time" value="'+bedStr()+'" /></div>'
-    +'<div class="field"><span class="l">Slept (h)</span><input class="fieldInput" id="slept" type="number" min="0" max="14" step="0.5" placeholder="7.5" value="'+(slept==null?'':slept)+'" /></div>'
+    +'<div class="field"><span class="l">Slept (h)</span><div class="stepperRow">'
+    +'<button type="button" class="miniStepBtn" data-step-target="slept" data-step="-0.25" aria-label="Subtract 15 min">−</button>'
+    +'<input class="fieldInput" id="slept" type="number" min="0" max="14" step="0.25" placeholder="7.5" value="'+(slept==null?'':slept)+'" />'
+    +'<button type="button" class="miniStepBtn" data-step-target="slept" data-step="0.25" aria-label="Add 15 min">+</button>'
+    +'</div></div>'
     +'</div></section>';
 }
 
@@ -464,7 +478,7 @@ function doseGridHtml(){
 
 /* ---- caffeine decay chart: mg remaining from now out to +10h, assuming no
    more doses — the visual half-life tracker. ---- */
-const CW=560,CX0=10,CX1=550,CY0=14,CY1=110;
+const CW=560,CX0=10,CX1=550,CY0=8,CY1=60;
 function decayChartHtml(){
   const now=nowT(), nowMg=bodyAt(now);
   const HOURS=10, STEP=0.25, N=Math.round(HOURS/STEP);
@@ -499,7 +513,11 @@ function caffeineHtml(){
     +'<div class="caffHead"><span class="caffTotal'+(over?' over':'')+'">'+Math.round(total)+' mg</span><span class="caffCeil">of '+CAFF_CEIL+' mg limit</span></div>'
     +'<div class="caffBarTrack"><div class="caffBarFill'+(over?' over':'')+'" style="width:'+pct+'%"></div></div>'
     +'<p class="coach'+(c.warn?' warn':'')+'">'+c.txt+'</p>'
-    +'<div class="customAdd"><input class="fieldInput" id="caffMg" type="number" min="1" step="5" placeholder="mg" /><button class="btn-primary" id="caffAdd">Add now</button></div>'
+    +'<div class="customAdd"><div class="stepperRow">'
+    +'<button type="button" class="miniStepBtn" data-step-target="caffMg" data-step="-5" aria-label="Subtract 5 mg">−</button>'
+    +'<input class="fieldInput" id="caffMg" type="number" min="0" step="5" placeholder="mg" />'
+    +'<button type="button" class="miniStepBtn" data-step-target="caffMg" data-step="5" aria-label="Add 5 mg">+</button>'
+    +'</div><button class="btn-primary" id="caffAdd">Add now</button></div>'
     +'<div class="hint" id="hint"></div>'
     +'<div class="decayRow"><div class="decayNow"><span class="n">'+nowMg+'</span><span class="l">mg in system now</span></div>'
     +'<span class="decayHalf">~'+HALF_LIFE+'h half-life</span></div>'
@@ -597,6 +615,21 @@ document.addEventListener('change',e=>{
   if(e.target.id==='slept'){ const v=e.target.value.trim(); const n=Number(v); sleepToday().slept=(v===''||!isFinite(n))?null:clamp(n,0,14); persist(); render(); }
 });
 document.addEventListener('click',e=>{
+  const stepBtn=e.target.closest('[data-step-target]');
+  if(stepBtn){
+    const id=stepBtn.getAttribute('data-step-target');
+    const delta=Number(stepBtn.getAttribute('data-step'));
+    const el=$(id);
+    if(el){
+      let next=(Number(el.value)||0)+delta;
+      if(id==='slept')next=clamp(next,0,14);
+      else next=Math.max(0,next);
+      next=Math.round(next*100)/100;
+      el.value=next;
+      if(id==='slept')el.dispatchEvent(new Event('change',{bubbles:true}));
+    }
+    return;
+  }
   const chartModeBtn=e.target.closest('[data-chart-mode]');
   if(chartModeBtn){ chartMode=chartModeBtn.getAttribute('data-chart-mode'); render(); return; }
   if(e.target.closest('#chartSettings')){ showBaseline=!showBaseline; render(); return; }
