@@ -107,8 +107,8 @@
   .gearBtn svg{width:15px;height:15px}
 
   /* -- shared chart chrome -- */
-  .chartWrap{position:relative;flex:1;display:flex;flex-direction:column;min-height:90px}
-  .chart{width:100%;display:block;margin-top:6px;flex:1;min-height:0}
+  .chartWrap{position:relative;flex:1;display:flex;flex-direction:column;justify-content:center;min-height:90px}
+  .chart{width:100%;height:auto;display:block;margin-top:6px}
   .chart .grid{stroke:var(--border);stroke-width:1}
   .chart .axl{fill:var(--muted);font-family:var(--font-mono);font-size:9px;letter-spacing:.08em}
   .dragHint{position:absolute;top:0;left:0;font-family:var(--font-mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;
@@ -415,7 +415,7 @@ function energyChartHtml(curve,peak,now,nowE){
   const labels=[[0,'12a'],[3,'3a'],[6,'6a'],[9,'9a'],[12,'12p'],[15,'3p'],[18,'6p'],[21,'9p'],[24,'12a']]
     .map(a=>'<text x="'+exOf(a[0])+'" y="'+(ECY1+15)+'" class="axl" text-anchor="middle">'+a[1]+'</text>').join('');
   return (chartMode==='line'?'<div class="dragHint">Drag to log feel</div>':'')
-    +'<svg viewBox="0 0 '+EW+' '+(ECY1+22)+'" preserveAspectRatio="none" class="chart" role="img" aria-label="Predicted energy through the day">'
+    +'<svg viewBox="0 0 '+EW+' '+(ECY1+22)+'" class="chart" role="img" aria-label="Predicted energy through the day">'
     +grid+svgInner+labels+'</svg>'
     +tooltip;
 }
