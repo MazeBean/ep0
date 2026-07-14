@@ -24,12 +24,18 @@ function clamp(x: number, a: number, b: number) {
   return Math.max(a, Math.min(b, x))
 }
 
+interface StackItem {
+  id: string
+  name: string
+}
+
 interface Widgets {
   fuel: { kcal: number; kcalGoal: number; protein: number; proteinGoal: number } | null
   finance: { netWorth: number; history: { t: number; v: number }[] } | null
   workout: { prsThisMonth: number; sessionsThisWeek: number } | null
   goals: { shortDone: number; shortTotal: number; longDone: number; longTotal: number } | null
   calendar: { dueToday: number; overdue: number; connected: boolean } | null
+  stack: { items: StackItem[]; checked: string[] } | null
 }
 
 function RadialGauge({ pct, label, sub }: { pct: number; label: string; sub: string }) {
@@ -127,15 +133,20 @@ function Bar({ label, pct, value }: { label: string; pct: number; value: string 
 
 export default function OverviewWidgets({ userId }: { userId: string }) {
   const [w, setW] = useState<Widgets | null>(null)
+  // Full raw Body store (not just the derived stack summary above) so a
+  // checkbox toggle here can write back through the same tileStore path
+  // Body's own tile uses — keeps this card in sync without needing Body open.
+  const [bodyStore, setBodyStore] = useState<Record<string, unknown> | null>(null)
 
   useEffect(() => {
     let alive = true
     ;(async () => {
-      const [fuelRaw, workoutRaw, goalsRaw, financeRaw] = await Promise.all([
+      const [fuelRaw, workoutRaw, goalsRaw, financeRaw, bodyRaw] = await Promise.all([
         tileStore.loadData(userId, 'fuel'),
         tileStore.loadData(userId, 'workout'),
         tileStore.loadData(userId, 'goals'),
         tileStore.loadData(userId, 'finance'),
+        tileStore.loadData(userId, 'intake'),
       ])
 
       const fuelStore = asRecord(fuelRaw)
@@ -208,12 +219,34 @@ export default function OverviewWidgets({ userId }: { userId: string }) {
         /* Todoist not configured — calendar widget shows a quiet "not connected" line */
       }
 
-      if (alive) setW({ fuel, workout, goals, finance, calendar })
+      const bodyStoreRaw = asRecord(bodyRaw)
+      const stackItems = asArray<{ id?: string; name?: string }>(bodyStoreRaw.stack)
+        .filter((s): s is StackItem => typeof s.id === 'string' && typeof s.name === 'string')
+      const stackChecksAll = asRecord(bodyStoreRaw.stackChecks)
+      const stackChecked = asArray<string>(stackChecksAll[fuelTodayKey()])
+      const stack = { items: stackItems, checked: stackChecked }
+
+      if (alive) {
+        setW({ fuel, workout, goals, finance, calendar, stack })
+        setBodyStore(bodyStoreRaw)
+      }
     })()
     return () => {
       alive = false
     }
   }, [userId])
+
+  async function toggleStackItem(id: string) {
+    if (!bodyStore) return
+    const key = fuelTodayKey()
+    const checksAll = asRecord(bodyStore.stackChecks)
+    const current = asArray<string>(checksAll[key])
+    const next = current.includes(id) ? current.filter((x) => x !== id) : [...current, id]
+    const updated = { ...bodyStore, stackChecks: { ...checksAll, [key]: next } }
+    setBodyStore(updated)
+    setW((prev) => (prev ? { ...prev, stack: prev.stack ? { ...prev.stack, checked: next } : prev.stack } : prev))
+    await tileStore.saveData(userId, 'intake', updated)
+  }
 
   if (!w) return null
 
@@ -302,6 +335,37 @@ export default function OverviewWidgets({ userId }: { userId: string }) {
           <span className={styles.cardTag}>Workout</span>
         </div>
         {w.workout && <RadialGauge pct={(w.workout.sessionsThisWeek / 7) * 100} label={`${w.workout.prsThisMonth} PRs this mo.`} sub="/ wk" />}
+      </div>
+
+      <div className={styles.card}>
+        <div className={styles.cardHead}>
+          <span className={styles.cardTitle}>Daily stack</span>
+          <span className={styles.cardTag}>Body</span>
+        </div>
+        {w.stack && w.stack.items.length ? (
+          <div className={styles.stackList}>
+            {w.stack.items.map((item) => {
+              const done = w.stack!.checked.includes(item.id)
+              return (
+                <div key={item.id} className={styles.stackRow}>
+                  <button
+                    type="button"
+                    className={`${styles.stackCheckBtn}${done ? ` ${styles.stackCheckBtnDone}` : ''}`}
+                    aria-label={done ? `Mark ${item.name} not taken today` : `Mark ${item.name} taken today`}
+                    onClick={() => toggleStackItem(item.id)}
+                  >
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M4 12l5 5L20 6" />
+                    </svg>
+                  </button>
+                  <span className={`${styles.stackItemName}${done ? ` ${styles.stackItemNameDone}` : ''}`}>{item.name}</span>
+                </div>
+              )
+            })}
+          </div>
+        ) : (
+          <p className={styles.emptyNote}>Open Body to add your daily stack.</p>
+        )}
       </div>
     </div>
   )

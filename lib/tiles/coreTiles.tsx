@@ -263,7 +263,7 @@ export const CORE_TILES: Record<CoreTileId, CoreTile> = {
     id: 'intake',
     href: '/app/starter',
     index: '12',
-    label: 'Intake',
+    label: 'Body',
     orb: { mode: 'wander' },
     defaultSize: 'tall',
     glyph: (

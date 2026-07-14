@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Intake</title>
+<title>Body</title>
 <style>
   /* Vitality Intake tile — daily energy-curve prediction + circadian rhythm
      (ported from the retired Peak tile), a caffeine log (400mg ceiling +
@@ -20,6 +20,7 @@
     --duration:.2s;--ease:cubic-bezier(.4,0,.2,1);
   }
   *{box-sizing:border-box}
+  h1,h2,h3,p{margin:0}
   html,body{margin:0;height:100%}
   body{background:radial-gradient(120% 60% at 50% 0%,#17171b 0%,#101013 42%,#0a0a0c 70%,#08080a 100%);
     color:var(--fg);font:15px/1.5 var(--font-display);display:flex;justify-content:center;padding:40px 20px;
@@ -53,7 +54,7 @@
     animation:sway 7s ease-in-out infinite}
   @keyframes sway{0%,100%{transform:rotate(-3deg) translateY(0)}50%{transform:rotate(3deg) translateY(-2px)}}
   .mark svg{width:20px;height:20px}
-  .title{font-size:21px;font-weight:700;letter-spacing:-.01em;margin:0}
+  .title{font-family:var(--font-serif);font-style:italic;font-size:40px;font-weight:600;letter-spacing:-.01em;margin:0}
   .subtitle{color:var(--muted);font-family:var(--font-mono);font-size:11px;letter-spacing:.12em;margin:4px 0 0}
   .card{position:relative;border:1px solid var(--border);border-radius:16px;background:var(--surface);padding:12px;margin-bottom:10px;
     -webkit-backdrop-filter:blur(20px) saturate(120%);backdrop-filter:blur(20px) saturate(120%);
@@ -137,23 +138,15 @@
   .swatch{width:14px;height:0;border-top:2px solid var(--brand)}
   .swatch.base{border-top:2px dashed var(--muted)}
 
-  /* -- Today's Plan -- */
-  .planCard{padding:11px}
-  .planEmpty{border:1.5px dashed var(--border);border-radius:12px;padding:13px;text-align:center;color:var(--muted);
-    font-family:var(--font-mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;
-    transition:border-color .15s var(--ease),color .15s var(--ease)}
-  .planEmpty:hover{border-color:var(--brand-line);color:var(--muted-strong)}
-  .planEmpty .dot{margin:0 8px;opacity:.5}
-  .planList{display:flex;flex-direction:column;gap:6px}
-  .planRow{display:flex;align-items:center;gap:12px;padding:8px 12px;border:1px solid var(--border);border-radius:var(--radius-md);background:var(--bg)}
-  .planTime{font-family:var(--font-mono);font-size:11px;color:var(--brand);min-width:64px}
-  .planText{flex:1;font-size:13.5px}
-  .planAddRow{display:flex;gap:8px;margin-top:8px;flex-wrap:wrap}
-  .planAddRow .fieldInput{flex:1;min-width:120px}
-  .planAddRow input[type=time]{width:110px;flex:none}
+  /* -- rhythm: log a night's sleep (wake/bed + computed hours), with a
+     toggleable history list and a separate sleep-debt readout -- */
+  .rhythmActions{display:flex;gap:8px;margin-top:10px}
+  .btn-ghost{background:transparent;border:1px solid var(--border);color:var(--muted-strong);font-weight:600;border-radius:10px;
+    padding:8px 13px;font:inherit;font-size:12.5px;cursor:pointer;white-space:nowrap;transition:border-color .15s var(--ease),color .15s var(--ease)}
+  .btn-ghost:hover{border-color:var(--brand-line);color:var(--fg)}
+  .decayNow .n.warn{color:var(--warn)}
 
-  .fields{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
-  @media(max-width:480px){.fields{grid-template-columns:1fr 1fr}}
+  .fields{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
   .field{display:flex;flex-direction:column;gap:4px}
   .field .l{font-family:var(--font-mono);font-size:10px;letter-spacing:.12em;color:var(--muted)}
   .fieldInput{background:var(--bg);border:1px solid var(--border);color:var(--fg);border-radius:10px;padding:7px 10px;font:inherit;width:100%}
@@ -241,7 +234,7 @@ function hexToRgba(hex,a){
 /* transient view state — not persisted, resets each session */
 let chartMode='line'; // 'line' | 'bars' | 'stack'
 let showBaseline=true;
-let planAddOpen=false;
+let sleepHistoryOpen=false;
 
 function spawnStars(){
   const wrap=$('stars');if(!wrap)return;
@@ -297,16 +290,38 @@ function deleteDose(id){
   const d=today(); d.doses=d.doses.filter(l=>String(l.id)!==id); persist(); render();
 }
 
-/* ---- rhythm: wake/bed/last-night's-sleep, ported from Peak ---- */
-function wakeStr(){return store.wake||'07:00';}
-function bedStr(){return store.bed||'23:00';}
+/* ---- rhythm: sleep is logged as discrete wake/bed entries (like Workout's
+   bodyweight log), not a live-editing daily setting. The most recently
+   logged entry feeds both the caffeine cut-off and the energy curve's
+   sleep-quality scaling below. ---- */
+function sleepLog(){ if(!Array.isArray(store.sleepLog))store.sleepLog=[]; return store.sleepLog; }
+function sleepSorted(){ return sleepLog().slice().sort((a,b)=>a.ts-b.ts); }
+function latestSleep(){ const l=sleepLog(); return l.length?l.slice().sort((a,b)=>b.ts-a.ts)[0]:null; }
+function wakeStr(){ const l=latestSleep(); return (l&&l.wake)||'07:00'; }
+function bedStr(){ const l=latestSleep(); return (l&&l.bed)||'23:00'; }
 function parseHM(s){ if(!s)return null; const m=String(s).match(/(\d{1,2}):(\d{2})/); if(!m)return null; return (+m[1])+(+m[2])/60; }
 function wakeBed(){ let wake=parseHM(wakeStr()),bed=parseHM(bedStr()); if(wake==null)wake=7; if(bed==null)bed=23; return {wake,bed}; }
-function sleepToday(){
-  if(!store.sleep||typeof store.sleep!=='object')store.sleep={};
-  let d=store.sleep[todayKey()];
-  if(!d||typeof d!=='object'){d={slept:null};store.sleep[todayKey()]=d;}
-  return d;
+function sleepHoursFor(bed,wake){
+  const b=parseHM(bed), w=parseHM(wake);
+  if(b==null||w==null)return null;
+  return ((w-b)+24)%24;
+}
+function logSleep(wake,bed){
+  const hours=sleepHoursFor(bed,wake);
+  if(hours==null)return false;
+  sleepLog().push({id:newId(),wake,bed,hours:Math.round(hours*100)/100,ts:Date.now()});
+  persist();
+  return true;
+}
+function deleteSleepEntry(id){
+  store.sleepLog=sleepLog().filter(s=>s.id!==id);
+  persist();
+}
+const SLEEP_TARGET=8; // hours/night reference — matches recScale()'s own s/8 baseline below
+function sleepDebt(days){
+  const cutoff=Date.now()-days*86400000;
+  const entries=sleepLog().filter(s=>s.ts>=cutoff);
+  return {debt:entries.reduce((sum,s)=>sum+(SLEEP_TARGET-s.hours),0),nights:entries.length};
 }
 
 /* ---- caffeine coaching: ceiling + bed-time cut-off (ported from Peak,
@@ -322,7 +337,7 @@ function coachInfo(){
 }
 
 /* ---- circadian energy shape (ported from Peak) ---- */
-function recScale(){ const s=sleepToday().slept; const r=(s==null)?0.78:clamp(s/8,0.3,1); return 0.58+0.42*r; }
+function recScale(){ const l=latestSleep(); const s=l?l.hours:null; const r=(s==null)?0.78:clamp(s/8,0.3,1); return 0.58+0.42*r; }
 function shape(t,wake,bed){
   const L=(((bed-wake)%24)+24)%24 || 16;
   let aw=(((t-wake)%24)+24)%24;
@@ -446,17 +461,44 @@ function peakCardHtml(){
     +'</section>';
 }
 
+function sleepHistoryHtml(){
+  const entries=sleepSorted().slice().reverse();
+  if(!entries.length)return '<p class="empty">No sleep logged yet.</p>';
+  const rows=entries.map(s=>{
+    const d=new Date(s.ts);
+    const dateLabel=d.toLocaleDateString(undefined,{month:'short',day:'numeric'});
+    return '<div class="logRow"><div><div class="nm">'+dateLabel+' <span class="meta">'+esc(s.bed)+' → '+esc(s.wake)+'</span></div></div>'
+      +'<div style="display:flex;align-items:center;gap:8px"><span class="meta">'+s.hours+'h</span>'
+      +'<button class="xBtn" data-del-sleep="'+s.id+'" title="Remove">×</button></div></div>';
+  }).join('');
+  return '<div class="logList">'+rows+'</div>';
+}
 function rhythmHtml(){
-  const slept=sleepToday().slept;
   return '<section class="card"><span class="cardName">Rhythm</span><div class="fields">'
     +'<div class="field"><span class="l">Wake</span><input class="fieldInput" id="wake" type="time" value="'+wakeStr()+'" /></div>'
     +'<div class="field"><span class="l">Bed</span><input class="fieldInput" id="bed" type="time" value="'+bedStr()+'" /></div>'
-    +'<div class="field"><span class="l">Slept (h)</span><div class="stepperRow">'
-    +'<button type="button" class="miniStepBtn" data-step-target="slept" data-step="-0.25" aria-label="Subtract 15 min">−</button>'
-    +'<input class="fieldInput" id="slept" type="number" min="0" max="14" step="0.25" placeholder="7.5" value="'+(slept==null?'':slept)+'" />'
-    +'<button type="button" class="miniStepBtn" data-step-target="slept" data-step="0.25" aria-label="Add 15 min">+</button>'
-    +'</div></div>'
-    +'</div></section>';
+    +'</div>'
+    +'<div class="rhythmActions"><button type="button" class="btn-primary" id="logSleepBtn">Log</button>'
+    +'<button type="button" class="btn-ghost" id="toggleSleepHistory">'+(sleepHistoryOpen?'Hide history':'History')+'</button></div>'
+    +(sleepHistoryOpen?sleepHistoryHtml():'')
+    +'</section>';
+}
+function sleepDebtHtml(){
+  const {debt,nights}=sleepDebt(7);
+  const owed=debt>0.05;
+  const ahead=debt<-0.05;
+  const num=nights?( (owed?'-':ahead?'+':'') +Math.abs(debt).toFixed(1)+'h'):'—';
+  const note=!nights
+    ? 'Log a night’s sleep to start tracking debt.'
+    : owed
+      ? Math.abs(debt).toFixed(1)+'h behind your '+SLEEP_TARGET+'h/night target over the last 7 nights.'
+      : ahead
+        ? Math.abs(debt).toFixed(1)+'h ahead of your '+SLEEP_TARGET+'h/night target over the last 7 nights.'
+        : 'Right on your '+SLEEP_TARGET+'h/night target over the last 7 nights.';
+  return '<section class="card"><span class="cardName">Sleep debt</span>'
+    +'<div class="decayRow"><div class="decayNow"><span class="n'+(owed?' warn':'')+'">'+num+'</span><span class="l">last 7 nights</span></div></div>'
+    +'<p class="coach'+(owed?' warn':'')+'">'+note+'</p>'
+    +'</section>';
 }
 
 /* ---- quick-log dose cards ---- */
@@ -522,33 +564,6 @@ function caffeineHtml(){
     +rows+'</section>';
 }
 
-/* ---- today's plan: a minimal time-blocked list for today, scoped to this
-   tile (resets daily by keying off todayKey(), same pattern as caffeine). ---- */
-function planToday(){
-  if(!store.plan||typeof store.plan!=='object')store.plan={};
-  if(!Array.isArray(store.plan[todayKey()]))store.plan[todayKey()]=[];
-  return store.plan[todayKey()];
-}
-function addPlanItem(time,text){
-  const t=(text||'').trim(); if(!t)return;
-  planToday().push({id:newId(),time:time||'',text:t});
-  persist();
-}
-function deletePlanItem(id){
-  store.plan[todayKey()]=planToday().filter(p=>p.id!==id);
-  persist();
-}
-function planHtml(){
-  const items=planToday().slice().sort((a,b)=>(a.time||'99:99').localeCompare(b.time||'99:99'));
-  const body=items.length
-    ? '<div class="planList">'+items.map(p=>'<div class="planRow"><span class="planTime">'+(p.time?clockOf(parseHM(p.time)):'—')+'</span><span class="planText">'+esc(p.text)+'</span><button class="xBtn" data-del-plan="'+p.id+'" title="Remove">×</button></div>').join('')+'</div>'
-    : '<div class="planEmpty" id="planEmptyBtn">Nothing scheduled<span class="dot">·</span>Tap to plan your day</div>';
-  const addRow=(planAddOpen||items.length)
-    ? '<div class="planAddRow"><input type="time" id="planTime" class="fieldInput" /><input type="text" id="planText" class="fieldInput" placeholder="What’s the plan?" autocomplete="off" /><button type="button" class="btn-primary" id="planAddBtn">Add</button></div>'
-    : '';
-  return '<section class="card planCard"><span class="cardName">Today’s Plan</span>'+body+addRow+'</section>';
-}
-
 /* ---- daily stack: Celexa 20mg + Creatine by default, one-tap check that
    resets each day (same pattern as Fuel's supplement checklist). ---- */
 function stackItems(){
@@ -600,19 +615,14 @@ function headerHtml(){
   return '<header class="header"><div class="markWrap"><div class="markGlow"></div><div class="mark" aria-hidden="true">'
     +'<svg viewBox="-12 -12 24 24" fill="none" stroke="#0a0a0c" stroke-width="1.4" stroke-linejoin="round" stroke-linecap="round">'
     +'<g transform="rotate(45)"><rect x="-9" y="-4.5" width="18" height="9" rx="4.5"/><line x1="0" y1="-4.5" x2="0" y2="4.5"/></g></svg></div></div>'
-    +'<div><h1 class="title">Intake</h1><p class="subtitle">Energy · Caffeine · Daily stack</p></div></header>';
+    +'<div><h1 class="title">Body</h1><p class="subtitle">Energy · Caffeine · Daily stack</p></div></header>';
 }
 function render(){
   $('app').innerHTML=headerHtml()+stackHtml()+doseGridHtml()
     +'<div class="peakRow">'+peakCardHtml()+caffeineHtml()+'</div>'
-    +planHtml()+rhythmHtml();
+    +rhythmHtml()+sleepDebtHtml();
 }
 
-document.addEventListener('change',e=>{
-  if(e.target.id==='wake'){ store.wake=e.target.value||'07:00'; persist(); render(); }
-  if(e.target.id==='bed'){ store.bed=e.target.value||'23:00'; persist(); render(); }
-  if(e.target.id==='slept'){ const v=e.target.value.trim(); const n=Number(v); sleepToday().slept=(v===''||!isFinite(n))?null:clamp(n,0,14); persist(); render(); }
-});
 document.addEventListener('click',e=>{
   const stepBtn=e.target.closest('[data-step-target]');
   if(stepBtn){
@@ -620,12 +630,9 @@ document.addEventListener('click',e=>{
     const delta=Number(stepBtn.getAttribute('data-step'));
     const el=$(id);
     if(el){
-      let next=(Number(el.value)||0)+delta;
-      if(id==='slept')next=clamp(next,0,14);
-      else next=Math.max(0,next);
+      let next=Math.max(0,(Number(el.value)||0)+delta);
       next=Math.round(next*100)/100;
       el.value=next;
-      if(id==='slept')el.dispatchEvent(new Event('change',{bubbles:true}));
     }
     return;
   }
@@ -641,14 +648,14 @@ document.addEventListener('click',e=>{
   }
   const del=e.target.closest('[data-del]');
   if(del){ deleteDose(del.getAttribute('data-del')); return; }
-  if(e.target.closest('#planEmptyBtn')){ planAddOpen=true; render(); return; }
-  if(e.target.closest('#planAddBtn')){
-    const timeEl=$('planTime'), textEl=$('planText');
-    addPlanItem(timeEl&&timeEl.value, textEl&&textEl.value);
+  if(e.target.closest('#logSleepBtn')){
+    const wakeEl=$('wake'), bedEl=$('bed');
+    logSleep(wakeEl&&wakeEl.value, bedEl&&bedEl.value);
     render(); return;
   }
-  const delPlan=e.target.closest('[data-del-plan]');
-  if(delPlan){ deletePlanItem(delPlan.getAttribute('data-del-plan')); render(); return; }
+  if(e.target.closest('#toggleSleepHistory')){ sleepHistoryOpen=!sleepHistoryOpen; render(); return; }
+  const delSleep=e.target.closest('[data-del-sleep]');
+  if(delSleep){ deleteSleepEntry(delSleep.getAttribute('data-del-sleep')); render(); return; }
   if(e.target.closest('#stackAdd')){
     const el=$('stackName');
     addStackItem((el&&el.value)||'');
@@ -670,12 +677,6 @@ document.addEventListener('keydown',e=>{
     e.preventDefault();
     const mg=Number(e.target.value);
     if(isFinite(mg)&&mg>0){addDose(mg,'Custom');e.target.value='';}
-  }
-  if(e.target.id==='planText'&&e.key==='Enter'){
-    e.preventDefault();
-    const timeEl=$('planTime');
-    addPlanItem(timeEl&&timeEl.value, e.target.value);
-    render();
   }
 });
 
