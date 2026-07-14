@@ -140,6 +140,7 @@
 
   /* -- rhythm: log a night's sleep (wake/bed + computed hours), with a
      toggleable history list and a separate sleep-debt readout -- */
+  .rhythmBlock{margin-top:12px;padding-top:12px;border-top:1px solid var(--border)}
   .rhythmActions{display:flex;gap:8px;margin-top:10px}
   .btn-ghost{background:transparent;border:1px solid var(--border);color:var(--muted-strong);font-weight:600;border-radius:10px;
     padding:8px 13px;font:inherit;font-size:12.5px;cursor:pointer;white-space:nowrap;transition:border-color .15s var(--ease),color .15s var(--ease)}
@@ -379,7 +380,7 @@ function setFeelToday(v){
 }
 
 /* ---- energy chart geometry ---- */
-const EW=560,ECX0=10,ECX1=550,ECY0=8,ECY1=150;
+const EW=560,ECX0=10,ECX1=550,ECY0=8,ECY1=95;
 function exOf(t){ return ECX0+(clamp(t,0,24)/24)*(ECX1-ECX0); }
 function eyOf(e){ return ECY1-(clamp(e,0,100)/100)*(ECY1-ECY0); }
 
@@ -458,6 +459,7 @@ function peakCardHtml(){
     +'</div></div>'
     +'<div class="chartWrap">'+energyChartHtml(curve,peak,now,nowE)+'</div>'
     +'<div class="legend"><span><i class="swatch"></i>With caffeine</span><span><i class="swatch base"></i>Baseline rhythm</span></div>'
+    +rhythmHtml()
     +'</section>';
 }
 
@@ -474,14 +476,14 @@ function sleepHistoryHtml(){
   return '<div class="logList">'+rows+'</div>';
 }
 function rhythmHtml(){
-  return '<section class="card"><span class="cardName">Rhythm</span><div class="fields">'
+  return '<div class="rhythmBlock"><span class="cardName">Rhythm</span><div class="fields">'
     +'<div class="field"><span class="l">Wake</span><input class="fieldInput" id="wake" type="time" value="'+wakeStr()+'" /></div>'
     +'<div class="field"><span class="l">Bed</span><input class="fieldInput" id="bed" type="time" value="'+bedStr()+'" /></div>'
     +'</div>'
     +'<div class="rhythmActions"><button type="button" class="btn-primary" id="logSleepBtn">Log</button>'
     +'<button type="button" class="btn-ghost" id="toggleSleepHistory">'+(sleepHistoryOpen?'Hide history':'History')+'</button></div>'
     +(sleepHistoryOpen?sleepHistoryHtml():'')
-    +'</section>';
+    +'</div>';
 }
 function sleepDebtHtml(){
   const {debt,nights}=sleepDebt(7);
@@ -620,7 +622,7 @@ function headerHtml(){
 function render(){
   $('app').innerHTML=headerHtml()+stackHtml()+doseGridHtml()
     +'<div class="peakRow">'+peakCardHtml()+caffeineHtml()+'</div>'
-    +rhythmHtml()+sleepDebtHtml();
+    +sleepDebtHtml();
 }
 
 document.addEventListener('click',e=>{

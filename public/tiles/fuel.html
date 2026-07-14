@@ -24,17 +24,24 @@
     position:relative;overflow-x:hidden;-webkit-font-smoothing:antialiased}
   body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
     background:repeating-linear-gradient(0deg,rgba(255,255,255,.03) 0 1px,transparent 1px 3px);mix-blend-mode:overlay}
+  /* body's flex+justify-content:center makes main a flex item; without
+     min-width:0 its default auto-minimum is its content's min-content size
+     (the meal grid's per-column floor), which can exceed the viewport and
+     push the whole page off-center instead of letting the meal table's own
+     overflow-x:auto contain the scroll. */
+  main{width:100%;min-width:0}
   .stars{position:fixed;inset:0;z-index:0;pointer-events:none}
   .star{position:absolute;width:2px;height:2px;background:#cfd0d6;border-radius:50%;opacity:.4;animation:twinkle 8s ease-in-out infinite}
   @keyframes twinkle{0%,100%{opacity:.15}50%{opacity:.5}}
   @media(prefers-reduced-motion:reduce){.star,.markOrb,.markGlow{animation:none!important}.card{transition:none}}
-  .shell{position:relative;z-index:1;width:100%;max-width:1200px}
+  .shell{position:relative;z-index:1;width:100%;max-width:none}
   /* Today (calc + gauge) and the weekly meal plan sit side by side on a wide
-     PC viewport instead of stacking full-width, one above the other with a
-     tall gap of empty space either side of the (narrower) gauge card. */
+     PC viewport instead of stacking full-width, one above the other. Today
+     keeps its own compact width; the meal plan (now a day-per-column grid)
+     takes whatever's left instead of leaving it empty. */
   .fuelTopRow{display:block}
   @media(min-width:900px){
-    .fuelTopRow{display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:start}
+    .fuelTopRow{display:grid;grid-template-columns:minmax(280px,420px) 1fr;gap:16px;align-items:start}
   }
   .header{display:flex;align-items:center;gap:14px;margin-bottom:12px}
   .markWrap{position:relative;width:44px;height:44px;flex-shrink:0}
@@ -67,7 +74,7 @@
   .calCell.remain.over .n{color:var(--neg)}
   .goalEdits{display:flex;flex-direction:column;gap:10px}
   .goalEdit{display:flex;align-items:center;gap:10px}
-  .fieldInput{background:var(--bg);border:1px solid var(--border);color:var(--fg);border-radius:10px;padding:9px 11px;font:inherit}
+  .fieldInput{width:100%;background:var(--bg);border:1px solid var(--border);color:var(--fg);border-radius:10px;padding:9px 11px;font:inherit;min-width:0}
   /* hide native number-input spin arrows for visual consistency with the rest of the dashboard */
   .fieldInput[type=number]{-moz-appearance:textfield;appearance:textfield}
   .fieldInput[type=number]::-webkit-inner-spin-button,.fieldInput[type=number]::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
@@ -127,22 +134,22 @@
   .field{flex:1;min-width:110px}
   .fieldLbl{display:block;font-size:11px;color:var(--muted);margin-bottom:6px}
   .fieldNote{font-family:var(--font-mono);font-size:10px;letter-spacing:.06em;color:var(--muted);margin:8px 0 0}
-  /* Each day is one horizontal row (label + its 3 meal slots side by side)
-     instead of a column — 7 short rows read faster than 7 tall columns and
-     use the panel's full width instead of a wide, mostly-empty grid. */
-  .mealGrid{display:flex;flex-direction:column;gap:5px}
-  .mealDay{display:flex;align-items:center;gap:8px}
-  .mealDayHead{width:30px;flex-shrink:0;text-align:center;font-family:var(--font-mono);font-size:10px;letter-spacing:.06em;color:var(--muted)}
-  .mealDay.today .mealDayHead{color:var(--brand);font-weight:700}
-  .mealSlots{display:flex;gap:6px;flex:1;min-width:0}
-  .mealSlot{flex:1;display:flex;align-items:center;gap:5px;min-width:0}
-  .mealSlotLbl{flex-shrink:0;font-family:var(--font-mono);font-size:8.5px;letter-spacing:.08em;color:var(--muted)}
-  .mealInput{width:100%;background:var(--bg);border:1px solid var(--border);color:var(--fg);border-radius:8px;padding:6px 7px;font:inherit;font-size:11.5px;min-width:0}
+  /* A day per column, a meal slot per row — a compact spreadsheet-style grid
+     that widens with the available screen instead of stacking tall. */
+  .mealTable{display:flex;flex-direction:column;gap:6px}
+  .mealHeadRow,.mealRow{display:flex;align-items:center;gap:8px}
+  .mealRowCells{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;flex:1;min-width:0}
+  .mealDayHead{text-align:center;font-family:var(--font-mono);font-size:10px;letter-spacing:.04em;color:var(--muted)}
+  .mealDayHead.today{color:var(--brand);font-weight:700}
+  .mealSlotLbl{flex-shrink:0;width:14px;text-align:center;font-family:var(--font-mono);font-size:9px;letter-spacing:.06em;color:var(--muted)}
+  .mealInput{width:100%;background:var(--bg);border:1px solid var(--border);color:var(--fg);border-radius:8px;padding:6px 4px;font:inherit;font-size:10.5px;min-width:0;text-align:center}
   .mealInput:focus{outline:none;border-color:var(--brand)}
   .mealInput::placeholder{color:#4a4a50}
+  @media(max-width:700px){
+    .mealTable{overflow-x:auto}
+    .mealRowCells{grid-template-columns:repeat(7,minmax(64px,1fr))}
+  }
   @media(max-width:640px){
-    .mealDay{flex-wrap:wrap}
-    .mealSlots{flex:1 1 100%}
     /* Calorie math + goal-edit inputs default to sitting side by side; on a
        narrow phone neither shrinks below its own min-content, so the row
        (and everything centered under it) was quietly forced wider than the
@@ -292,15 +299,17 @@ function summaryHtml(){
 }
 function mealPlanHtml(){
   const todayIdx=new Date().getDay();
-  const rows=WEEKDAYS.map((label,i)=>{
-    const slots=MEAL_SLOTS.map(slot=>{
+  const headCells=WEEKDAYS.map((label,i)=>'<span class="mealDayHead'+(i===todayIdx?' today':'')+'">'+label+'</span>').join('');
+  const rows=MEAL_SLOTS.map(slot=>{
+    const cells=WEEKDAYS.map((_,i)=>{
       const val=esc(mealFor(i,slot));
-      return '<div class="mealSlot"><span class="mealSlotLbl">'+slot.slice(0,1).toUpperCase()+'</span>'
-        +'<input class="mealInput" type="text" data-meal-day="'+i+'" data-meal-slot="'+slot+'" value="'+val+'" placeholder="'+slot+'" autocomplete="off" /></div>';
+      return '<input class="mealInput" type="text" data-meal-day="'+i+'" data-meal-slot="'+slot+'" value="'+val+'" placeholder="'+slot+'" autocomplete="off" />';
     }).join('');
-    return '<div class="mealDay'+(i===todayIdx?' today':'')+'"><span class="mealDayHead">'+label+'</span><div class="mealSlots">'+slots+'</div></div>';
+    return '<div class="mealRow"><span class="mealSlotLbl">'+slot.slice(0,1).toUpperCase()+'</span><div class="mealRowCells">'+cells+'</div></div>';
   }).join('');
-  return '<section class="card"><span class="cardName">Weekly meal plan</span><div class="mealGrid">'+rows+'</div></section>';
+  return '<section class="card"><span class="cardName">Weekly meal plan</span><div class="mealTable">'
+    +'<div class="mealHeadRow"><span class="mealSlotLbl"></span><div class="mealRowCells">'+headCells+'</div></div>'
+    +rows+'</div></section>';
 }
 function resultsInner(){
   const q=query.trim().toLowerCase();
