@@ -41,7 +41,7 @@
      full-width band. */
   .peakRow{display:block}
   @media(min-width:820px){
-    .peakRow{display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:start}
+    .peakRow{display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:stretch}
   }
   .header{display:flex;align-items:center;gap:12px;margin-bottom:10px}
   .markWrap{position:relative;width:40px;height:40px;flex-shrink:0}
@@ -79,7 +79,7 @@
   .doseUnderline{height:2px;border-radius:2px;background:linear-gradient(90deg,transparent,var(--dose-accent),transparent);opacity:.55}
 
   /* -- Peak (energy curve) card -- */
-  .peakCard{padding:13px}
+  .peakCard{padding:13px;display:flex;flex-direction:column}
   .peakTop{display:flex;align-items:center;gap:16px;flex-wrap:wrap;margin-bottom:6px}
   .peakGauge{position:relative;width:68px;height:68px;flex-shrink:0}
   .peakGauge svg{width:100%;height:100%;transform:rotate(-90deg)}
@@ -107,8 +107,8 @@
   .gearBtn svg{width:15px;height:15px}
 
   /* -- shared chart chrome -- */
-  .chartWrap{position:relative}
-  .chart{width:100%;height:auto;display:block;margin-top:6px}
+  .chartWrap{position:relative;flex:1;display:flex;flex-direction:column;min-height:90px}
+  .chart{width:100%;display:block;margin-top:6px;flex:1;min-height:0}
   .chart .grid{stroke:var(--border);stroke-width:1}
   .chart .axl{fill:var(--muted);font-family:var(--font-mono);font-size:9px;letter-spacing:.08em}
   .dragHint{position:absolute;top:0;left:0;font-family:var(--font-mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;
@@ -415,7 +415,7 @@ function energyChartHtml(curve,peak,now,nowE){
   const labels=[[0,'12a'],[3,'3a'],[6,'6a'],[9,'9a'],[12,'12p'],[15,'3p'],[18,'6p'],[21,'9p'],[24,'12a']]
     .map(a=>'<text x="'+exOf(a[0])+'" y="'+(ECY1+15)+'" class="axl" text-anchor="middle">'+a[1]+'</text>').join('');
   return (chartMode==='line'?'<div class="dragHint">Drag to log feel</div>':'')
-    +'<svg viewBox="0 0 '+EW+' '+(ECY1+22)+'" class="chart" role="img" aria-label="Predicted energy through the day">'
+    +'<svg viewBox="0 0 '+EW+' '+(ECY1+22)+'" preserveAspectRatio="none" class="chart" role="img" aria-label="Predicted energy through the day">'
     +grid+svgInner+labels+'</svg>'
     +tooltip;
 }
@@ -506,7 +506,7 @@ function caffeineHtml(){
   const rows=log.length
     ? '<div class="logList">'+log.map(l=>'<div class="logRow"><div><div class="nm">'+Math.round(l.mg)+' mg <span class="meta">'+(l.label?esc(l.label)+' · ':'')+clockOf(l.t)+'</span></div></div><button class="xBtn" data-del="'+l.id+'" title="Remove">×</button></div>').join('')+'</div>'
     : '<p class="empty">No caffeine logged yet today.</p>';
-  return '<section class="card"><span class="cardName">Caffeine</span>'
+  return '<section class="card"><h2 class="peakTitle" style="margin-bottom:10px">Caffeine</h2>'
     +'<div class="caffHead"><span class="caffTotal'+(over?' over':'')+'">'+Math.round(total)+' mg</span><span class="caffCeil">of '+CAFF_CEIL+' mg limit</span></div>'
     +'<div class="caffBarTrack"><div class="caffBarFill'+(over?' over':'')+'" style="width:'+pct+'%"></div></div>'
     +'<p class="coach'+(c.warn?' warn':'')+'">'+c.txt+'</p>'
