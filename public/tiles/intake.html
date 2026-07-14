@@ -35,17 +35,14 @@
   @keyframes twinkle{0%,100%{opacity:.15}50%{opacity:.5}}
   @media(prefers-reduced-motion:reduce){.star,.markOrb,.markGlow{animation:none!important}.card{transition:none}}
   .shell{position:relative;z-index:1;width:100%;max-width:none}
-  /* on a wide PC viewport, balance the secondary cards into two newspaper-style
-     columns; the header and the three hero sections (quick-log row, Peak card,
-     Today's Plan) stay full-width banners above them. */
+  /* Peak and the detailed Caffeine breakdown sit side by side on a wide PC
+     viewport instead of each spanning the full width — every other section
+     (Daily stack, the quick-log row, Today's Plan, Rhythm) stays a normal
+     full-width band. */
+  .peakRow{display:block}
   @media(min-width:820px){
-    .shell{column-count:2;column-gap:16px}
-    .header{column-span:all}
-    .doseGrid{column-span:all}
-    .peakCard{column-span:all}
-    .planCard{column-span:all}
+    .peakRow{display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:start}
   }
-  .card{break-inside:avoid}
   .header{display:flex;align-items:center;gap:12px;margin-bottom:10px}
   .markWrap{position:relative;width:40px;height:40px;flex-shrink:0}
   .markGlow{position:absolute;inset:-10px;border-radius:50%;background:var(--brand);filter:blur(14px);opacity:.4;
@@ -490,10 +487,10 @@ function decayChartHtml(){
   const area=dline+' L '+xOf(HOURS).toFixed(1)+' '+CY1+' L '+xOf(0).toFixed(1)+' '+CY1+' Z';
   const grid=[2.5,5,7.5].map(h=>'<line x1="'+xOf(h).toFixed(1)+'" y1="'+CY0+'" x2="'+xOf(h).toFixed(1)+'" y2="'+CY1+'" class="grid"/>').join('');
   const labels=[0,2.5,5,7.5,10].map(h=>{
-    const label=h===0?'now':'+'+h+'h';
+    const label=h===0?'now':clockOf(Math.round((now+h)*2)/2);
     return '<text x="'+xOf(h).toFixed(1)+'" y="'+(CY1+15)+'" class="axl" text-anchor="middle">'+label+'</text>';
   }).join('');
-  return '<svg viewBox="0 0 '+CW+' '+(CY1+22)+'" class="chart" role="img" aria-label="Caffeine remaining over the next 10 hours">'
+  return '<svg viewBox="0 0 '+CW+' '+(CY1+22)+'" class="chart" role="img" aria-label="Caffeine remaining, by clock time through the evening">'
     +'<defs><linearGradient id="dfill" x1="0" y1="0" x2="0" y2="1">'
     +'<stop offset="0" stop-color="#6EE7B7" stop-opacity=".24"/><stop offset="1" stop-color="#6EE7B7" stop-opacity="0"/></linearGradient></defs>'
     +grid+'<path d="'+area+'" fill="url(#dfill)" class="darea"/><path d="'+dline+'" class="dline"/>'
@@ -606,7 +603,9 @@ function headerHtml(){
     +'<div><h1 class="title">Intake</h1><p class="subtitle">Energy · Caffeine · Daily stack</p></div></header>';
 }
 function render(){
-  $('app').innerHTML=headerHtml()+doseGridHtml()+peakCardHtml()+planHtml()+rhythmHtml()+caffeineHtml()+stackHtml();
+  $('app').innerHTML=headerHtml()+stackHtml()+doseGridHtml()
+    +'<div class="peakRow">'+peakCardHtml()+caffeineHtml()+'</div>'
+    +planHtml()+rhythmHtml();
 }
 
 document.addEventListener('change',e=>{

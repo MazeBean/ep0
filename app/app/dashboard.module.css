@@ -133,8 +133,14 @@
 .shell {
   position: relative;
   /* Lifts content above the fixed WelcomeBackdrop layers (aurora/mountains/
-     particles sit at z 0-2) so tiles and greeting stay in front. */
-  z-index: 5;
+     particles sit at z 0-2) so tiles and greeting stay in front. Also has to
+     clear AppSidebar's z-index:20 (a sibling, not a descendant): .shell's own
+     z-index creates a stacking context, so a full-page tile overlay inside it
+     (.openOverlay, z-index:80) only ever outranks its OWN siblings within that
+     context — from the root it's capped at .shell's z-index. Without this,
+     the overlay's leftmost ~216px renders correctly but the fixed sidebar
+     still paints on top of it, clipping whatever sits there. */
+  z-index: 25;
   max-width: 1180px;
   margin: 0 auto;
   display: flex;

@@ -40,7 +40,7 @@
     .stats{column-span:all}
   }
   .card{break-inside:avoid}
-  .header{display:flex;align-items:center;gap:14px;margin-bottom:22px}
+  .header{display:flex;align-items:center;gap:14px;margin-bottom:12px}
   .markWrap{position:relative;width:44px;height:44px;flex-shrink:0}
   .markGlow{position:absolute;inset:-10px;border-radius:50%;background:var(--brand);filter:blur(14px);opacity:.4;
     animation:glowBreathe 4.5s ease-in-out infinite}
@@ -52,22 +52,22 @@
   .mark svg{width:22px;height:22px}
   .title{font-size:24px;font-weight:700;letter-spacing:-.01em;margin:0}
   .subtitle{color:var(--muted);font-family:var(--font-mono);font-size:11px;letter-spacing:.12em;margin:5px 0 0}
-  .stats{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:18px}
-  .stat{position:relative;border:1px solid var(--border);border-radius:var(--radius-md);background:var(--surface);padding:14px 12px;text-align:center;
+  .stats{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:10px}
+  .stat{position:relative;border:1px solid var(--border);border-radius:var(--radius-md);background:var(--surface);padding:10px 12px;text-align:center;
     -webkit-backdrop-filter:blur(18px);backdrop-filter:blur(18px);overflow:hidden;transition:border-color .2s var(--ease)}
   .stat:hover,.card:hover{border-color:var(--brand-line);box-shadow:0 0 0 1px var(--brand-line) inset}
-  .statNum{font-size:22px;font-weight:600;letter-spacing:-.01em}
+  .statNum{font-size:20px;font-weight:600;letter-spacing:-.01em}
   .statNum.brand{color:var(--brand)}
   .statNum.short{color:var(--short)}
   .statNum.long{color:var(--long)}
-  .statLbl{color:var(--muted);font-family:var(--font-mono);font-size:10px;letter-spacing:.1em;margin-top:4px}
-  .card{position:relative;border:1px solid var(--border);border-radius:16px;background:var(--surface);padding:18px;margin-bottom:22px;
+  .statLbl{color:var(--muted);font-family:var(--font-mono);font-size:10px;letter-spacing:.1em;margin-top:3px}
+  .card{position:relative;border:1px solid var(--border);border-radius:16px;background:var(--surface);padding:12px;margin-bottom:10px;
     -webkit-backdrop-filter:blur(20px) saturate(120%);backdrop-filter:blur(20px) saturate(120%);
     overflow:hidden;transition:border-color .2s var(--ease)}
-  .cardHead{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin-bottom:14px}
-  .cardName{font-family:var(--font-display);font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#fff}
+  .cardHead{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin-bottom:10px}
+  .cardName{font-family:var(--font-mono);font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#fff}
   .count{font-family:var(--font-mono);font-size:10px;letter-spacing:.12em;color:var(--muted)}
-  .row{display:flex;gap:10px;align-items:center;margin-bottom:14px;flex-wrap:wrap}
+  .row{display:flex;gap:10px;align-items:center;margin-bottom:10px;flex-wrap:wrap}
   .field{flex:1;min-width:90px}
   .fieldLbl{display:block;font-size:11px;color:var(--muted);margin-bottom:6px}
   input[type=text],input[type=number]{width:100%;background:var(--bg);border:1px solid var(--border);color:var(--fg);
@@ -82,8 +82,8 @@
   .card.cardLong .btn-primary{background:var(--long);color:#160f26}
   .card.cardShort input:focus{border-color:var(--short)}
   .card.cardLong input:focus{border-color:var(--long)}
-  .list{display:flex;flex-direction:column;gap:8px}
-  .goal{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 15px;border:1px solid var(--border);
+  .list{display:flex;flex-direction:column;gap:6px}
+  .goal{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:9px 12px;border:1px solid var(--border);
     border-left:3px solid var(--brand-line);border-radius:var(--radius-md);background:var(--surface)}
   .card.cardShort .goal{border-left-color:var(--short-line)}
   .card.cardLong .goal{border-left-color:var(--long-line)}
