@@ -72,8 +72,10 @@
     -webkit-backdrop-filter:blur(20px) saturate(120%);backdrop-filter:blur(20px) saturate(120%);
     overflow:hidden;transition:border-color .2s var(--ease)}
   .cardName{font-family:var(--font-display);font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#fff;display:block;margin-bottom:14px}
+  .cardHead{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:14px;flex-wrap:wrap}
+  .cardHead .cardName{margin-bottom:0}
   .row{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end}
-  .field{flex:1;min-width:100px}
+  .field{margin-bottom:16px}
   .fieldLbl{display:block;font-size:11px;color:var(--muted);margin-bottom:6px}
   select,input[type=text],input[type=number]{width:100%;background:var(--bg);border:1px solid var(--border);color:var(--fg);
     border-radius:10px;padding:10px 12px;font:inherit}
@@ -82,26 +84,44 @@
   .btn-primary{background:var(--brand);color:#0a0a0c;border:none;font-weight:600;border-radius:10px;padding:10px 16px;font:inherit;cursor:pointer;white-space:nowrap}
   .btn-ghost{background:transparent;border:1px solid var(--border);color:var(--muted-strong);font-weight:500;border-radius:10px;padding:8px 13px;font:inherit;font-size:12.5px;cursor:pointer;white-space:nowrap;transition:border-color .15s var(--ease),color .15s var(--ease)}
   .btn-ghost:hover{border-color:var(--brand-line);color:var(--fg)}
+  .iconBtn{background:transparent;border:1px solid var(--border);color:var(--muted);width:30px;height:30px;border-radius:50%;cursor:pointer;font-size:13px;
+    display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:border-color .15s var(--ease),color .15s var(--ease)}
+  .iconBtn:hover{border-color:var(--brand-line);color:var(--fg)}
   .hint{color:var(--neg);font-size:12px;font-family:var(--font-mono);min-height:14px;margin-top:8px}
 
-  /* -- weight stepper + rep buttons: the whole "log a set" interaction -- */
-  .exField{margin-bottom:16px}
-  .weightStepper{display:flex;align-items:center;justify-content:center;gap:20px;margin-bottom:16px}
-  .stepBtn{width:44px;height:44px;flex-shrink:0;border-radius:50%;border:1px solid var(--border);background:var(--bg);
-    color:var(--fg);font-size:22px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;
-    transition:border-color .15s var(--ease),background .15s var(--ease),transform .1s var(--ease)}
-  .stepBtn:hover{border-color:var(--brand-line);background:var(--brand-soft)}
-  .stepBtn:active{transform:scale(.93)}
-  .weightVal{min-width:110px;text-align:center}
-  .weightVal .n{font-size:34px;font-weight:700;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
-  .weightVal .u{font-family:var(--font-mono);font-size:11px;letter-spacing:.08em;color:var(--muted);margin-left:4px}
-  .repRow{display:flex;flex-wrap:wrap;gap:7px}
-  .repBtn{flex:1 1 44px;min-width:44px;padding:13px 0;border-radius:12px;border:1px solid var(--border);background:var(--bg);color:var(--fg);
-    font-size:17px;font-weight:700;font-family:inherit;cursor:pointer;font-variant-numeric:tabular-nums;
-    transition:border-color .15s var(--ease),background .15s var(--ease),transform .1s var(--ease)}
-  .repBtn:hover{border-color:var(--brand-line);background:var(--brand-soft)}
-  .repBtn:active{transform:scale(.95)}
-  .repHint{text-align:center;font-family:var(--font-mono);font-size:10px;letter-spacing:.1em;color:var(--muted);margin-top:10px}
+  /* -- sessions (home list + builder) -- */
+  .sessionList{display:flex;flex-direction:column;gap:8px}
+  .sessionCard{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 16px;border:1px solid var(--border);
+    border-radius:var(--radius-md);background:var(--surface);cursor:pointer;transition:border-color .15s var(--ease)}
+  .sessionCard:hover{border-color:var(--brand-line)}
+  .sessionCardMain{min-width:0}
+  .sessionName{font-weight:600;font-size:15px}
+  .sessionMeta{font-family:var(--font-mono);font-size:11px;color:var(--muted);margin-top:4px}
+  .sessionCardActions{display:flex;align-items:center;gap:6px;flex-shrink:0}
+  .pickWrap{display:flex;flex-direction:column;gap:16px;margin-top:4px}
+  .pickCategoryName{font-family:var(--font-mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:8px}
+  .pickGrid{display:flex;flex-wrap:wrap;gap:8px}
+  .exercisePick{display:flex;align-items:center;gap:7px;padding:9px 12px;border:1px solid var(--border);border-radius:var(--radius-pill);
+    background:var(--bg);font-size:13px;cursor:pointer;transition:border-color .15s var(--ease),background .15s var(--ease)}
+  .exercisePick:hover{border-color:var(--brand-line)}
+  .exercisePick.checked{border-color:var(--brand-line);background:var(--brand-soft)}
+  .exercisePick input{accent-color:var(--brand)}
+
+  /* -- running a session -- */
+  .runProgress{font-family:var(--font-mono);font-size:11px;color:var(--muted);margin:0 0 16px}
+  .runCategory{margin-bottom:18px}
+  .runCategory:last-child{margin-bottom:0}
+  .runCategoryName{font-family:var(--font-mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:8px}
+  .runRow{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:11px 14px;border:1px solid var(--border);
+    border-radius:var(--radius-md);background:var(--surface);margin-bottom:8px}
+  .runRow:last-child{margin-bottom:0}
+  .runRow.done{border-left:3px solid var(--brand-line)}
+  .runRowMain{display:flex;align-items:center;gap:12px;flex:1;min-width:0}
+  .runExName{font-size:14px;font-weight:500}
+  .runRow.done .runExName{text-decoration:line-through;color:var(--muted-strong)}
+  .runExWeight{font-family:var(--font-mono);font-size:13px;color:var(--brand);margin-left:auto;display:flex;align-items:center;gap:6px}
+  .runWeightInput{width:92px;flex-shrink:0;margin-left:auto}
+  .runCompleteBtn{flex-shrink:0}
 
   .prRow{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:14px;flex-wrap:wrap}
   .prSelect{max-width:220px}
@@ -132,6 +152,9 @@
     border:1px solid rgba(232,200,120,.4);background:rgba(232,200,120,.08);border-radius:var(--radius-pill);padding:3px 8px}
   .entryStats{font-size:14px;color:var(--muted-strong);margin-top:6px}
   .entryMeta{display:block;margin-top:6px;font-family:var(--font-mono);font-size:10px;letter-spacing:.1em;color:var(--muted)}
+  .logExList{display:flex;flex-direction:column;gap:5px;margin-top:8px}
+  .logExRow{display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:13.5px;color:var(--muted-strong)}
+  .logExWeight{font-family:var(--font-mono);font-size:12px;color:var(--fg);display:flex;align-items:center;gap:6px;flex-shrink:0}
   .xBtn{background:transparent;border:1px solid var(--border);color:var(--muted);width:26px;height:26px;border-radius:50%;cursor:pointer;flex-shrink:0;line-height:1}
   .xBtn:hover{color:var(--neg);border-color:var(--neg-line)}
   .empty{color:var(--muted);font-size:13px;padding:14px 0}
@@ -167,6 +190,12 @@
     .t-success-check{animation:none!important;opacity:1}
     .t-success-check svg path{animation:none!important;stroke-dashoffset:0!important}
   }
+  @media(max-width:640px){
+    .runRowMain{flex-wrap:wrap}
+    .runWeightInput{width:100%;margin-left:0}
+    .runCompleteBtn{width:100%}
+    .runRow{flex-direction:column;align-items:stretch}
+  }
 </style>
 </head>
 <body>
@@ -186,16 +215,32 @@
 </div>
 <main><div class="shell" id="app"></div></main>
 <script>
-/* Workout — tap-to-log sets (weight stepper in lb + one-tap rep buttons, no
-   separate "add" step), personal records with a toast on a new PR, a
-   per-exercise progress chart, and a bodyweight tracker. No network:
-   persists through the dashboard bridge (window.Vitality) as one object
-   with `entries` and `bodyweight` arrays. */
-let store={entries:[],bodyweight:[]};
-let selectedExercise=null;
-let currentExercise=''; // the exercise field's live text — kept in JS so incidental
-                         // re-renders (weight stepper, delete, add-bodyweight) don't wipe it
-let currentWeight=50; // lb — the stepper's live value, not persisted between visits
+/* Workout — build named sessions (a chosen set of exercises from a fixed,
+   category-sorted catalog), then run one in real time: tap it, type a
+   weight per exercise as you go, mark each done. Personal records still get
+   a toast, still get a per-exercise chart, still get a bodyweight tracker.
+   No more logging individual sets — a session run IS the log entry.
+   No network: persists through the dashboard bridge (window.Vitality) as
+   one object with `sessions`, `logs` and `bodyweight` arrays. */
+const CATEGORIES=['Chest','Back','Shoulders','Arms','Legs','Core'];
+const EXERCISE_CATALOG={
+  Chest:['Barbell bench','Incline barbell bench','Flat DB press','Incline DB press','Machine chest press','Weighted dips','Cable chest fly','Pec deck'],
+  Back:['Weighted pull-ups','Pull-ups','Barbell row','Pendlay row','T-bar row','Seated cable row','Chest-supported DB row','Single-arm DB row','Lat pulldown'],
+  Shoulders:['Standing barbell OHP','Seated DB shoulder press','Machine shoulder press','Push press','DB lateral raise','Cable lateral raise','Rear delt cable fly','Reverse pec deck','Cable face pull'],
+  Arms:['Close-grip bench','Tricep rope pushdown','Overhead cable tri ext','Skullcrushers','Barbell curl','Hammer curl','Cable curl','Incline DB curl','Preacher curl'],
+  Legs:['Barbell back squat','Front squat','Hack squat','Leg press','Romanian deadlift','Conventional deadlift','Bulgarian split squat','DB split squat','Walking lunge','Leg extension','Seated leg curl','Lying leg curl','Barbell hip thrust','Calf raise'],
+  Core:['Cable crunch','Hanging leg raise','Toes-to-bar','Ab wheel rollout','Weighted sit-up','Decline sit-up','Russian twist','Plank']
+};
+function categoryOf(exercise){
+  for(const cat of CATEGORIES)if(EXERCISE_CATALOG[cat].includes(exercise))return cat;
+  return 'Other';
+}
+
+let store={sessions:[],logs:[],bodyweight:[]};
+let view={mode:'home'}; // {mode:'home'} | {mode:'build'} | {mode:'run',sessionId}
+let builderDraft={name:'',selected:new Set(),editId:null}; // live while mode==='build'; editId set when editing an existing session, null when creating
+let runDraftWeights={}; // exercise -> typed value, live while mode==='run'; reset on entering a session
+let selectedExercise=null; // PR chart's chosen exercise
 let prToast=null; // {exercise, weight} while the toast is showing
 let prToastTimer=null;
 let historyOpen=false; // "view past weights" panel under the PR chart
@@ -225,29 +270,51 @@ function spawnStars(){
   }
   wrap.innerHTML=html;
 }
-/* ---- derived data ---- */
-function exercises(){
-  const seen=new Map();
-  for(const e of store.entries){
-    const k=e.exercise.toLowerCase();
-    if(!seen.has(k))seen.set(k,e.exercise);
+
+/* ---- sessions: named templates built from the fixed catalog ---- */
+function createOrUpdateSession(id,name,exerciseList){
+  if(id){
+    const s=store.sessions.find(x=>x.id===id);
+    if(s){s.name=name;s.exercises=exerciseList;persist();return;}
   }
-  return Array.from(seen.values()).sort((a,b)=>a.localeCompare(b));
+  store.sessions.push({id:newId(),name,exercises:exerciseList});
+  persist();
+}
+function deleteSession(id){
+  store.sessions=store.sessions.filter(s=>s.id!==id);
+  persist();
+}
+
+/* ---- logs: one entry per (session, calendar day) actually run, filled in
+   progressively as exercises are completed — this IS the workout history,
+   there's no separate "finish session" step. ---- */
+function logFor(sessionId,dateKey){
+  return store.logs.find(l=>l.sessionId===sessionId&&l.date===dateKey);
+}
+function ensureLog(sessionId,sessionName,dateKey){
+  let l=logFor(sessionId,dateKey);
+  if(!l){l={id:newId(),sessionId,sessionName,date:dateKey,ts:null,entries:[]};store.logs.push(l);}
+  return l;
+}
+function allEntries(){
+  const out=[];
+  for(const l of store.logs)for(const e of l.entries)out.push(e);
+  return out;
 }
 function entriesFor(exercise){
   const k=(exercise||'').toLowerCase();
-  return store.entries.filter(e=>e.exercise.toLowerCase()===k).sort((a,b)=>a.ts-b.ts);
+  return allEntries().filter(e=>e.exercise.toLowerCase()===k).sort((a,b)=>a.ts-b.ts);
 }
 function prFor(exercise){
   const list=entriesFor(exercise);
   if(!list.length)return null;
   return list.reduce((best,e)=>e.weight>best.weight?e:best,list[0]);
 }
-/* running max at the time each entry was logged, for the PR badge on log rows */
+/* running max at the time each entry was logged, for the PR badge on rows */
 function prAtLogTime(){
   const running={};
   const marks={};
-  const chronological=store.entries.slice().sort((a,b)=>a.ts-b.ts);
+  const chronological=allEntries().slice().sort((a,b)=>a.ts-b.ts);
   for(const e of chronological){
     const k=e.exercise.toLowerCase();
     const prev=running[k]||0;
@@ -256,14 +323,57 @@ function prAtLogTime(){
   }
   return marks;
 }
-function thisWeekCount(){
+function loggedExercises(){
+  const seen=new Map();
+  for(const e of allEntries()){
+    const k=e.exercise.toLowerCase();
+    if(!seen.has(k))seen.set(k,e.exercise);
+  }
+  return Array.from(seen.values()).sort((a,b)=>a.localeCompare(b));
+}
+function sessionsThisWeekCount(){
   const cutoff=Date.now()-7*24*60*60*1000;
-  return store.entries.filter(e=>e.ts>=cutoff).length;
+  return store.logs.filter(l=>l.entries.length&&l.ts>=cutoff).length;
 }
 function prsThisMonth(){
   const marks=prAtLogTime();
-  const now=new Date(); const monthStart=new Date(now.getFullYear(),now.getMonth(),1).getTime();
-  return store.entries.filter(e=>marks[e.id]&&e.ts>=monthStart).length;
+  const now=new Date();const monthStart=new Date(now.getFullYear(),now.getMonth(),1).getTime();
+  return allEntries().filter(e=>marks[e.id]&&e.ts>=monthStart).length;
+}
+/* Completing (or re-completing, to fix a mistake) one exercise within
+   today's run of a session — this is the only way data enters the log. */
+function completeExercise(sessionId,sessionName,exercise,weight){
+  const dk=dayKey(Date.now());
+  const log=ensureLog(sessionId,sessionName,dk);
+  log.entries=log.entries.filter(e=>e.exercise!==exercise); // replace, don't duplicate, on re-complete
+  const prevPR=prFor(exercise); // computed AFTER the removal above, so editing compares fairly
+  const entry={id:newId(),exercise,weight,ts:Date.now()};
+  log.entries.push(entry);
+  if(!log.ts)log.ts=entry.ts;
+  persist();
+  return !prevPR||weight>prevPR.weight;
+}
+function uncompleteExercise(sessionId,exercise){
+  const log=logFor(sessionId,dayKey(Date.now()));
+  if(!log)return;
+  log.entries=log.entries.filter(e=>e.exercise!==exercise);
+  if(!log.entries.length)store.logs=store.logs.filter(l=>l.id!==log.id);
+  persist();
+}
+function deleteEntryById(id){
+  for(const l of store.logs){
+    const idx=l.entries.findIndex(e=>e.id===id);
+    if(idx>=0){
+      l.entries.splice(idx,1);
+      if(!l.entries.length)store.logs=store.logs.filter(x=>x.id!==l.id);
+      persist();
+      return;
+    }
+  }
+}
+function deleteLog(id){
+  store.logs=store.logs.filter(l=>l.id!==id);
+  persist();
 }
 
 /* ---- chart geometry (shared by the PR chart and the bodyweight chart) ---- */
@@ -290,7 +400,7 @@ function chartHtml(exercise){
     +grid+'<path d="'+area+'" fill="url(#wfill)" class="area"/><path d="'+eline+'" class="eline"/>'+dots+labels+'</svg>';
 }
 
-/* ---- bodyweight ---- */
+/* ---- bodyweight (unchanged) ---- */
 function bwSorted(){return (store.bodyweight||[]).slice().sort((a,b)=>a.ts-b.ts);}
 function addBodyweight(lb){
   if(!Array.isArray(store.bodyweight))store.bodyweight=[];
@@ -320,8 +430,6 @@ function bwChartHtml(){
     +'<stop offset="0" stop-color="#e0b13c" stop-opacity=".22"/><stop offset="1" stop-color="#e0b13c" stop-opacity="0"/></linearGradient></defs>'
     +'<path d="'+area+'" fill="url(#bwfill)" class="area"/><path d="'+line+'" class="bwline"/>'+dots+labels+'</svg>';
 }
-/* Newest-first list of every weigh-in, each removable — in case one was
-   typed in wrong, the chart/latest-value alone give no way to fix it. */
 function bwHistoryListHtml(){
   const list=bwSorted().slice().reverse();
   if(!list.length)return '<p class="empty">No weigh-ins logged yet.</p>';
@@ -337,7 +445,7 @@ function bodyweightHtml(){
   const latest=data.length?data[data.length-1].lb:null;
   return '<section class="card"><span class="cardName">Bodyweight</span>'
     +(latest!=null?'<div class="bwNow"><span class="n">'+latest+'</span><span class="l">lb · Latest</span></div>':'')
-    +'<div class="row bwAdd"><div class="field"><input class="fieldInput" type="number" id="bwInput" min="0" step="0.1" placeholder="e.g. 172.5" /></div>'
+    +'<div class="row bwAdd"><div class="field" style="flex:1;margin-bottom:0"><input class="fieldInput" type="number" id="bwInput" min="0" step="0.1" placeholder="e.g. 172.5" /></div>'
     +'<button class="btn-primary" id="bwAdd">Log</button></div>'
     +bwChartHtml()
     +'<div style="margin-top:14px"><button type="button" class="btn-ghost" id="toggleBwHistory">'+(bwHistoryOpen?'Hide past weigh-ins':'View past weigh-ins')+'</button></div>'
@@ -345,93 +453,160 @@ function bodyweightHtml(){
     +'</section>';
 }
 
-/* ---- render ---- */
-function headerHtml(){
-  return '<header class="header"><div class="markWrap"><div class="markGlow"></div><div class="mark" aria-hidden="true">'
-    +'<svg viewBox="-12 -12 24 24" fill="none" stroke="#0a0a0c" stroke-width="1.6" stroke-linecap="round">'
-    +'<rect x="-10" y="-3" width="2.8" height="6" rx="0.6" stroke-width="1.6"/>'
-    +'<rect x="7.2" y="-3" width="2.8" height="6" rx="0.6" stroke-width="1.6"/>'
-    +'<line x1="-7.2" y1="0" x2="7.2" y2="0" stroke-width="1.6"/></svg></div></div>'
-    +'<div><h1 class="title">Workout</h1><p class="subtitle">Reps · Weight · PRs</p></div></header>';
+/* ---- home: session list + builder trigger ---- */
+function sessionCardHtml(s){
+  const todayLog=logFor(s.id,dayKey(Date.now()));
+  const doneCount=todayLog?todayLog.entries.length:0;
+  const total=s.exercises.length;
+  return '<div class="sessionCard" data-open-session="'+s.id+'">'
+    +'<div class="sessionCardMain"><div class="sessionName">'+esc(s.name)+'</div>'
+    +'<div class="sessionMeta">'+total+(total===1?' exercise':' exercises')+(doneCount?' · '+doneCount+'/'+total+' done today':'')+'</div></div>'
+    +'<div class="sessionCardActions">'
+    +'<button type="button" class="iconBtn" data-edit-session="'+s.id+'" title="Edit">✎</button>'
+    +'<button type="button" class="xBtn" data-del-session="'+s.id+'" title="Delete">×</button>'
+    +'</div></div>';
 }
-function statsHtml(){
-  return '<section class="stats">'
-    +'<div class="stat"><div class="statNum">'+thisWeekCount()+'</div><div class="statLbl">Sessions this week</div></div>'
-    +'<div class="stat"><div class="statNum brand">'+prsThisMonth()+'</div><div class="statLbl">PRs this month</div></div>'
+function sessionsHtml(){
+  const rows=store.sessions.length?store.sessions.map(sessionCardHtml).join(''):'<p class="empty">No sessions yet. Build one to start logging workouts.</p>';
+  return '<section class="card"><div class="cardHead"><span class="cardName">Sessions</span>'
+    +'<button type="button" class="btn-ghost" id="newSessionBtn">+ New session</button></div>'
+    +'<div class="sessionList">'+rows+'</div></section>';
+}
+
+/* ---- building / editing a session ---- */
+function builderHtml(){
+  const editing=!!builderDraft.editId;
+  const catBlocks=CATEGORIES.map(cat=>{
+    const items=EXERCISE_CATALOG[cat].map(ex=>{
+      const checked=builderDraft.selected.has(ex);
+      return '<label class="exercisePick'+(checked?' checked':'')+'"><input type="checkbox" data-pick-exercise="'+esc(ex)+'"'+(checked?' checked':'')+' /><span>'+esc(ex)+'</span></label>';
+    }).join('');
+    return '<div class="pickCategory"><div class="pickCategoryName">'+cat+'</div><div class="pickGrid">'+items+'</div></div>';
+  }).join('');
+  return '<section class="card"><div class="cardHead"><span class="cardName">'+(editing?'Edit session':'Build a session')+'</span>'
+    +'<button type="button" class="btn-ghost" id="cancelBuild">Cancel</button></div>'
+    +'<div class="field"><label class="fieldLbl">Session name</label>'
+    +'<input class="fieldInput" id="sessionName" type="text" placeholder="e.g. Push day" value="'+esc(builderDraft.name)+'" autocomplete="off" /></div>'
+    +'<div class="pickWrap">'+catBlocks+'</div>'
+    +'<div class="hint" id="buildHint"></div>'
+    +'<div style="display:flex;justify-content:flex-end;margin-top:14px">'
+    +'<button type="button" class="btn-primary" id="saveSessionBtn">'+(editing?'Save changes':'Create session')+'</button></div>'
     +'</section>';
 }
-function formHtml(){
-  const exList=exercises();
-  const datalist=exList.map(x=>'<option value="'+esc(x)+'">').join('');
-  return '<section class="card"><span class="cardName">Log a set</span>'
-    +'<div class="exField"><label class="fieldLbl">Exercise</label>'
-    +'<input type="text" id="exercise" list="exerciseList" placeholder="e.g. bench press" autocomplete="off" value="'+esc(currentExercise)+'" />'
-    +'<datalist id="exerciseList">'+datalist+'</datalist></div>'
-    +'<div class="weightStepper">'
-    +'<button type="button" class="stepBtn" id="wMinus" aria-label="Subtract 5 lb">−</button>'
-    +'<div class="weightVal"><span class="n">'+currentWeight+'</span><span class="u">lb</span></div>'
-    +'<button type="button" class="stepBtn" id="wPlus" aria-label="Add 5 lb">+</button>'
-    +'</div>'
-    +'<div class="repRow">'
-    +[4,5,6,7,8,9,10,11,12].map(r=>'<button type="button" class="repBtn" data-reps="'+r+'">'+r+'</button>').join('')
-    +'</div>'
-    +'<p class="repHint">Tap a rep count to log the set</p>'
-    +'<div class="hint" id="hint"></div>'
-    +'</section>';
+function saveSessionFromBuilder(){
+  const name=(builderDraft.name||'').trim();
+  if(!name){$('buildHint').textContent='Name the session first.';return;}
+  if(!builderDraft.selected.size){$('buildHint').textContent='Pick at least one exercise.';return;}
+  const exerciseList=CATEGORIES.flatMap(cat=>EXERCISE_CATALOG[cat].filter(ex=>builderDraft.selected.has(ex)));
+  createOrUpdateSession(builderDraft.editId,name,exerciseList);
+  view={mode:'home'};
+  render();
 }
-/* Newest-first list of every set logged for one exercise, each removable —
-   the per-day log below only ever shows the most recent day, so this is the
-   only way to reach (and delete from) anything older. */
+
+/* ---- running a session ---- */
+function runViewHtml(){
+  const s=store.sessions.find(x=>x.id===view.sessionId);
+  if(!s){view={mode:'home'};return sessionsHtml();}
+  const dk=dayKey(Date.now());
+  const log=logFor(s.id,dk);
+  const doneMap={};
+  if(log)for(const e of log.entries)doneMap[e.exercise]=e;
+  const prMarks=prAtLogTime();
+  const byCat={};
+  for(const ex of s.exercises){const cat=categoryOf(ex);(byCat[cat]=byCat[cat]||[]).push(ex);}
+  const blocks=CATEGORIES.concat(['Other']).filter(cat=>byCat[cat]&&byCat[cat].length).map(cat=>{
+    const rows=byCat[cat].map(ex=>{
+      const done=doneMap[ex];
+      if(done){
+        const isPR=!!prMarks[done.id];
+        return '<div class="runRow done"><div class="runRowMain"><span class="runExName">'+esc(ex)+'</span></div>'
+          +'<span class="runExWeight">'+done.weight+' lb'+(isPR?' <span class="prTag">PR</span>':'')+'</span>'
+          +'<button type="button" class="iconBtn" data-edit-run="'+esc(ex)+'" title="Edit">✎</button></div>';
+      }
+      const draft=runDraftWeights[ex]!=null?runDraftWeights[ex]:'';
+      return '<div class="runRow"><div class="runRowMain"><span class="runExName">'+esc(ex)+'</span></div>'
+        +'<input class="fieldInput runWeightInput" type="number" inputmode="decimal" placeholder="lb" data-weight-for="'+esc(ex)+'" value="'+esc(draft)+'" />'
+        +'<button type="button" class="btn-primary runCompleteBtn" data-complete-run="'+esc(ex)+'">Done</button></div>';
+    }).join('');
+    return '<div class="runCategory"><div class="runCategoryName">'+cat+'</div>'+rows+'</div>';
+  }).join('');
+  const doneCount=log?log.entries.length:0,total=s.exercises.length;
+  return '<section class="card"><div class="cardHead"><span class="cardName">'+esc(s.name)+'</span>'
+    +'<button type="button" class="btn-ghost" id="backToSessions">← Sessions</button></div>'
+    +'<p class="runProgress">'+doneCount+' / '+total+' done'+(total>0&&doneCount===total?' — session complete':'')+'</p>'
+    +blocks+'</section>';
+}
+function completeRunExercise(exercise){
+  const s=store.sessions.find(x=>x.id===view.sessionId);
+  if(!s)return;
+  const el=document.querySelector('[data-weight-for="'+CSS.escape(exercise)+'"]');
+  const weight=Number(el&&el.value);
+  if(!isFinite(weight)||weight<=0)return;
+  const isNewPR=completeExercise(s.id,s.name,exercise,weight);
+  delete runDraftWeights[exercise];
+  render();
+  if(isNewPR)showPRToast(exercise,weight);
+}
+
+/* Newest-first list of every weight logged for one exercise, each removable —
+   the history below only ever shows the most recent day's sessions, so this
+   is the only way to reach (and delete from) anything older. */
 function historyListHtml(exercise){
   const list=entriesFor(exercise).slice().reverse();
   if(!list.length)return '<p class="empty">No past weights logged for this exercise yet.</p>';
   return '<div class="log">'+list.map(e=>
     '<div class="entry"><div class="entryLeft">'
-    +'<div class="entryStats">'+e.weight+' lb × '+e.reps+' reps</div>'
+    +'<div class="entryStats">'+e.weight+' lb</div>'
     +'<span class="entryMeta">'+new Date(e.ts).toLocaleDateString(undefined,{month:'short',day:'numeric',year:'numeric'})+'</span></div>'
     +'<button class="xBtn" data-del="'+e.id+'" title="Remove">×</button></div>'
   ).join('')+'</div>';
 }
 function prChartHtml(){
-  const exList=exercises();
+  const exList=loggedExercises();
   if(!exList.length)return '';
   if(!selectedExercise||!exList.includes(selectedExercise))selectedExercise=exList[exList.length-1];
   const pr=prFor(selectedExercise);
   const opts=exList.map(x=>'<option value="'+esc(x)+'"'+(x===selectedExercise?' selected':'')+'>'+esc(x)+'</option>').join('');
   return '<section class="card"><div class="prRow">'
     +'<select class="prSelect" id="exSelect">'+opts+'</select>'
-    +'<div class="prBadge"><div class="prNum">'+(pr?pr.weight:0)+'</div><div class="prLbl">Personal record'+(pr?' · '+pr.reps+' reps':'')+'</div></div>'
+    +'<div class="prBadge"><div class="prNum">'+(pr?pr.weight:0)+'</div><div class="prLbl">Personal record</div></div>'
     +'</div>'+chartHtml(selectedExercise)
     +'<div style="margin-top:14px"><button type="button" class="btn-ghost" id="toggleHistory">'+(historyOpen?'Hide past weights':'View past weights')+'</button></div>'
     +(historyOpen?'<div style="margin-top:12px">'+historyListHtml(selectedExercise)+'</div>':'')
     +'</section>';
 }
-/* Only the most recent logged day shows by default — a quick glance, not
-   the whole history. The full history is one click away as a download. */
-function logInner(){
-  if(!store.entries.length)return '<p class="empty">No sets logged yet. Add one above.</p>';
+
+/* ---- history: past logged sessions, most recent day first ---- */
+function historyInner(){
+  const withData=store.logs.filter(l=>l.entries.length);
+  if(!withData.length)return '<p class="empty">No sessions logged yet. Build one above and tap it to start.</p>';
   const prMarks=prAtLogTime();
-  const sorted=store.entries.slice().sort((a,b)=>b.ts-a.ts);
-  const mostRecentKey=dayKey(sorted[0].ts);
-  const dayEntries=sorted.filter(e=>dayKey(e.ts)===mostRecentKey);
-  return dayEntries.map(e=>{
-    const isPR=!!prMarks[e.id];
-    return '<div class="entry'+(isPR?' pr':'')+'"><div class="entryLeft">'
-      +'<div class="entryTop"><span class="exBadge">'+esc(e.exercise)+'</span>'+(isPR?'<span class="prTag">PR</span>':'')+'</div>'
-      +'<div class="entryStats">'+e.weight+' lb × '+e.reps+' reps</div>'
-      +'<span class="entryMeta">'+new Date(e.ts).toLocaleTimeString([],{hour:'numeric',minute:'2-digit'})+'</span></div>'
-      +'<button class="xBtn" data-del="'+e.id+'" title="Remove">×</button></div>';
+  const sorted=withData.slice().sort((a,b)=>b.ts-a.ts);
+  const mostRecentKey=sorted[0].date;
+  const dayLogs=sorted.filter(l=>l.date===mostRecentKey);
+  return dayLogs.map(l=>{
+    const rows=l.entries.slice().sort((a,b)=>a.ts-b.ts).map(e=>{
+      const isPR=!!prMarks[e.id];
+      return '<div class="logExRow"><span>'+esc(e.exercise)+'</span><span class="logExWeight">'+e.weight+' lb'+(isPR?' <span class="prTag">PR</span>':'')+'</span></div>';
+    }).join('');
+    return '<div class="entry"><div class="entryLeft" style="flex:1">'
+      +'<div class="entryTop"><span class="exBadge">'+esc(l.sessionName)+'</span></div>'
+      +'<div class="logExList">'+rows+'</div>'
+      +'<span class="entryMeta">'+new Date(l.ts).toLocaleTimeString([],{hour:'numeric',minute:'2-digit'})+'</span></div>'
+      +'<button class="xBtn" data-del-log="'+l.id+'" title="Remove">×</button></div>';
   }).join('');
 }
-function logHtml(){
-  const label=store.entries.length?dayLabel(store.entries.slice().sort((a,b)=>b.ts-a.ts)[0].ts):'History';
+function historyHtml(){
+  const withData=store.logs.filter(l=>l.entries.length);
+  const label=withData.length?dayLabel(withData.slice().sort((a,b)=>b.ts-a.ts)[0].ts):'History';
   return '<div class="logHead"><h2 class="sectionTitle">'+label+'</h2>'
     +'<div style="display:flex;align-items:center;gap:10px">'
-    +'<span class="count">'+(store.entries.length?store.entries.length+(store.entries.length===1?' set total':' sets total'):'Empty')+'</span>'
-    +(store.entries.length?'<button type="button" class="btn-ghost" id="downloadLog">Download full log</button>':'')
+    +'<span class="count">'+(withData.length?withData.length+(withData.length===1?' session logged':' sessions logged'):'Empty')+'</span>'
+    +(withData.length?'<button type="button" class="btn-ghost" id="downloadLog">Download full log</button>':'')
     +'</div></div>'
-    +'<div class="log" id="log">'+logInner()+'</div>';
+    +'<div class="log" id="log">'+historyInner()+'</div>';
 }
+
 function prToastHtml(){
   if(!prToast)return '';
   return '<div class="prToast" role="status">'
@@ -439,92 +614,121 @@ function prToastHtml(){
     +'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12l5 5L20 6"/></svg>'
     +'</span><div class="prToastText"><strong>New PR!</strong> '+esc(prToast.exercise)+' at '+prToast.weight+' lb</div></div>';
 }
-function render(){
-  $('app').innerHTML=headerHtml()+prToastHtml()+statsHtml()+formHtml()+prChartHtml()+bodyweightHtml()+logHtml();
-}
-
-/* ---- interactions ---- */
-/* Patches just the weight number instead of a full render(): a full
-   re-render replaces #exercise (wiping whatever the user was mid-typing —
-   its value isn't tracked anywhere else, just the live DOM) and recreates
-   the header's .mark/.markGlow nodes, which restarts their CSS animations
-   from frame zero (a brand new element, even if visually identical). Both
-   read as "the weight buttons reset everything". */
-function adjustWeight(delta){
-  currentWeight=Math.max(0,currentWeight+delta);
-  const el=document.querySelector('.weightVal .n');
-  if(el)el.textContent=currentWeight;
-}
 function showPRToast(exercise,weight){
   prToast={exercise,weight};
   render();
   clearTimeout(prToastTimer);
   prToastTimer=setTimeout(()=>{prToast=null;render();},3200);
 }
-function logSet(reps){
-  const exEl=$('exercise');
-  const exercise=(exEl.value||'').trim();
-  if(!exercise){$('hint').textContent='Name the exercise first.';exEl.focus();return;}
-  const prevPR=prFor(exercise);
-  const entry={id:newId(),exercise,weight:currentWeight,reps,ts:Date.now()};
-  store.entries.push(entry);
-  selectedExercise=exercise;
-  currentExercise='';
-  persist();
-  $('hint').textContent='';
-  const isNewPR=!prevPR||entry.weight>prevPR.weight;
-  render();
-  if(isNewPR)showPRToast(exercise,entry.weight);
+
+function headerHtml(){
+  return '<header class="header"><div class="markWrap"><div class="markGlow"></div><div class="mark" aria-hidden="true">'
+    +'<svg viewBox="-12 -12 24 24" fill="none" stroke="#0a0a0c" stroke-width="1.6" stroke-linecap="round">'
+    +'<rect x="-10" y="-3" width="2.8" height="6" rx="0.6" stroke-width="1.6"/>'
+    +'<rect x="7.2" y="-3" width="2.8" height="6" rx="0.6" stroke-width="1.6"/>'
+    +'<line x1="-7.2" y1="0" x2="7.2" y2="0" stroke-width="1.6"/></svg></div></div>'
+    +'<div><h1 class="title">Workout</h1><p class="subtitle">Sessions · Weights · PRs</p></div></header>';
 }
-function deleteEntry(id){
-  store.entries=store.entries.filter(e=>e.id!==id);
-  persist();
-  render();
+function statsHtml(){
+  return '<section class="stats">'
+    +'<div class="stat"><div class="statNum">'+sessionsThisWeekCount()+'</div><div class="statLbl">Sessions this week</div></div>'
+    +'<div class="stat"><div class="statNum brand">'+prsThisMonth()+'</div><div class="statLbl">PRs this month</div></div>'
+    +'</section>';
 }
+function render(){
+  let body;
+  if(view.mode==='build')body=builderHtml();
+  else if(view.mode==='run')body=runViewHtml();
+  else body=sessionsHtml()+prChartHtml()+bodyweightHtml()+historyHtml();
+  $('app').innerHTML=headerHtml()+prToastHtml()+statsHtml()+body;
+}
+
 function downloadLog(){
-  const rows=store.entries.slice().sort((a,b)=>a.ts-b.ts);
-  const header='date,time,exercise,weight_lb,reps\n';
-  const csv=header+rows.map(e=>{
-    const d=new Date(e.ts);
-    const date=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
-    const time=String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');
-    return [date,time,'"'+e.exercise.replace(/"/g,'""')+'"',e.weight,e.reps].join(',');
-  }).join('\n');
+  const rows=[];
+  for(const l of store.logs.slice().sort((a,b)=>(a.ts||0)-(b.ts||0))){
+    for(const e of l.entries.slice().sort((a,b)=>a.ts-b.ts)){
+      const d=new Date(e.ts);
+      const date=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+      const time=String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');
+      rows.push([date,time,'"'+l.sessionName.replace(/"/g,'""')+'"','"'+e.exercise.replace(/"/g,'""')+'"',e.weight].join(','));
+    }
+  }
+  const csv='date,time,session,exercise,weight_lb\n'+rows.join('\n');
   const today=new Date();
   const fname='workout-log-'+today.getFullYear()+'-'+String(today.getMonth()+1).padStart(2,'0')+'-'+String(today.getDate()).padStart(2,'0')+'.csv';
   window.Vitality.download(fname,csv,'text/csv');
 }
 
 document.addEventListener('click',e=>{
-  if(e.target.closest('#wMinus')){adjustWeight(-5);return;}
-  if(e.target.closest('#wPlus')){adjustWeight(5);return;}
-  const rep=e.target.closest('[data-reps]');
-  if(rep){logSet(Number(rep.getAttribute('data-reps')));return;}
-  if(e.target.closest('#downloadLog')){downloadLog();return;}
+  // sessions home
+  if(e.target.closest('#newSessionBtn')){view={mode:'build'};builderDraft={name:'',selected:new Set(),editId:null};render();return;}
+  const editS=e.target.closest('[data-edit-session]');
+  if(editS){
+    const s=store.sessions.find(x=>x.id===editS.getAttribute('data-edit-session'));
+    if(s){view={mode:'build'};builderDraft={name:s.name,selected:new Set(s.exercises),editId:s.id};render();}
+    return;
+  }
+  const delS=e.target.closest('[data-del-session]');
+  if(delS){deleteSession(delS.getAttribute('data-del-session'));render();return;}
+  const openS=e.target.closest('[data-open-session]');
+  if(openS){view={mode:'run',sessionId:openS.getAttribute('data-open-session')};runDraftWeights={};render();return;}
+  // builder
+  if(e.target.closest('#cancelBuild')){view={mode:'home'};render();return;}
+  if(e.target.closest('#saveSessionBtn')){saveSessionFromBuilder();return;}
+  // run view
+  if(e.target.closest('#backToSessions')){view={mode:'home'};render();return;}
+  const completeRun=e.target.closest('[data-complete-run]');
+  if(completeRun){completeRunExercise(completeRun.getAttribute('data-complete-run'));return;}
+  const editRun=e.target.closest('[data-edit-run]');
+  if(editRun){
+    const exercise=editRun.getAttribute('data-edit-run');
+    const s=store.sessions.find(x=>x.id===view.sessionId);
+    if(s){
+      const log=logFor(s.id,dayKey(Date.now()));
+      const prevEntry=log&&log.entries.find(x=>x.exercise===exercise);
+      uncompleteExercise(s.id,exercise);
+      runDraftWeights[exercise]=prevEntry?String(prevEntry.weight):'';
+      render();
+    }
+    return;
+  }
+  // PR chart / history / bodyweight (shared across all home cards)
   if(e.target.closest('#toggleHistory')){historyOpen=!historyOpen;render();return;}
   if(e.target.closest('#toggleBwHistory')){bwHistoryOpen=!bwHistoryOpen;render();return;}
+  if(e.target.closest('#downloadLog')){downloadLog();return;}
   if(e.target.closest('#bwAdd')){
-    const el=$('bwInput'), lb=Number(el&&el.value);
+    const el=$('bwInput'),lb=Number(el&&el.value);
     if(!isFinite(lb)||lb<=0)return;
     if(el)el.value='';
     addBodyweight(lb);return;
   }
   const delBw=e.target.closest('[data-del-bw]');
   if(delBw){deleteBodyweight(delBw.getAttribute('data-del-bw'));return;}
+  const delLog=e.target.closest('[data-del-log]');
+  if(delLog){deleteLog(delLog.getAttribute('data-del-log'));render();return;}
   const del=e.target.closest('[data-del]');
-  if(del){deleteEntry(del.getAttribute('data-del'));}
+  if(del){deleteEntryById(del.getAttribute('data-del'));render();}
 });
 document.addEventListener('change',e=>{
-  if(e.target.id==='exSelect'){selectedExercise=e.target.value;render();}
+  if(e.target.id==='exSelect'){selectedExercise=e.target.value;render();return;}
+  const pick=e.target.hasAttribute&&e.target.hasAttribute('data-pick-exercise')?e.target:null;
+  if(pick){
+    const ex=pick.getAttribute('data-pick-exercise');
+    if(pick.checked)builderDraft.selected.add(ex);else builderDraft.selected.delete(ex);
+    pick.closest('.exercisePick').classList.toggle('checked',pick.checked);
+  }
 });
 document.addEventListener('input',e=>{
-  if(e.target.id==='exercise'){
-    currentExercise=e.target.value;
-    const h=$('hint');if(h&&h.textContent)h.textContent='';
+  if(e.target.id==='sessionName'){builderDraft.name=e.target.value;const h=$('buildHint');if(h&&h.textContent)h.textContent='';}
+  if(e.target.hasAttribute&&e.target.hasAttribute('data-weight-for')){
+    runDraftWeights[e.target.getAttribute('data-weight-for')]=e.target.value;
   }
 });
 document.addEventListener('keydown',e=>{
-  if(e.target.id==='exercise'&&e.key==='Enter'){e.preventDefault();}
+  if(e.target.id==='sessionName'&&e.key==='Enter'){e.preventDefault();saveSessionFromBuilder();}
+  if(e.target.hasAttribute&&e.target.hasAttribute('data-weight-for')&&e.key==='Enter'){
+    e.preventDefault();completeRunExercise(e.target.getAttribute('data-weight-for'));
+  }
   if(e.target.id==='bwInput'&&e.key==='Enter'){
     e.preventDefault();
     const lb=Number(e.target.value);
@@ -536,7 +740,8 @@ spawnStars();
 (async()=>{
   const d=await window.Vitality.load();
   if(d&&typeof d==='object'&&!Array.isArray(d)){
-    if(Array.isArray(d.entries))store.entries=d.entries;
+    if(Array.isArray(d.sessions))store.sessions=d.sessions;
+    if(Array.isArray(d.logs))store.logs=d.logs;
     if(Array.isArray(d.bodyweight))store.bodyweight=d.bodyweight;
   }
   render();
