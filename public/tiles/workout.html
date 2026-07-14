@@ -97,14 +97,20 @@
   .sessionName{font-weight:600;font-size:15px}
   .sessionMeta{font-family:var(--font-mono);font-size:11px;color:var(--muted);margin-top:4px}
   .sessionCardActions{display:flex;align-items:center;gap:6px;flex-shrink:0}
-  .pickWrap{display:flex;flex-direction:column;gap:16px;margin-top:4px}
-  .pickCategoryName{font-family:var(--font-mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:8px}
-  .pickGrid{display:flex;flex-wrap:wrap;gap:8px}
-  .exercisePick{display:flex;align-items:center;gap:7px;padding:9px 12px;border:1px solid var(--border);border-radius:var(--radius-pill);
-    background:var(--bg);font-size:13px;cursor:pointer;transition:border-color .15s var(--ease),background .15s var(--ease)}
-  .exercisePick:hover{border-color:var(--brand-line)}
-  .exercisePick.checked{border-color:var(--brand-line);background:var(--brand-soft)}
-  .exercisePick input{accent-color:var(--brand)}
+  .pickWrap{display:flex;flex-direction:column;gap:12px;margin-top:4px}
+  .pickCategoryName{font-family:var(--font-mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
+  .pickGrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:2px 10px}
+  .exercisePick{position:relative;display:flex;align-items:flex-start;gap:10px;padding:6px 4px;border-radius:8px;cursor:pointer;
+    transition:background .15s var(--ease)}
+  .pickDot{margin-top:1px}
+  .exercisePick:hover{background:var(--surface)}
+  .exercisePick input{position:absolute;opacity:0;width:0;height:0;pointer-events:none}
+  .pickDot{flex-shrink:0;width:19px;height:19px;border-radius:50%;border:1.5px solid var(--border);display:flex;
+    align-items:center;justify-content:center;color:transparent;transition:border-color .15s var(--ease),background .15s var(--ease),color .15s var(--ease)}
+  .pickDot svg{width:11px;height:11px}
+  .exercisePick.checked .pickDot{background:var(--brand);border-color:var(--brand);color:#0a0a0c}
+  .pickName{font-size:13px;color:var(--muted-strong);line-height:1.25;transition:color .15s var(--ease)}
+  .exercisePick.checked .pickName{color:var(--fg)}
 
   /* -- running a session -- */
   .runProgress{font-family:var(--font-mono);font-size:11px;color:var(--muted);margin:0 0 16px}
@@ -465,7 +471,9 @@ function builderHtml(){
   const catBlocks=CATEGORIES.map(cat=>{
     const items=EXERCISE_CATALOG[cat].map(ex=>{
       const checked=builderDraft.selected.has(ex);
-      return '<label class="exercisePick'+(checked?' checked':'')+'"><input type="checkbox" data-pick-exercise="'+esc(ex)+'"'+(checked?' checked':'')+' /><span>'+esc(ex)+'</span></label>';
+      return '<label class="exercisePick'+(checked?' checked':'')+'"><input type="checkbox" data-pick-exercise="'+esc(ex)+'"'+(checked?' checked':'')+' />'
+        +'<span class="pickDot" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12l5 5L20 6"/></svg></span>'
+        +'<span class="pickName">'+esc(ex)+'</span></label>';
     }).join('');
     return '<div class="pickCategory"><div class="pickCategoryName">'+cat+'</div><div class="pickGrid">'+items+'</div></div>';
   }).join('');
