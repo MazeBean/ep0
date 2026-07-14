@@ -188,7 +188,7 @@ export default function Dashboard({ firstName, userId }: DashboardProps) {
     setChrome(dashboardChrome.get(userId))
   }, [userId])
 
-  const wallAccent = chrome ? backgroundAccent(chrome.background) : '#e0b13c'
+  const wallAccent = chrome ? backgroundAccent(chrome.background) : '#6EE7B7'
 
   return (
     <main className={`${styles.page} ${styles.oneScreen} grain-overlay`} style={{ ['--wall-accent' as string]: wallAccent }}>

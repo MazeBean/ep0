@@ -1,12 +1,11 @@
 /* Persistent left nav — one slot per real tile, matching the reference's
-   sidebar structure. Scoped accent tokens so this component owns its own
-   orange-red identity without touching the app-wide --mint (used elsewhere,
-   outside this dashboard). */
+   sidebar structure. Scoped accent tokens, kept in step with the app-wide
+   --mint so the sidebar reads as part of the same dashboard. */
 .sidebar {
-  --accent: #e0b13c;
-  --accent-ink: #2a1e05;
-  --accent-soft: rgba(224, 177, 60, 0.1);
-  --accent-line: rgba(224, 177, 60, 0.3);
+  --accent: #6EE7B7;
+  --accent-ink: #06110c;
+  --accent-soft: rgba(110, 231, 183, 0.1);
+  --accent-line: rgba(110, 231, 183, 0.3);
 
   position: fixed;
   top: 0;

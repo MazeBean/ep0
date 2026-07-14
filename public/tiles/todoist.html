@@ -9,7 +9,7 @@
     --bg:#0a0a0c;--surface:rgba(255,255,255,.045);--border:rgba(255,255,255,.11);--brand:#6EE7B7;
     --brand-soft:rgba(110,231,183,.08);--brand-line:rgba(110,231,183,.3);
     --muted:#8a8a90;--muted-strong:#a8a8b0;--fg:#ededf0;--neg:#ff6b6b;--neg-line:rgba(255,107,107,.4);
-    --today:#e8a15f;--track:#17171b;--radius-md:12px;--radius-pill:999px;
+    --today:#6EE7B7;--track:#17171b;--radius-md:12px;--radius-pill:999px;
     --font-display:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,sans-serif;
     --font-mono:ui-monospace,SFMono-Regular,Menlo,"JetBrains Mono",monospace;
     --font-serif:Georgia,"Iowan Old Style","Times New Roman",serif;
@@ -303,13 +303,25 @@ async function addTask(){
     $('hint').textContent='Could not add that task.';
   }
 }
+/* Optimistic: update the local list + render immediately so the chip
+   vanishes the instant you click, instead of waiting on the remove/complete
+   round-trip AND a full re-list before the UI moves at all. Re-syncs with
+   the server in the background; rolls back only if the actual call fails. */
 async function completeTask(id){
-  try{ await window.Vitality.todoist.complete(id); }catch(err){ /* fail quiet, refresh below still shows current state */ }
-  await refresh();
+  const prev=tasks;
+  tasks=tasks.filter(t=>String(t.id)!==String(id));
+  render();
+  try{ await window.Vitality.todoist.complete(id); }
+  catch(err){ tasks=prev; render(); return; }
+  refresh();
 }
 async function deleteTask(id){
-  try{ await window.Vitality.todoist.remove(id); }catch(err){ /* fail quiet */ }
-  await refresh();
+  const prev=tasks;
+  tasks=tasks.filter(t=>String(t.id)!==String(id));
+  render();
+  try{ await window.Vitality.todoist.remove(id); }
+  catch(err){ tasks=prev; render(); return; }
+  refresh();
 }
 
 document.addEventListener('click',e=>{

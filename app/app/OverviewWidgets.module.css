@@ -25,7 +25,7 @@
 }
 
 .card:hover {
-  border-color: rgba(224, 177, 60, 0.24);
+  border-color: rgba(110, 231, 183, 0.24);
 }
 
 /* Pinned to the narrow column, after Goals progress — the grid's normal
@@ -60,7 +60,7 @@
   font-family: var(--font-mono), ui-monospace, monospace;
   font-size: 0.625rem;
   letter-spacing: 0.1em;
-  color: rgba(224, 177, 60, 0.8);
+  color: rgba(110, 231, 183, 0.8);
 }
 
 .bigNum {
@@ -152,7 +152,7 @@
 
 .gaugeFill {
   fill: none;
-  stroke: #e0b13c;
+  stroke: #6EE7B7;
   stroke-width: 9;
   stroke-linecap: round;
   transition: stroke-dashoffset 500ms cubic-bezier(0.16, 1, 0.3, 1);
@@ -221,7 +221,7 @@
 
 .wheelFill {
   fill: none;
-  stroke: #e0b13c;
+  stroke: #6EE7B7;
   stroke-width: 11;
   stroke-linecap: round;
 }
@@ -271,12 +271,12 @@
 }
 
 .sparkArea {
-  fill: rgba(224, 177, 60, 0.16);
+  fill: rgba(110, 231, 183, 0.16);
 }
 
 .sparkLine {
   fill: none;
-  stroke: #e0b13c;
+  stroke: #6EE7B7;
   stroke-width: 1.6;
   stroke-linejoin: round;
   stroke-linecap: round;
