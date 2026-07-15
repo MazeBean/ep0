@@ -337,7 +337,7 @@ export default function OverviewWidgets({ userId }: { userId: string }) {
         {w.workout && <RadialGauge pct={(w.workout.sessionsThisWeek / 7) * 100} label={`${w.workout.prsThisMonth} PRs this mo.`} sub="/ wk" />}
       </div>
 
-      <div className={styles.card}>
+      <div className={`${styles.card} ${styles.stackCard}`}>
         <div className={styles.cardHead}>
           <span className={styles.cardTitle}>Daily stack</span>
           <span className={styles.cardTag}>Body</span>
