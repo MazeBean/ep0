@@ -19,7 +19,7 @@
   }
   *{box-sizing:border-box}
   h1,h2,h3,p{margin:0}
-  html,body{margin:0;height:100%}
+  html,body{margin:0;height:100%;scrollbar-gutter:stable}
   body{background:radial-gradient(120% 60% at 50% 0%,#17171b 0%,#101013 42%,#0a0a0c 70%,#08080a 100%);
     color:var(--fg);font:15px/1.5 var(--font-display);display:flex;justify-content:center;padding:40px 20px;
     position:relative;overflow-x:hidden;-webkit-font-smoothing:antialiased}
@@ -52,7 +52,7 @@
     animation:sway 7s ease-in-out infinite}
   @keyframes sway{0%,100%{transform:rotate(-3deg) translateY(0)}50%{transform:rotate(3deg) translateY(-2px)}}
   .mark svg{width:22px;height:22px}
-  .title{font-family:var(--font-serif);font-style:italic;font-size:40px;font-weight:600;letter-spacing:-.01em;margin:0}
+  .title{font-family:var(--font-serif);font-style:italic;font-size:40px;font-weight:600;line-height:1;letter-spacing:-.01em;margin:0}
   .subtitle{color:var(--muted);font-family:var(--font-mono);font-size:11px;letter-spacing:.12em;margin:5px 0 0}
   .stats{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:10px}
   .stat{position:relative;border:1px solid var(--border);border-radius:var(--radius-md);background:var(--surface);padding:10px 12px;text-align:center;

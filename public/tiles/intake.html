@@ -21,7 +21,11 @@
   }
   *{box-sizing:border-box}
   h1,h2,h3,p{margin:0}
-  html,body{margin:0;height:100%}
+  /* Reserve the scrollbar's width up front so toggling collapsible content
+     (e.g. sleep history) that pushes the page just past the overflow
+     threshold doesn't shrink the available width and reflow the grid-paired
+     cards by a few pixels. */
+  html,body{margin:0;height:100%;scrollbar-gutter:stable}
   body{background:radial-gradient(120% 60% at 50% 0%,#17171b 0%,#101013 42%,#0a0a0c 70%,#08080a 100%);
     color:var(--fg);font:15px/1.5 var(--font-display);display:flex;justify-content:center;padding:40px 20px;
     position:relative;overflow-x:hidden;-webkit-font-smoothing:antialiased}
@@ -54,7 +58,7 @@
     animation:sway 7s ease-in-out infinite}
   @keyframes sway{0%,100%{transform:rotate(-3deg) translateY(0)}50%{transform:rotate(3deg) translateY(-2px)}}
   .mark svg{width:20px;height:20px}
-  .title{font-family:var(--font-serif);font-style:italic;font-size:40px;font-weight:600;letter-spacing:-.01em;margin:0}
+  .title{font-family:var(--font-serif);font-style:italic;font-size:40px;font-weight:600;line-height:1;letter-spacing:-.01em;margin:0}
   .subtitle{color:var(--muted);font-family:var(--font-mono);font-size:11px;letter-spacing:.12em;margin:4px 0 0}
   .card{position:relative;border:1px solid var(--border);border-radius:16px;background:var(--surface);padding:12px;margin-bottom:10px;
     -webkit-backdrop-filter:blur(20px) saturate(120%);backdrop-filter:blur(20px) saturate(120%);
