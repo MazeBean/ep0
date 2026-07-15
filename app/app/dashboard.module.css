@@ -103,28 +103,35 @@
 .header {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  text-align: center;
+  align-items: flex-start;
+  text-align: left;
   gap: var(--space-2);
   opacity: 0;
   animation: fadeUp 700ms var(--ease-premium) forwards;
   min-width: 0;
 }
 
-/* Live clock + weather row — sits under the date, same muted mono voice. */
+/* Date + live clock + weather, all one line (date first) — enlarged and
+   bolder than the old two-line muted-mono layout so it reads as real
+   information, not fine print. */
 .heroStats {
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
   flex-wrap: wrap;
   gap: var(--space-2);
   margin-top: var(--space-1);
   font-family: var(--font-mono), ui-monospace, monospace;
-  font-size: var(--text-xs);
-  letter-spacing: 0.06em;
-  color: var(--muted);
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: var(--fg);
   font-variant-numeric: tabular-nums;
   min-height: 1.2em;
+}
+
+.heroDate {
+  white-space: nowrap;
 }
 
 .heroStat {
@@ -137,8 +144,8 @@
 
 .heroWeatherIcon {
   display: inline-flex;
-  width: 14px;
-  height: 14px;
+  width: 18px;
+  height: 18px;
   color: var(--muted);
   flex-shrink: 0;
 }
@@ -146,6 +153,17 @@
 .heroWeatherIcon svg {
   width: 100%;
   height: 100%;
+}
+
+/* Weather-condition icon is colored per-kind inline (sun/rain/snow/etc. all
+   read differently) — humidity and sunset get their own fixed accent so the
+   whole line reads as distinct at-a-glance stats, not a wall of same-color text. */
+.heroIconHumidity {
+  color: #22d3ee;
+}
+
+.heroIconSunset {
+  color: #fb923c;
 }
 
 .greeting {
@@ -183,13 +201,6 @@
     animation: none;
     opacity: 0;
   }
-}
-
-.date {
-  font-size: var(--text-xs);
-  font-weight: 500;
-  color: var(--muted);
-  letter-spacing: 0.12em;
 }
 
 @keyframes fadeUp {
@@ -601,12 +612,12 @@
 /* Header row: gem on the left, greeting + date on the right. The gem
    anchors the "Vitality character" presence on the dashboard without
    cluttering the tiles. */
-/* .header is the only thing laid out here. Centering it on the row's full
-   width centers it over the whole panel grid beneath (OverviewWidgets + the
-   tile grid both span the same .shell width). */
+/* .header is the only thing laid out here — left-aligned, flush with the
+   left edge of the panel grid beneath (OverviewWidgets + the tile grid both
+   start at the same .shell edge). */
 .headerRow {
   display: flex;
-  justify-content: center;
+  justify-content: flex-start;
 }
 
 .headerGem {
@@ -620,12 +631,17 @@
     width: 100px;
     height: 100px;
   }
-  /* Let the greeting shrink/wrap instead of running underneath the gear. */
+  /* Let the greeting shrink/wrap instead of running underneath the gear.
+     The desktop one-line/nowrap treatment is specifically so it aligns with
+     the multi-column panel grid above it — moot on a single-column phone
+     layout, and a long "Better get to bed, <name>..." would otherwise run
+     off the right edge with nothing to shrink it back on screen. */
   .header {
     min-width: 0;
   }
   .greeting {
     font-size: clamp(1.85rem, 7vw, 2.3rem);
+    white-space: normal;
   }
 }
 
@@ -732,34 +748,35 @@
 }
 
 /* ───────── One-screen fit (desktop) ─────────
-   On desktop widths that run the 4-column bento (≥981px) and are tall
-   enough to hold it (≥761px), lock the dashboard to the viewport height
-   so it fills exactly one screen with no scroll. The shell flexes to fill
-   the viewport, the grid takes whatever height is left under the header,
-   and its three rows split that space evenly — Train still spans two rows,
-   Brand the third, so the proportions are unchanged, just sized to fit.
-   Narrower or shorter screens fall through to the natural scrolling
-   layout above (this block is purely additive, no base rules touched).
+   On desktop widths (≥981px) tall enough to hold the home tab comfortably
+   (≥761px), lock the dashboard to the viewport height so it fills exactly
+   one screen with no scroll — matching every other tab, which each render
+   full-screen in their own tile overlay. .shell is capped to the remaining
+   height under the header and flexes to fill it; OverviewWidgets.module.css's
+   .grid (the 6-card overview) is given the matching flex:1 + equal-height
+   rows there, so its cards stretch/shrink together instead of the page
+   growing past the fold. Narrower or shorter screens fall through to the
+   natural scrolling layout above (this block is purely additive, no base
+   rules touched).
 
    IMPORTANT: gated on .oneScreen, not bare .page. Many other modules
    (goals, peak, wearables, the workout log, the session menu, fitness
    setup) borrow dashboardStyles.page for the same chrome but are taller
    than the viewport. Locking bare .page to 100vh clipped them with no
    scroll. Only the dashboard home tags its root with .oneScreen. */
-@media (min-width: 981px) and (min-height: 761px) {
-  /* The dashboard is customizable now: it can hold many tiles and grow past one
-     screen, so it scrolls naturally. The OLD one-screen fit locked .page to 100vh
-     and forced the grid into 4 collapsible rows (repeat(4, minmax(0,150px))) —
-     that crushed the new flexible grid's rows and made tiles overlap. It is gone.
-     The grid keeps its natural row heights (grid-auto-rows in veeTiles.css); we
-     only cap its width here so the backdrop still breathes on the sides. */
+@media (min-width: 981px) and (min-height: 800px) {
   .page.oneScreen {
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
     padding-top: var(--space-8);
     padding-bottom: var(--space-8);
   }
   .oneScreen .shell {
     width: 100%;
     gap: var(--space-6);
+    flex: 1;
+    min-height: 0;
   }
   .oneScreen .shell :global(.veeTiles .grid) {
     width: 100%;

@@ -103,6 +103,36 @@ function WeatherIcon({ code }: { code: number }) {
   )
 }
 
+/** Each weather family gets its own accent so the icon row reads at a glance
+ *  instead of everything sitting in the same muted grey. */
+const WEATHER_KIND_COLOR: Record<ReturnType<typeof weatherKind>, string> = {
+  clear: '#fbbf24',
+  cloudy: '#94a3b8',
+  fog: '#9ca3af',
+  rain: '#60a5fa',
+  snow: '#bae6fd',
+  storm: '#a78bfa',
+}
+
+function DropletIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round">
+      <path d="M12 2.7c3.4 4.2 5.8 7.6 5.8 10.8a5.8 5.8 0 0 1-11.6 0c0-3.2 2.4-6.6 5.8-10.8Z" />
+    </svg>
+  )
+}
+
+function SunsetIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round">
+      <path d="M17 15.5a5 5 0 0 0-10 0" />
+      <path d="M12 4v5.5" />
+      <path d="M9 7l3 3 3-3" />
+      <path d="M3 15.5h18" />
+    </svg>
+  )
+}
+
 export default function DashboardHeader({ firstName, greeting, date }: DashboardHeaderProps) {
   const g = greeting ?? DEFAULT_CHROME.greeting
   const d = date ?? DEFAULT_CHROME.date
@@ -219,20 +249,29 @@ export default function DashboardHeader({ firstName, greeting, date }: Dashboard
           ▌
         </span>
       </h1>
-      {d.show && <p className={styles.date}>{dateText}</p>}
       <div className={styles.heroStats}>
+        {d.show && <span className={styles.heroDate}>{dateText}</span>}
+        {d.show && clock && <span className={styles.heroDot} aria-hidden>·</span>}
         {clock && <span className={styles.heroStat}>{clock}</span>}
         {weatherStatus === 'ok' && weather && (
           <>
             <span className={styles.heroDot} aria-hidden>·</span>
-            <span className={styles.heroWeatherIcon} aria-hidden><WeatherIcon code={weather.code} /></span>
+            <span className={styles.heroWeatherIcon} style={{ color: WEATHER_KIND_COLOR[weatherKind(weather.code)] }} aria-hidden>
+              <WeatherIcon code={weather.code} />
+            </span>
             <span className={styles.heroStat}>{weather.tempF}°F</span>
             <span className={styles.heroDot} aria-hidden>·</span>
-            <span className={styles.heroStat}>{weather.humidity}% Humidity</span>
+            <span className={`${styles.heroWeatherIcon} ${styles.heroIconHumidity}`} aria-hidden>
+              <DropletIcon />
+            </span>
+            <span className={styles.heroStat}>{weather.humidity}%</span>
             {sunsetText && (
               <>
                 <span className={styles.heroDot} aria-hidden>·</span>
-                <span className={styles.heroStat}>Sunset {sunsetText}</span>
+                <span className={`${styles.heroWeatherIcon} ${styles.heroIconSunset}`} aria-hidden>
+                  <SunsetIcon />
+                </span>
+                <span className={styles.heroStat}>{sunsetText}</span>
               </>
             )}
           </>
