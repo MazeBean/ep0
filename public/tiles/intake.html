@@ -96,7 +96,6 @@
   .peakTitleBlock{display:flex;flex-direction:column;gap:2px}
   .peakTitle{font-family:var(--font-serif);font-style:italic;font-weight:600;font-size:22px;margin:0;letter-spacing:-.01em}
   .peakSub{font-family:var(--font-mono);font-size:9.5px;letter-spacing:.12em;color:var(--muted)}
-  .peakHint{font-size:11px;color:var(--muted-strong)}
   .peakDesc{flex:1;min-width:190px}
   .peakDescLabel{font-family:var(--font-mono);font-size:10px;letter-spacing:.12em;color:var(--muted);text-transform:uppercase;display:block;margin-bottom:4px}
   .peakDescText{font-size:13px;color:var(--muted-strong);margin:0;line-height:1.5}
@@ -452,14 +451,13 @@ function peakCardHtml(){
     +'<circle class="gaugeTrack" cx="50" cy="50" r="40"/>'
     +'<circle class="gaugeFill" cx="50" cy="50" r="40" stroke-dasharray="'+circumference.toFixed(1)+'" stroke-dashoffset="'+offset.toFixed(1)+'"/>'
     +'</svg><span class="peakGaugeNum">'+nowE+'</span></div>'
-    +'<div class="peakTitleBlock"><h2 class="peakTitle">Peak</h2><span class="peakSub">RIGHT NOW</span>'
-    +'<span class="peakHint">Drag the now-line to log feel</span></div>'
+    +'<div class="peakTitleBlock"><h2 class="peakTitle">Peak</h2><span class="peakSub">RIGHT NOW</span></div>'
     +'<div class="peakDesc"><span class="peakDescLabel">Today’s energy curve</span>'
     +'<p class="peakDescText">Your predicted score, hour by hour.</p></div>'
     +'<div class="peakControls"><div class="segToggle">'+segs+'</div>'
     +'<button type="button" class="gearBtn'+(showBaseline?' active':'')+'" id="chartSettings" title="Toggle baseline rhythm line">'
-    +'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="3"/>'
-    +'<path d="M12 2v3M12 19v3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M2 12h3M19 12h3M4.9 19.1l2.1-2.1M17 7l2.1-2.1"/></svg></button>'
+    +'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/>'
+    +'<path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></button>'
     +'</div></div>'
     +'<div class="chartWrap">'+energyChartHtml(curve,peak,now,nowE)+'</div>'
     +'<div class="legend"><span><i class="swatch"></i>With caffeine</span><span><i class="swatch base"></i>Baseline rhythm</span></div>'
