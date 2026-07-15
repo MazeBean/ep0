@@ -24,8 +24,6 @@
     --track:#17171b;
     --card-shadow:0 1px 0 rgba(255,255,255,0.02) inset, 0 18px 44px -30px rgba(0,0,0,0.85);
     --glow-1:rgba(255,255,255,0.06); --glow-2:rgba(255,255,255,0.03);
-    --tabbar-grad:linear-gradient(to top, rgba(5,5,6,0.94) 55%, transparent);
-    --tabbar-pill:rgba(16,16,20,0.92);
     --space-1:.2rem;--space-2:.4rem;--space-3:.55rem;--space-4:.75rem;--space-5:.9rem;
     --space-6:1.05rem;--space-8:1.4rem;--space-10:1.7rem;--space-12:2rem;--space-16:2.6rem;
     --radius-sm:8px;--radius-md:11px;--radius-lg:18px;--radius-pill:999px;
@@ -60,7 +58,7 @@
 
   .page { position: relative; z-index: 1; min-height: 100dvh; background: transparent; color: var(--fg); padding: var(--space-8) var(--space-5) var(--space-16); isolation: isolate; }
   .page::before { content:''; position: absolute; inset:0; pointer-events:none; z-index:-1; background: radial-gradient(58% 42% at 82% 6%, var(--glow-1), transparent 70%), radial-gradient(48% 38% at 12% 92%, var(--glow-2), transparent 72%); }
-  .shell { max-width: none; margin: 0 auto; padding-bottom: 56px; }
+  .shell { max-width: none; margin: 0 auto; }
 
   /* Header */
   .header { display:flex; align-items:flex-end; justify-content:space-between; gap: var(--space-4); margin-bottom: var(--space-8); flex-wrap: wrap; }
@@ -77,10 +75,9 @@
   .headerRight { display:flex; flex-direction:column; align-items:flex-end; gap: var(--space-2); }
   .title { font-family: var(--font-serif); font-style: italic; font-weight: 600; font-size: var(--text-3xl); line-height: 1.0; letter-spacing: -0.01em; color: var(--fg); margin: 0; }
   .subtitle { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.18em; color: var(--muted); margin: 0; }
+  /* Pill wrapper for the section switcher (net worth / subs / orders / wishlist),
+     now living top-right in the header where the currency switcher used to be. */
   .currencySeg { display:inline-flex; align-items:center; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-pill); padding: 3px; gap: 2px; }
-  .currencyBtn { appearance:none; background: transparent; border:0; color: var(--muted); font-family: var(--font-mono); font-size: 11px; font-weight: 500; letter-spacing: 0.04em; padding: 5px 11px; border-radius: var(--radius-pill); cursor: pointer; transition: background var(--duration) var(--ease-premium), color var(--duration) var(--ease-premium); }
-  .currencyBtn:hover { color: var(--muted-strong); }
-  .currencyBtnActive, .currencyBtnActive:hover { background: var(--brand); color: var(--brand-ink); }
 
   /* Section */
   .section { margin-bottom: var(--space-10); }
@@ -308,8 +305,6 @@
   }
 
   /* Tab bar */
-  .tabBar { position: fixed; bottom:0; left:0; right:0; z-index: 30; display:flex; justify-content:center; padding: var(--space-3) var(--space-4) calc(var(--space-3) + env(safe-area-inset-bottom)); background: var(--tabbar-grad); pointer-events:none; }
-  .tabBarInner { display:flex; gap: 4px; padding: 5px; background: var(--tabbar-pill); border: 1px solid var(--border); border-radius: var(--radius-pill); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); box-shadow: 0 14px 44px rgba(0,0,0,0.45); pointer-events:auto; }
   .tab { appearance:none; background: transparent; border:0; color: var(--muted); font-family: var(--font-ui); font-size: 12px; font-weight: 600; letter-spacing: 0.02em; padding: 9px 18px; border-radius: var(--radius-pill); cursor: pointer; transition: background var(--duration) var(--ease-premium), color var(--duration) var(--ease-premium); }
   .tab:hover { color: var(--muted-strong); }
   .tab.active, .tab.active:hover { background: var(--brand); color: var(--brand-ink); }
@@ -336,11 +331,10 @@
  * ============================================================ */
 const ACTIVITY_MAX = 50;
 const NW_HISTORY_MAX = 500;
-const CURRENCIES = ['CHF', 'USD', 'EUR', 'GBP'];
 const TAB_KEYS = ['net', 'subs', 'orders', 'wish'];
 const TAB_LABELS = { net: 'Net worth', subs: 'Subs', orders: 'Orders', wish: 'Wishlist' };
-/* No live FX in a sealed tile — every currency is a display symbol at rate 1. */
-const DEFAULT_RATES = { CHF: 1, USD: 1, EUR: 1, GBP: 1 };
+/* Money is always shown in USD — no currency switcher, no live FX. */
+const DEFAULT_RATES = { USD: 1 };
 
 function genId(prefix) { return (prefix || 'id') + '_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2, 8); }
 
@@ -404,7 +398,7 @@ function esc(s) { return String(s == null ? '' : s).replace(/&/g,'&amp;').replac
 /* ============================================================
  * State + persistence (through the bridge)
  * ============================================================ */
-const DEFAULT_STATE = { version: 1, currency: 'CHF', activeTab: 'net', accounts: [], subscriptions: [], orders: [], wishlist: [], activity: [], netWorthHistory: [] };
+const DEFAULT_STATE = { version: 1, currency: 'USD', activeTab: 'net', accounts: [], subscriptions: [], orders: [], wishlist: [], activity: [], netWorthHistory: [] };
 
 let state = Object.assign({}, DEFAULT_STATE);
 let rates = Object.assign({}, DEFAULT_RATES);
@@ -457,7 +451,6 @@ function pushActivity(entry) {
  * Actions
  * ============================================================ */
 const actions = {
-  setCurrency(c) { state.currency = c; save(); render(); },
   setActiveTab(t) { state.activeTab = t; save(); render(); },
 
   addAccount(type, name, displayAmount) {
@@ -567,7 +560,7 @@ const CHART_PERIODS = [ { key:'1D',label:'1D',days:1 }, { key:'1W',label:'1W',da
  * Header + ticker
  * ============================================================ */
 function headerHtml() {
-  const segs = CURRENCIES.map(c => '<button type="button" class="currencyBtn ' + (c === state.currency ? 'currencyBtnActive' : '') + '" data-act="currency" data-c="' + c + '">' + c + '</button>').join('');
+  const segs = TAB_KEYS.map(k => '<button type="button" class="tab ' + (k === state.activeTab ? 'active' : '') + '" data-act="tab" data-tab="' + k + '">' + TAB_LABELS[k] + '</button>').join('');
   return '<header class="header"><div class="headerLeft">'
     + '<div style="display:flex;align-items:center;gap:14px">'
     + '<div class="markWrap"><div class="markGlow"></div><div class="mark" aria-hidden="true">'
@@ -576,7 +569,7 @@ function headerHtml() {
     + '<div><h1 class="title">Finance</h1><p class="subtitle">Net worth · subs · orders · wishlist</p></div>'
     + '</div>'
     + '</div>'
-    + '<div class="headerRight"><div class="currencySeg" role="radiogroup" aria-label="Display currency">' + segs + '</div></div></header>';
+    + '<div class="headerRight"><div class="currencySeg" role="radiogroup" aria-label="Section">' + segs + '</div></div></header>';
 }
 
 function tickerEntries() {
@@ -968,13 +961,8 @@ function viewHtml() {
   if (state.activeTab === 'orders') return ordersViewHtml();
   return wishViewHtml();
 }
-function tabBarHtml() {
-  return '<nav class="tabBar" aria-label="Finance sections"><div class="tabBarInner">'
-    + TAB_KEYS.map(k => '<button type="button" class="tab ' + (k === state.activeTab ? 'active' : '') + '" data-act="tab" data-tab="' + k + '">' + TAB_LABELS[k] + '</button>').join('')
-    + '</div></nav>';
-}
 function render() {
-  document.getElementById('app').innerHTML = headerHtml() + tickerHtml() + viewHtml() + tabBarHtml();
+  document.getElementById('app').innerHTML = headerHtml() + tickerHtml() + viewHtml();
   mountTicker();
   // Focus an inline-edit input if one just opened.
   if (ui.edit) {
@@ -1054,7 +1042,6 @@ document.addEventListener('click', e => {
   const act = btn.dataset.act;
   const id = btn.dataset.id;
   switch (act) {
-    case 'currency': actions.setCurrency(btn.dataset.c); break;
     case 'tab': actions.setActiveTab(btn.dataset.tab); break;
     case 'chartPeriod': ui.chartPeriod = btn.dataset.p; render(); break;
     case 'showAdd': ui.show[btn.dataset.show] = true; render(); break;
@@ -1133,7 +1120,7 @@ function spawnStars() {
   state = Object.assign({}, DEFAULT_STATE, loaded);
   // Defensive: guarantee every collection exists even after a partial save.
   ['accounts','subscriptions','orders','wishlist','activity','netWorthHistory'].forEach(k => { if (!Array.isArray(state[k])) state[k] = []; });
-  if (CURRENCIES.indexOf(state.currency) < 0) state.currency = 'CHF';
+  state.currency = 'USD';
   if (TAB_KEYS.indexOf(state.activeTab) < 0) state.activeTab = 'net';
   maybeSnapshotNw(); save();
   spawnStars();

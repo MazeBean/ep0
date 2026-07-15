@@ -145,14 +145,11 @@
 /* ───────── Editorial greeting (parent /app dashboard) ───────── */
 
 .header {
-  /* .headerRow is grid-template-columns: 180px 1fr 180px. profileAvatar is
-     position:absolute, so it never participates in grid auto-placement —
-     this is the ONLY grid-placed child. Auto-placement defaults an only
-     child into column 1, not the centre column, which is what actually
-     broke when the header gem (previously the first grid-placed child,
-     pushing this into column 2 by ordinary flow) was removed. Force it
-     explicitly instead of relying on now-nonexistent sibling order. */
-  grid-column: 2;
+  /* .headerRow mirrors OverviewWidgets' 2fr/1fr grid (same gap) so this column
+     is pixel-for-pixel the same width as the "Today's intake" card below it —
+     centering here lines the greeting up over that card instead of over the
+     full shell width. */
+  grid-column: 1;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -160,6 +157,7 @@
   gap: var(--space-2);
   opacity: 0;
   animation: fadeUp 700ms var(--ease-premium) forwards;
+  min-width: 0;
 }
 
 /* Live clock + weather row — sits under the date, same muted mono voice. */
@@ -200,27 +198,28 @@
 }
 
 .greeting {
-  font-family: var(--font-mono), ui-monospace, monospace;
-  font-weight: 700;
-  /* --greet-scale (default 1) lets the user size their greeting; the
-     terminal-log look (phosphor green mono + typed-out reveal) replaces the
-     old rounded-sans display face. */
-  font-size: calc(clamp(2.25rem, 4.5vw, 3.25rem) * var(--greet-scale, 1));
+  font-family: var(--font-fira), ui-monospace, monospace;
+  font-weight: 600;
+  /* --greet-scale (default 1) lets the user size their greeting. Sized off the
+     header column's own width (not the viewport) so it always fits the one
+     line it's confined to, however narrow that column gets. */
+  font-size: calc(clamp(1.5rem, 3vw, 3.25rem) * var(--greet-scale, 1));
   line-height: 1;
   letter-spacing: 0;
-  color: #39ff7a;
-  text-shadow: 0 0 18px rgba(57, 255, 122, 0.35);
+  white-space: nowrap;
+  color: var(--mint);
+  text-shadow: 0 0 18px rgba(110, 231, 183, 0.35);
 }
 
 .greetingName {
-  /* the accented name follows the chosen wallpaper accent (mint by default) */
-  color: var(--wall-accent, var(--mint));
+  /* the whole greeting is mint green now, name included — no separate accent */
+  color: var(--mint);
 }
 
 .caret {
   display: inline-block;
   margin-left: 2px;
-  color: currentColor;
+  color: var(--mint);
   animation: caretBlink 1s step-end infinite;
 }
 
@@ -652,19 +651,16 @@
 /* Header row: gem on the left, greeting + date on the right. The gem
    anchors the "Vitality character" presence on the dashboard without
    cluttering the tiles. */
-/* Grid, not flex: a 3-column row (gem | header | balancing spacer) where the
-   two outer tracks are the SAME width. That makes the centre column
-   mathematically centred on the row's full width no matter what's in the
-   side columns — unlike flex, where centering .header "within remaining
-   space next to the gem" visibly pushed it right of true centre. The third
-   column has nothing placed in it (the avatar is position:absolute,
-   pulled out of grid flow entirely) — it exists purely to balance the gem's
-   180px on the other side. */
+/* Grid, not flex, and matching OverviewWidgets.module.css's .grid (2fr 1fr,
+   same gap) column-for-column: that's what makes .header's first column line
+   up exactly over the "Today's intake" card that renders directly beneath it.
+   The avatar is position:absolute, pulled out of grid flow entirely, so the
+   second column exists only as leftover space — nothing is placed there. */
 .headerRow {
   display: grid;
-  grid-template-columns: 180px 1fr 180px;
+  grid-template-columns: 2fr 1fr;
   align-items: center;
-  gap: var(--space-6);
+  gap: var(--space-4);
 }
 
 .headerGem {
@@ -674,12 +670,10 @@
 }
 
 @media (max-width: 980px) {
+  /* OverviewWidgets' own grid collapses to a single column at this width too
+     (its cards stack full-width), so the header matches it here. */
   .headerRow {
-    grid-template-columns: 140px 1fr 140px;
-  }
-  .headerGem {
-    width: 140px;
-    height: 140px;
+    grid-template-columns: 1fr;
   }
 }
 

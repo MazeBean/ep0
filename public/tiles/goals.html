@@ -112,6 +112,17 @@
   .xBtn{background:transparent;border:1px solid var(--border);color:var(--muted);width:26px;height:26px;border-radius:50%;cursor:pointer;flex-shrink:0;line-height:1}
   .xBtn:hover{color:var(--neg);border-color:var(--neg-line)}
   .empty{color:var(--muted);font-size:13px;padding:6px 0}
+  @media(min-width:820px){ .purpose{column-span:all} }
+  .purpose{margin-top:2px}
+  .purposeTitle{font-family:var(--font-serif);font-style:italic;font-size:26px;font-weight:600;letter-spacing:-.01em;margin:0 0 12px;
+    padding-top:16px;border-top:1px solid var(--border)}
+  .purposeGrid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+  @media(max-width:640px){ .purposeGrid{grid-template-columns:1fr} }
+  .purposeItem .cardHead{margin-bottom:8px}
+  textarea.purposeInput{width:100%;min-height:96px;background:var(--bg);border:1px solid var(--border);color:var(--fg);
+    border-radius:10px;padding:10px 12px;font:inherit;resize:vertical}
+  textarea.purposeInput:focus{outline:none;border-color:var(--brand)}
+  textarea.purposeInput::placeholder{color:#55555c}
 </style>
 </head>
 <body>
@@ -120,7 +131,7 @@
 <script>
 /* Goals — short-term + long-term goal lists. No network: persists through
    the dashboard bridge (window.Vitality) as one object with two arrays. */
-let store={shortTerm:[],longTerm:[]};
+let store={shortTerm:[],longTerm:[],purpose:{rules:'',purpose:'',ideas:'',goals:''}};
 const $=id=>document.getElementById(id);
 const REDUCED=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
@@ -196,10 +207,22 @@ function sectionHtml(key,label,inputId,btnId){
     +'<div class="list">'+listInner(key)+'</div>'
     +'</section>';
 }
+/* Free-text reflection fields, separate from the short/long goal lists above.
+   Plain textareas, not list items — there's nothing to check off or delete. */
+function purposeHtml(){
+  const fields=[['rules','My Rules'],['purpose','My Purpose'],['ideas','My Ideas'],['goals','My Goals']];
+  return '<section class="purpose"><h2 class="purposeTitle">Purpose</h2><div class="purposeGrid">'
+    +fields.map(([key,label])=>
+      '<div class="card purposeItem"><div class="cardHead"><span class="cardName">'+label+'</span></div>'
+      +'<textarea class="purposeInput" id="purpose_'+key+'" data-purpose="'+key+'" placeholder="Write '+label.toLowerCase()+'&hellip;">'+esc(store.purpose[key])+'</textarea></div>'
+    ).join('')
+    +'</div></section>';
+}
 function render(){
   $('app').innerHTML=headerHtml()+statsHtml()
     +sectionHtml('shortTerm','Short-term','shortInput','shortAdd')
-    +sectionHtml('longTerm','Long-term','longInput','longAdd');
+    +sectionHtml('longTerm','Long-term','longInput','longAdd')
+    +purposeHtml();
 }
 
 /* Short-term goals get a days+weeks span from today; long-term ones get a
@@ -264,12 +287,26 @@ document.addEventListener('keydown',e=>{
   if(e.target.id==='longInput'&&e.key==='Enter'){e.preventDefault();addGoal('longTerm','longInput');}
 });
 
+/* Debounced so persist() isn't called on every keystroke — no re-render here
+   (that would rebuild the textarea mid-type and drop focus/cursor position). */
+let purposeSaveTimer=null;
+document.addEventListener('input',e=>{
+  const key=e.target.dataset&&e.target.dataset.purpose;
+  if(!key)return;
+  store.purpose[key]=e.target.value;
+  clearTimeout(purposeSaveTimer);
+  purposeSaveTimer=setTimeout(persist,500);
+});
+
 spawnStars();
 (async()=>{
   const d=await window.Vitality.load();
   if(d&&typeof d==='object'&&!Array.isArray(d)){
     store.shortTerm=Array.isArray(d.shortTerm)?d.shortTerm:[];
     store.longTerm=Array.isArray(d.longTerm)?d.longTerm:[];
+    if(d.purpose&&typeof d.purpose==='object'){
+      store.purpose={rules:d.purpose.rules||'',purpose:d.purpose.purpose||'',ideas:d.purpose.ideas||'',goals:d.purpose.goals||''};
+    }
   }
   render();
   window.Vitality.ready();

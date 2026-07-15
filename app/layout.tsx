@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from 'next'
-import { Inter, Instrument_Serif, Hanken_Grotesk, JetBrains_Mono, Nunito } from 'next/font/google'
+import { Inter, Instrument_Serif, Hanken_Grotesk, JetBrains_Mono, Nunito, Fira_Code } from 'next/font/google'
 import './globals.css'
 import { cn } from "@/lib/utils";
 
@@ -46,6 +46,14 @@ const jetBrainsMono = JetBrains_Mono({
   display: 'swap',
 })
 
+// Terminal-log voice for the home dashboard's editorial greeting only.
+const firaCode = Fira_Code({
+  subsets: ['latin'],
+  weight: ['500', '600'],
+  variable: '--font-fira',
+  display: 'swap',
+})
+
 export const metadata: Metadata = {
   title: 'Vitality',
   description: 'A personal dashboard built around your goals.',
@@ -84,7 +92,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={cn(inter.variable, instrumentSerif.variable, hankenGrotesk.variable, jetBrainsMono.variable, nunito.variable, "font-sans")}
+      className={cn(inter.variable, instrumentSerif.variable, hankenGrotesk.variable, jetBrainsMono.variable, nunito.variable, firaCode.variable, "font-sans")}
     >
       <body>{children}</body>
     </html>

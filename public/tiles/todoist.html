@@ -121,6 +121,8 @@
     padding:6px 26px 6px 10px;font-size:12px;cursor:pointer;max-width:100%}
   .bucketChip.overdue{border-left-color:var(--neg)}
   .bucketChip:hover{border-color:var(--brand-line)}
+  .bucketChip .chipText{display:block}
+  .bucketChip .entryDue{display:block;margin-top:3px}
   .bucketChip .chipDel{position:absolute;top:2px;right:4px;background:none;border:none;color:var(--muted);cursor:pointer;font-size:12px;line-height:1;padding:3px}
   .bucketChip .chipDel:hover{color:var(--neg)}
 </style>
@@ -176,8 +178,8 @@ function dueLabel(due){
   const d=parseDue(due);
   if(!d)return due||'';
   if(isToday(due))return 'today';
-  if(isOverdue(due))return d.toLocaleDateString(undefined,{month:'short',day:'numeric'})+' (overdue)';
-  return d.toLocaleDateString(undefined,{month:'short',day:'numeric'});
+  const dateStr=d.toLocaleDateString(undefined,{weekday:'short',month:'short',day:'numeric'});
+  return isOverdue(due)?dateStr+' (overdue)':dateStr;
 }
 
 /* ---- the next-7-days calendar grid ---- */
@@ -205,9 +207,11 @@ function groupTasks(){
   }
   return {days,map,overdue,later,undated};
 }
-function chipHtml(t,cls){
+function chipHtml(t,cls,showDue){
+  const due=showDue?'<span class="entryDue">'+esc(dueLabel(t.due))+'</span>':'';
   return '<div class="'+(cls||'chip')+'" data-complete="'+t.id+'">'
     +'<span class="chipText">'+esc(t.content)+'</span>'
+    +due
     +'<button class="chipDel" data-del="'+t.id+'" title="Delete">×</button>'
     +'</div>';
 }
@@ -229,14 +233,14 @@ function weekGridHtml(){
 function bucketsHtml(){
   const {overdue,later,undated}=groupTasks();
   if(!overdue.length&&!later.length&&!undated.length)return '';
-  const bucket=(label,items,cls)=>{
+  const bucket=(label,items,cls,showDue)=>{
     if(!items.length)return '';
     return '<div class="bucketRow"><span class="bucketLbl">'+label+'</span><div class="bucketList">'
-      +items.map(t=>chipHtml(t,'bucketChip'+(cls?' '+cls:''))).join('')+'</div></div>';
+      +items.map(t=>chipHtml(t,'bucketChip'+(cls?' '+cls:''),showDue)).join('')+'</div></div>';
   };
   return '<section class="card">'
-    +bucket('Overdue',overdue,'overdue')
-    +bucket('Upcoming',later,'')
+    +bucket('Overdue',overdue,'overdue',true)
+    +bucket('Upcoming',later,'',true)
     +bucket('No due date',undated,'')
     +'</section>';
 }

@@ -213,11 +213,11 @@ export default function DashboardHeader({ firstName, greeting, date }: Dashboard
             </span>
           )
         })}
-        {typedCount < fullLength && (
-          <span className={styles.caret} aria-hidden="true">
-            ▌
-          </span>
-        )}
+        {/* Stays visible (and blinking) after the message finishes typing too —
+            a terminal cursor, not just a typing indicator. */}
+        <span className={styles.caret} aria-hidden="true">
+          ▌
+        </span>
       </h1>
       {d.show && <p className={styles.date}>{dateText}</p>}
       <div className={styles.heroStats}>
