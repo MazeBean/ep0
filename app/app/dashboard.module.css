@@ -68,50 +68,6 @@
   outline-offset: 2px;
 }
 
-/* Top-bar profile avatar — pinned top-right, just left of the gear. */
-.profileAvatar {
-  position: absolute;
-  top: calc(var(--space-6) + env(safe-area-inset-top));
-  right: calc(var(--space-6) + 40px + var(--space-3));
-  z-index: 10;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  color: #6EE7B7;
-  font-weight: 600;
-  font-size: 0.95rem;
-  text-decoration: none;
-  background: radial-gradient(120% 120% at 35% 25%, rgba(110, 231, 183, 0.22), rgba(110, 231, 183, 0.05));
-  border: 1.5px solid rgba(110, 231, 183, 0.4);
-  box-shadow: 0 0 24px -8px rgba(110, 231, 183, 0.4), inset 0 0 14px -6px rgba(110, 231, 183, 0.5);
-  transition:
-    transform var(--duration) var(--ease),
-    box-shadow var(--duration) var(--ease),
-    border-color var(--duration) var(--ease);
-}
-.profileAvatar:hover {
-  transform: translateY(-1px);
-  border-color: #6EE7B7;
-  box-shadow: 0 0 30px -6px rgba(110, 231, 183, 0.4), inset 0 0 14px -4px rgba(110, 231, 183, 0.6);
-}
-.profileAvatar:focus-visible {
-  outline: 2px solid #6EE7B7;
-  outline-offset: 2px;
-}
-/* An uploaded photo fills the avatar and clips to its circle (the initial span,
-   when there's no photo, is unaffected). */
-.profileAvatar:has(.profileAvatarImg) {
-  overflow: hidden;
-}
-.profileAvatarImg {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
-}
 
 .page::before {
   content: '';
@@ -145,11 +101,6 @@
 /* ───────── Editorial greeting (parent /app dashboard) ───────── */
 
 .header {
-  /* .headerRow mirrors OverviewWidgets' 2fr/1fr grid (same gap) so this column
-     is pixel-for-pixel the same width as the "Today's intake" card below it —
-     centering here lines the greeting up over that card instead of over the
-     full shell width. */
-  grid-column: 1;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -200,10 +151,9 @@
 .greeting {
   font-family: var(--font-fira), ui-monospace, monospace;
   font-weight: 600;
-  /* --greet-scale (default 1) lets the user size their greeting. Sized off the
-     header column's own width (not the viewport) so it always fits the one
-     line it's confined to, however narrow that column gets. */
-  font-size: calc(clamp(1.5rem, 3vw, 3.25rem) * var(--greet-scale, 1));
+  /* --greet-scale (default 1) lets the user size their greeting. white-space:
+     nowrap keeps it to the one line it's meant to be, instead of wrapping. */
+  font-size: calc(clamp(1.5rem, 4.5vw, 3.25rem) * var(--greet-scale, 1));
   line-height: 1;
   letter-spacing: 0;
   white-space: nowrap;
@@ -651,16 +601,12 @@
 /* Header row: gem on the left, greeting + date on the right. The gem
    anchors the "Vitality character" presence on the dashboard without
    cluttering the tiles. */
-/* Grid, not flex, and matching OverviewWidgets.module.css's .grid (2fr 1fr,
-   same gap) column-for-column: that's what makes .header's first column line
-   up exactly over the "Today's intake" card that renders directly beneath it.
-   The avatar is position:absolute, pulled out of grid flow entirely, so the
-   second column exists only as leftover space — nothing is placed there. */
+/* .header is the only thing laid out here. Centering it on the row's full
+   width centers it over the whole panel grid beneath (OverviewWidgets + the
+   tile grid both span the same .shell width). */
 .headerRow {
-  display: grid;
-  grid-template-columns: 2fr 1fr;
-  align-items: center;
-  gap: var(--space-4);
+  display: flex;
+  justify-content: center;
 }
 
 .headerGem {
@@ -669,21 +615,7 @@
   height: 180px;
 }
 
-@media (max-width: 980px) {
-  /* OverviewWidgets' own grid collapses to a single column at this width too
-     (its cards stack full-width), so the header matches it here. */
-  .headerRow {
-    grid-template-columns: 1fr;
-  }
-}
-
 @media (max-width: 560px) {
-  /* Phone reverts to a plain flex row — gem, header, gear, avatar inline
-     left-to-right, not centred (the grid centring is a desktop/tablet thing). */
-  .headerRow {
-    display: flex;
-    gap: var(--space-4);
-  }
   .headerGem {
     width: 100px;
     height: 100px;
@@ -694,28 +626,6 @@
   }
   .greeting {
     font-size: clamp(1.85rem, 7vw, 2.3rem);
-  }
-  /* Gear joins the header flow on phone: vertically centered with the gem +
-     greeting, pushed to the far right. No more floating, misaligned corner
-     icon overlapping the text. */
-  .settingsBtn {
-    position: static;
-    flex: 0 0 auto;
-    align-self: center;
-    margin-left: auto;
-  }
-  /* Avatar joins the header flow on phone too: it takes the auto margin so the
-     avatar + gear sit together as a right-aligned cluster. */
-  .profileAvatar {
-    position: static;
-    flex: 0 0 auto;
-    align-self: center;
-    margin-left: auto;
-    width: 36px;
-    height: 36px;
-  }
-  .profileAvatar + .settingsBtn {
-    margin-left: var(--space-3);
   }
 }
 
