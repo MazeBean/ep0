@@ -200,20 +200,40 @@
 }
 
 .greeting {
-  font-family: var(--font-rounded), 'Nunito', ui-rounded, system-ui, sans-serif;
+  font-family: var(--font-mono), ui-monospace, monospace;
   font-weight: 700;
-  /* --greet-scale (default 1) lets the user size their greeting; the font is a
-     soft rounded sans, no italics — the personality lives in the
-     letterform's roundness, not a display flourish. */
+  /* --greet-scale (default 1) lets the user size their greeting; the
+     terminal-log look (phosphor green mono + typed-out reveal) replaces the
+     old rounded-sans display face. */
   font-size: calc(clamp(2.25rem, 4.5vw, 3.25rem) * var(--greet-scale, 1));
   line-height: 1;
-  letter-spacing: -0.01em;
-  color: var(--fg);
+  letter-spacing: 0;
+  color: #39ff7a;
+  text-shadow: 0 0 18px rgba(57, 255, 122, 0.35);
 }
 
 .greetingName {
   /* the accented name follows the chosen wallpaper accent (mint by default) */
   color: var(--wall-accent, var(--mint));
+}
+
+.caret {
+  display: inline-block;
+  margin-left: 2px;
+  color: currentColor;
+  animation: caretBlink 1s step-end infinite;
+}
+
+@keyframes caretBlink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .caret {
+    animation: none;
+    opacity: 0;
+  }
 }
 
 .date {

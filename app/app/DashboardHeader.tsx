@@ -107,16 +107,20 @@ export default function DashboardHeader({ firstName, greeting, date }: Dashboard
   const g = greeting ?? DEFAULT_CHROME.greeting
   const d = date ?? DEFAULT_CHROME.date
   const [autoWord, setAutoWord] = useState('')
+  const [isBedtime, setIsBedtime] = useState(false)
   const [fullDate, setFullDate] = useState('')
   const [todayDate, setTodayDate] = useState('')
   const [clock, setClock] = useState('')
   const [weather, setWeather] = useState<WeatherState | null>(null)
   const [weatherStatus, setWeatherStatus] = useState<'loading' | 'ok' | 'unavailable'>('loading')
+  const [typedCount, setTypedCount] = useState(0)
 
   useEffect(() => {
     const now = new Date()
     const hour = now.getHours()
-    setAutoWord(hour < 12 ? 'Good morning' : hour < 18 ? 'Good afternoon' : 'Good evening')
+    const bedtime = hour >= 0 && hour < 4
+    setIsBedtime(bedtime)
+    setAutoWord(bedtime ? 'Better get to bed' : hour < 12 ? 'Good morning' : hour < 18 ? 'Good afternoon' : 'Good evening')
     setFullDate(now.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' }))
     setTodayDate(now.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' }))
   }, [])
@@ -155,20 +159,65 @@ export default function DashboardHeader({ firstName, greeting, date }: Dashboard
   const word = g.mode === 'custom' && g.text.trim() ? g.text.trim() : autoWord
   const includesName = !!(firstName && word.toLowerCase().includes(firstName.toLowerCase()))
   const renderName = g.showName && firstName && !includesName
+  // The bedtime line ("Better get to bed, Charlie...") only applies to the
+  // auto-computed word — a custom greeting the user typed themselves is left
+  // exactly as they wrote it, no trailing ellipsis appended.
+  const showEllipsis = isBedtime && !(g.mode === 'custom' && g.text.trim())
   const dateText = d.format === 'today' ? todayDate : fullDate
   const sunsetText = weather
     ? new Date(weather.sunset).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })
     : null
 
+  const segments: { text: string; accent?: boolean }[] = [{ text: word }]
+  if (renderName) {
+    segments.push({ text: ', ' }, { text: firstName as string, accent: !!g.accentName })
+  }
+  if (showEllipsis) segments.push({ text: '...' })
+  const fullLength = segments.reduce((n, s) => n + s.text.length, 0)
+
+  // Types the greeting out a character at a time, like a terminal log line.
+  // Skips straight to the full text under prefers-reduced-motion.
+  useEffect(() => {
+    if (!word) return
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    if (reduced) {
+      setTypedCount(fullLength)
+      return
+    }
+    setTypedCount(0)
+    const id = setInterval(() => {
+      setTypedCount((c) => {
+        if (c + 1 >= fullLength) {
+          clearInterval(id)
+          return fullLength
+        }
+        return c + 1
+      })
+    }, 45)
+    return () => clearInterval(id)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [word, renderName, showEllipsis, firstName, g.accentName])
+
+  let consumed = 0
+
   return (
     <div className={styles.header} style={{ ['--greet-scale' as string]: g.scale }}>
       <h1 className={styles.greeting}>
-        {word}
-        {renderName ? (
-          <>
-            ,&nbsp;<span className={g.accentName ? styles.greetingName : undefined}>{firstName}</span>
-          </>
-        ) : null}
+        {segments.map((seg, i) => {
+          const start = consumed
+          consumed += seg.text.length
+          const visible = Math.max(0, Math.min(seg.text.length, typedCount - start))
+          return (
+            <span key={i} className={seg.accent ? styles.greetingName : undefined}>
+              {seg.text.slice(0, visible)}
+            </span>
+          )
+        })}
+        {typedCount < fullLength && (
+          <span className={styles.caret} aria-hidden="true">
+            ▌
+          </span>
+        )}
       </h1>
       {d.show && <p className={styles.date}>{dateText}</p>}
       <div className={styles.heroStats}>
