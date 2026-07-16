@@ -83,6 +83,17 @@
   .doseLogBtn:active{transform:translateY(0)}
   .doseUnderline{height:2px;border-radius:2px;background:linear-gradient(90deg,transparent,var(--dose-accent),transparent);opacity:.55}
 
+  /* -- quick time entry, next to "Add now" and under each preset -- lets a
+     dose be logged for a time earlier today instead of always "right now" */
+  .timeChip{display:flex;align-items:center;gap:6px;border:1px solid var(--border);border-radius:10px;
+    padding:0 9px;background:var(--bg);color:var(--muted);flex-shrink:0;transition:border-color .15s var(--ease)}
+  .timeChip:focus-within{border-color:var(--brand-line)}
+  .timeChip svg{width:13px;height:13px;flex-shrink:0}
+  .timeChip input{background:transparent;border:none;color:var(--fg);font:inherit;font-size:12.5px;
+    padding:7px 0;width:100%;min-width:0}
+  .timeChip input:focus{outline:none}
+  .timeChip input::placeholder{color:var(--muted)}
+
   /* -- Peak (energy curve) card -- */
   .peakCard{padding:13px;display:flex;flex-direction:column}
   .peakTop{display:flex;align-items:center;gap:16px;flex-wrap:wrap;margin-bottom:6px}
@@ -115,15 +126,19 @@
   .chart{width:100%;height:auto;display:block;margin-top:6px}
   .chart .grid{stroke:var(--border);stroke-width:1}
   .chart .axl{fill:var(--muted);font-family:var(--font-mono);font-size:9px;letter-spacing:.08em}
-  .dragHint{position:absolute;top:0;left:0;font-family:var(--font-mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;
-    color:var(--brand);opacity:.85;pointer-events:none}
+  /* In normal flow (not absolutely positioned over the chart) so it pushes
+     the chart down instead of overlapping its top edge — on a narrow phone
+     viewport the chart renders shorter (same viewBox, less width), so an
+     overlaid hint here used to sit right on top of the curve. */
+  .dragHint{font-family:var(--font-mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;
+    color:var(--brand);opacity:.85;pointer-events:none;margin-bottom:4px}
   .logFeelTip{position:absolute;top:2px;transform:translateX(-50%);font-family:var(--font-mono);font-size:9px;letter-spacing:.05em;
     text-transform:uppercase;color:var(--brand);border:1px solid var(--brand-line);border-radius:var(--radius-pill);padding:3px 8px;
     background:rgba(110,231,183,.1);pointer-events:none;white-space:nowrap}
   /* energy chart (e-prefixed to keep it distinct from the caffeine decay chart below) */
   .chart .eline{fill:none;stroke:var(--brand);stroke-width:2;stroke-linejoin:round;stroke-linecap:round;
     filter:drop-shadow(0 0 3px rgba(110,231,183,.9)) drop-shadow(0 0 8px rgba(110,231,183,.45))}
-  .chart .ebline{fill:none;stroke:var(--muted);stroke-width:1.25;stroke-dasharray:3 4;opacity:.55}
+  .chart .ebline{fill:none;stroke:var(--muted-strong);stroke-width:1.5;stroke-dasharray:3 4;opacity:.8}
   .chart .nowLine{stroke:var(--brand);stroke-width:1;opacity:.6;stroke-dasharray:2 3;pointer-events:none}
   .chart .nowHandle{fill:transparent;cursor:ns-resize;pointer-events:all}
   .chart .enowd{fill:var(--fg)}
@@ -179,8 +194,9 @@
   .caffBarFill.over{background:var(--neg)}
   .coach{font-family:var(--font-mono);font-size:11px;letter-spacing:.02em;color:var(--muted-strong);margin:4px 0 8px}
   .coach.warn{color:var(--warn)}
-  .customAdd{display:flex;gap:8px;align-items:center;margin-bottom:6px}
+  .customAdd{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:6px}
   .customAdd .stepperRow{width:120px}
+  .customAdd .timeChip{width:104px}
   .btn-primary{background:var(--brand);color:#06110c;border:none;border-radius:10px;padding:7px 14px;font:inherit;font-weight:700;cursor:pointer}
   .hint{color:var(--neg);font-size:12px;font-family:var(--font-mono);min-height:14px;margin-top:6px}
   .decayRow{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;margin:6px 0 2px;flex-wrap:wrap}
@@ -276,6 +292,12 @@ const DOSE_ICONS={
   tea:'<path d="M4 11c0-4.5 3.6-8 13-8 0 8.5-3.6 12-9 12A4 4 0 0 1 4 11Z"/><path d="M5.5 16.5c2.5-2.5 4-4 10-9.5"/>'
 };
 const CAFF_CEIL=400; // FDA-cited safe daily ceiling (mg)
+const CLOCK_ICON='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7.5v5l3 2"/></svg>';
+function timeChipHtml(id,dataAttr){
+  return '<div class="timeChip">'+CLOCK_ICON
+    +'<input type="text" inputmode="numeric" autocomplete="off" id="'+id+'" '+dataAttr+' placeholder="now" aria-label="Time taken (blank = now)" />'
+    +'</div>';
+}
 
 /* one-compartment pharmacokinetic model — the energy curve's caffeine
    boost/rebound (below) reuses bodyAt() rather than re-deriving it. */
@@ -285,10 +307,21 @@ function doseAmount(mg,h){ if(h<0)return 0; if(Math.abs(KA-KE)<1e-9)return 0;
 function bodyAt(t){ return today().doses.reduce((s,l)=>s+doseAmount(+l.mg||0,t-(+l.t||0)),0); }
 function caffTotal(){ return today().doses.reduce((s,l)=>s+(+l.mg||0),0); }
 
-function addDose(mg,label){
+function addDose(mg,label,t){
   mg=Math.round(mg);
-  today().doses.push({id:newId(),t:Math.round(nowT()*4)/4,mg,label:label||''});
+  const at=(typeof t==='number'&&isFinite(t))?((t%24)+24)%24:nowT();
+  today().doses.push({id:newId(),t:Math.round(at*4)/4,mg,label:label||''});
   persist(); render();
+}
+/* Reads an optional quick-time field next to a log button: blank means "now"
+   (addDose's own default), anything else is parsed and assumed to be
+   earlier today — logging a dose after the fact still lands in today's log
+   and feeds the decay chart/energy curve at that clock time, not now. */
+function doseTimeFrom(el){
+  const raw=el&&el.value;
+  if(!raw)return undefined;
+  const hm=parseQuickTime(raw);
+  return hm?parseHM(hm):undefined;
 }
 function deleteDose(id){
   const d=today(); d.doses=d.doses.filter(l=>String(l.id)!==id); persist(); render();
@@ -304,6 +337,27 @@ function latestSleep(){ const l=sleepLog(); return l.length?l.slice().sort((a,b)
 function wakeStr(){ const l=latestSleep(); return (l&&l.wake)||'07:00'; }
 function bedStr(){ const l=latestSleep(); return (l&&l.bed)||'23:00'; }
 function parseHM(s){ if(!s)return null; const m=String(s).match(/(\d{1,2}):(\d{2})/); if(!m)return null; return (+m[1])+(+m[2])/60; }
+/* Quick keyboard time entry — typed straight into a plain text field instead
+   of a native <input type=time>, whose per-segment click-then-type behavior
+   is what people were actually complaining "not having to click and
+   replace" about. Accepts bare digits ("930", "2130"), a colon ("9:30"),
+   and an optional am/pm ("930p", "9:30pm") — always normalizes to 24h
+   "HH:MM" so it round-trips through parseHM/wakeStr/bedStr unchanged. */
+function parseQuickTime(str){
+  if(!str)return null;
+  const s=String(str).trim().toLowerCase().replace(/[.\s]/g,'');
+  const m=s.match(/^(\d{1,2}):?(\d{2})?(am|pm|a|p)?$/);
+  if(!m)return null;
+  let hh=+m[1];
+  const mm=m[2]!=null?+m[2]:0;
+  const ap=m[3];
+  if(mm>59)return null;
+  if(ap){
+    if(hh<1||hh>12)return null;
+    hh=hh%12; if(ap[0]==='p')hh+=12;
+  } else if(hh>23) return null;
+  return String(hh).padStart(2,'0')+':'+String(mm).padStart(2,'0');
+}
 function wakeBed(){ let wake=parseHM(wakeStr()),bed=parseHM(bedStr()); if(wake==null)wake=7; if(bed==null)bed=23; return {wake,bed}; }
 function sleepHoursFor(bed,wake){
   const b=parseHM(bed), w=parseHM(wake);
@@ -455,12 +509,18 @@ function peakCardHtml(){
     +'<div class="peakDesc"><span class="peakDescLabel">Today’s energy curve</span>'
     +'<p class="peakDescText">Your predicted score, hour by hour.</p></div>'
     +'<div class="peakControls"><div class="segToggle">'+segs+'</div>'
-    +'<button type="button" class="gearBtn'+(showBaseline?' active':'')+'" id="chartSettings" title="Toggle baseline rhythm line">'
-    +'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/>'
-    +'<path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></button>'
+    // Baseline rhythm only ever draws in Line mode, so the gear that toggles
+    // it is hidden the rest of the time — showing a control with no visible
+    // effect is exactly what read as "doesn't work."
+    +(chartMode==='line'
+      ? '<button type="button" class="gearBtn'+(showBaseline?' active':'')+'" id="chartSettings" title="Toggle baseline rhythm line">'
+        +'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/>'
+        +'<path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></button>'
+      : '')
     +'</div></div>'
     +'<div class="chartWrap">'+energyChartHtml(curve,peak,now,nowE)+'</div>'
-    +'<div class="legend"><span><i class="swatch"></i>With caffeine</span><span><i class="swatch base"></i>Baseline rhythm</span></div>'
+    +'<div class="legend"><span><i class="swatch"></i>With caffeine</span>'
+    +(chartMode==='line'&&showBaseline?'<span><i class="swatch base"></i>Baseline rhythm</span>':'')+'</div>'
     +rhythmHtml()
     +'</section>';
 }
@@ -479,8 +539,8 @@ function sleepHistoryHtml(){
 }
 function rhythmHtml(){
   return '<div class="rhythmBlock"><span class="cardName">Rhythm</span><div class="fields">'
-    +'<div class="field"><span class="l">Wake</span><input class="fieldInput" id="wake" type="time" value="'+wakeStr()+'" /></div>'
-    +'<div class="field"><span class="l">Bed</span><input class="fieldInput" id="bed" type="time" value="'+bedStr()+'" /></div>'
+    +'<div class="field"><span class="l">Last night&rsquo;s bedtime</span><input class="fieldInput" id="bed" type="text" inputmode="numeric" autocomplete="off" value="'+bedStr()+'" /></div>'
+    +'<div class="field"><span class="l">Today&rsquo;s wakeup</span><input class="fieldInput" id="wake" type="text" inputmode="numeric" autocomplete="off" value="'+wakeStr()+'" /></div>'
     +'</div>'
     +'<div class="rhythmActions"><button type="button" class="btn-primary" id="logSleepBtn">Log</button>'
     +'<button type="button" class="btn-ghost" id="toggleSleepHistory">'+(sleepHistoryOpen?'Hide history':'History')+'</button></div>'
@@ -512,7 +572,8 @@ function doseGridHtml(){
     return '<div class="doseCard" style="--dose-accent:'+p.accent+'">'
       +'<div class="doseIconBadge" style="background:'+badgeBg+'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">'+DOSE_ICONS[p.icon]+'</svg></div>'
       +'<div class="doseInfo"><span class="doseName">'+esc(p.name)+'</span><span class="doseMg">'+p.mg+' mg</span></div>'
-      +'<button type="button" class="doseLogBtn" data-dose-preset="'+i+'">+ Log now</button>'
+      +timeChipHtml('doseTime'+i,'')
+      +'<button type="button" class="doseLogBtn" data-dose-preset="'+i+'">+ Log</button>'
       +'<div class="doseUnderline"></div>'
       +'</div>';
   }).join('');
@@ -560,7 +621,9 @@ function caffeineHtml(){
     +'<button type="button" class="miniStepBtn" data-step-target="caffMg" data-step="-5" aria-label="Subtract 5 mg">−</button>'
     +'<input class="fieldInput" id="caffMg" type="number" min="0" step="5" placeholder="mg" />'
     +'<button type="button" class="miniStepBtn" data-step-target="caffMg" data-step="5" aria-label="Add 5 mg">+</button>'
-    +'</div><button class="btn-primary" id="caffAdd">Add now</button></div>'
+    +'</div><button class="btn-primary" id="caffAdd">Add now</button>'
+    +timeChipHtml('caffTime','')
+    +'</div>'
     +'<div class="hint" id="hint"></div>'
     +'<div class="decayRow"><div class="decayNow"><span class="n">'+nowMg+'</span><span class="l">mg in system now</span></div>'
     +'<span class="decayHalf">~'+HALF_LIFE+'h half-life</span></div>'
@@ -644,17 +707,24 @@ document.addEventListener('click',e=>{
   if(chartModeBtn){ chartMode=chartModeBtn.getAttribute('data-chart-mode'); render(); return; }
   if(e.target.closest('#chartSettings')){ showBaseline=!showBaseline; render(); return; }
   const dosePreset=e.target.closest('[data-dose-preset]');
-  if(dosePreset){ const p=PRESETS[Number(dosePreset.getAttribute('data-dose-preset'))]; if(p)addDose(p.mg,p.name); return; }
+  if(dosePreset){
+    const idx=Number(dosePreset.getAttribute('data-dose-preset'));
+    const p=PRESETS[idx];
+    if(p)addDose(p.mg,p.name,doseTimeFrom($('doseTime'+idx)));
+    return;
+  }
   if(e.target.closest('#caffAdd')){
     const el=$('caffMg'), mg=Number(el&&el.value);
     if(!isFinite(mg)||mg<=0){ const h=$('hint'); if(h)h.textContent='Enter a caffeine amount in mg.'; return; }
-    addDose(mg,'Custom'); return;
+    addDose(mg,'Custom',doseTimeFrom($('caffTime'))); return;
   }
   const del=e.target.closest('[data-del]');
   if(del){ deleteDose(del.getAttribute('data-del')); return; }
   if(e.target.closest('#logSleepBtn')){
     const wakeEl=$('wake'), bedEl=$('bed');
-    logSleep(wakeEl&&wakeEl.value, bedEl&&bedEl.value);
+    const wake=(wakeEl&&parseQuickTime(wakeEl.value))||(wakeEl&&wakeEl.value);
+    const bed=(bedEl&&parseQuickTime(bedEl.value))||(bedEl&&bedEl.value);
+    logSleep(wake, bed);
     render(); return;
   }
   if(e.target.closest('#toggleSleepHistory')){ sleepHistoryOpen=!sleepHistoryOpen; render(); return; }
@@ -680,9 +750,19 @@ document.addEventListener('keydown',e=>{
   if(e.target.id==='caffMg'&&e.key==='Enter'){
     e.preventDefault();
     const mg=Number(e.target.value);
-    if(isFinite(mg)&&mg>0){addDose(mg,'Custom');e.target.value='';}
+    if(isFinite(mg)&&mg>0){addDose(mg,'Custom',doseTimeFrom($('caffTime')));e.target.value='';}
   }
 });
+/* Normalizes the wake/bed quick-time fields to clean 24h "HH:MM" as soon as
+   you leave them, so what's on screen always matches what's actually stored
+   — typing "930p" then tabbing away shows "21:30", not the raw shorthand.
+   blur doesn't bubble, so this listens on the capture phase instead. */
+document.addEventListener('blur',e=>{
+  const el=e.target;
+  if(!el||!el.matches||!el.matches('#wake,#bed'))return;
+  const parsed=parseQuickTime(el.value);
+  if(parsed)el.value=parsed;
+},true);
 
 /* ---- drag-to-log-feel: press and drag the now-line on the energy chart
    (line mode only) to set today's subjective feel reading. Uses SVG
