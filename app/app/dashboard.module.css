@@ -98,6 +98,40 @@
   gap: var(--space-10);
 }
 
+/* ───────── Boot radar-ping (home overview only) ─────────
+   Three rings expand once from a point near the first card, on a stagger,
+   like a radar sweep waking the panel grid up — paired with each .card's
+   own entrance in OverviewWidgets.module.css, which lights up in the order
+   the ring would actually reach it (not a flat top-to-bottom stagger).
+   Animates width/height/margin, not transform:scale — scale also stretches
+   border-width, which turns a thin ring into a thick blurry band by the time
+   it's grown 80x. .page's overflow:hidden clips it once it outgrows the viewport. */
+.pingRing {
+  position: absolute;
+  top: 108px;
+  left: 56px;
+  width: 18px;
+  height: 18px;
+  margin: -9px 0 0 -9px;
+  border-radius: 50%;
+  border: 1.5px solid var(--mint);
+  opacity: 0;
+  pointer-events: none;
+  z-index: 1;
+  animation: pingExpand 1100ms var(--ease-premium) forwards;
+}
+.pingRing:nth-of-type(2) { animation-delay: 140ms; }
+.pingRing:nth-of-type(3) { animation-delay: 280ms; }
+
+@keyframes pingExpand {
+  0% { width: 18px; height: 18px; margin: -9px 0 0 -9px; opacity: 0.55; }
+  100% { width: 1500px; height: 1500px; margin: -750px 0 0 -750px; opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pingRing { display: none; }
+}
+
 /* ───────── Editorial greeting (parent /app dashboard) ───────── */
 
 .header {
@@ -308,6 +342,12 @@
 @media (prefers-reduced-motion: reduce) {
   .header, .page::before {
     animation: none !important;
+  }
+  /* .header's base rule starts it at opacity:0, waiting for fadeUp to bring it
+     to 1 — cancelling that animation without this left the whole greeting
+     permanently invisible under reduced motion. */
+  .header {
+    opacity: 1 !important;
   }
 }
 

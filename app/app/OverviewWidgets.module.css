@@ -2,15 +2,13 @@
   display: grid;
   grid-template-columns: 2fr 1fr;
   gap: var(--space-4);
-  opacity: 0;
-  animation: widgetsIn 700ms cubic-bezier(0.16, 1, 0.3, 1) 120ms forwards;
 }
 
-@keyframes widgetsIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
+/* Each card lights up on its own instead of the old single-block fade — the
+   --ping-delay custom property (set inline per card in OverviewWidgets.tsx)
+   is tuned to roughly when dashboard.module.css's expanding .pingRing would
+   physically reach that card's position, so the grid appears to wake up in
+   the order the ring sweeps over it: Fuel first, Consistency last. */
 .card {
   position: relative;
   display: flex;
@@ -22,7 +20,19 @@
   border-radius: var(--radius-lg);
   min-height: 168px;
   overflow: hidden;
+  opacity: 0;
+  animation: cardIn 550ms var(--ease-premium) forwards;
+  animation-delay: var(--ping-delay, 0ms);
   transition: border-color var(--duration) var(--ease);
+}
+
+@keyframes cardIn {
+  from { opacity: 0; transform: translateY(8px) scale(0.98); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card { animation: none; opacity: 1; }
 }
 
 .card:hover {

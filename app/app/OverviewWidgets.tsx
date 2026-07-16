@@ -252,7 +252,7 @@ export default function OverviewWidgets({ userId }: { userId: string }) {
 
   return (
     <div className={styles.grid}>
-      <div className={styles.card}>
+      <div className={styles.card} style={{ ['--ping-delay' as string]: '60ms' }}>
         <div className={styles.cardHead}>
           <span className={styles.cardTitle}>Today&rsquo;s intake</span>
           <span className={styles.cardTag}>Fuel</span>
@@ -278,7 +278,7 @@ export default function OverviewWidgets({ userId }: { userId: string }) {
         )}
       </div>
 
-      <div className={styles.card}>
+      <div className={styles.card} style={{ ['--ping-delay' as string]: '200ms' }}>
         <div className={styles.cardHead}>
           <span className={styles.cardTitle}>Net worth</span>
           <span className={styles.cardTag}>Finance</span>
@@ -291,7 +291,7 @@ export default function OverviewWidgets({ userId }: { userId: string }) {
         )}
       </div>
 
-      <div className={styles.card}>
+      <div className={styles.card} style={{ ['--ping-delay' as string]: '260ms' }}>
         <div className={styles.cardHead}>
           <span className={styles.cardTitle}>This week</span>
           <span className={styles.cardTag}>Calendar</span>
@@ -306,7 +306,7 @@ export default function OverviewWidgets({ userId }: { userId: string }) {
         )}
       </div>
 
-      <div className={styles.card}>
+      <div className={styles.card} style={{ ['--ping-delay' as string]: '380ms' }}>
         <div className={styles.cardHead}>
           <span className={styles.cardTitle}>Goals progress</span>
           <span className={styles.cardTag}>Goals</span>
@@ -329,7 +329,7 @@ export default function OverviewWidgets({ userId }: { userId: string }) {
 
       {/* Pinned to the narrow column via .consistencyCard, right after Goals
           progress — see that class for why explicit placement is needed. */}
-      <div className={`${styles.card} ${styles.consistencyCard}`}>
+      <div className={`${styles.card} ${styles.consistencyCard}`} style={{ ['--ping-delay' as string]: '560ms' }}>
         <div className={styles.cardHead}>
           <span className={styles.cardTitle}>Consistency</span>
           <span className={styles.cardTag}>Workout</span>
@@ -337,7 +337,7 @@ export default function OverviewWidgets({ userId }: { userId: string }) {
         {w.workout && <RadialGauge pct={(w.workout.sessionsThisWeek / 7) * 100} label={`${w.workout.prsThisMonth} PRs this mo.`} sub="/ wk" />}
       </div>
 
-      <div className={`${styles.card} ${styles.stackCard}`}>
+      <div className={`${styles.card} ${styles.stackCard}`} style={{ ['--ping-delay' as string]: '440ms' }}>
         <div className={styles.cardHead}>
           <span className={styles.cardTitle}>Daily stack</span>
           <span className={styles.cardTag}>Body</span>

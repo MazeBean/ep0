@@ -47,7 +47,19 @@ export default function Dashboard({ firstName, userId }: DashboardProps) {
           <DashboardHeader firstName={firstName} greeting={chrome?.greeting} date={chrome?.date} />
         </div>
 
-        {openTileId === null && <OverviewWidgets userId={userId} />}
+        {openTileId === null && (
+          <>
+            {/* Radar-ping boot: three rings expand from near the first card,
+                the visual cue that "wakes up" the overview grid — see the
+                .card entrance in OverviewWidgets.module.css for the other
+                half (each card lights up as the ring reaches it). Purely
+                decorative, so it's inert to pointer/assistive tech. */}
+            <span className={styles.pingRing} aria-hidden="true" />
+            <span className={styles.pingRing} aria-hidden="true" />
+            <span className={styles.pingRing} aria-hidden="true" />
+            <OverviewWidgets userId={userId} />
+          </>
+        )}
 
         <DashboardGrid
           userId={userId}
