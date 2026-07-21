@@ -21,14 +21,33 @@
   min-height: 168px;
   overflow: hidden;
   opacity: 0;
-  animation: cardIn 550ms var(--ease-premium) forwards;
+  animation: cardIn 650ms var(--ease-premium) forwards;
   animation-delay: var(--ping-delay, 0ms);
   transition: border-color var(--duration) var(--ease);
 }
 
+/* A bit more than a fade: each card overshoots slightly on the way in and
+   flashes its border/glow mint for a moment (like the ping ring actually
+   just swept over it) before settling to its normal resting state. */
 @keyframes cardIn {
-  from { opacity: 0; transform: translateY(8px) scale(0.98); }
-  to { opacity: 1; transform: translateY(0) scale(1); }
+  0% {
+    opacity: 0;
+    transform: translateY(14px) scale(0.94);
+    border-color: var(--border);
+    box-shadow: none;
+  }
+  55% {
+    opacity: 1;
+    transform: translateY(-2px) scale(1.015);
+    border-color: rgba(110, 231, 183, 0.55);
+    box-shadow: 0 0 0 1px rgba(110, 231, 183, 0.25), 0 10px 26px -14px rgba(110, 231, 183, 0.4);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    border-color: var(--border);
+    box-shadow: none;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

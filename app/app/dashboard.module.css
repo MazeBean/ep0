@@ -166,13 +166,31 @@
   gap: var(--space-3);
 }
 
+/* Same terminal-log voice as the home greeting (.greeting below) — Fira Code,
+   mint, lowercase — just scaled for a standalone splash mark rather than a
+   full sentence. */
 .introMark {
   font-family: var(--font-fira), ui-monospace, monospace;
-  font-weight: 700;
-  font-size: 1.5rem;
-  letter-spacing: 0.04em;
+  font-weight: 600;
+  font-size: clamp(1.85rem, 5vw, 3rem);
+  line-height: 1;
+  letter-spacing: 0;
   color: var(--mint);
   text-shadow: 0 0 18px rgba(110, 231, 183, 0.4);
+}
+
+.introCaret {
+  display: inline-block;
+  margin-left: 2px;
+  color: var(--mint);
+  animation: caretBlink 1s step-end infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .introCaret {
+    animation: none;
+    opacity: 0;
+  }
 }
 
 .introHint {

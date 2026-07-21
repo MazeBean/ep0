@@ -94,16 +94,21 @@ export default function Dashboard({ firstName, userId }: DashboardProps) {
 
   return (
     <main className={`${styles.page} ${styles.oneScreen} grain-overlay`} style={{ ['--wall-accent' as string]: wallAccent }}>
-      <audio ref={audioRef} src="/ambient.mp3" loop preload="auto" />
+      {/* preload="metadata" not "auto" — the track is a long ambient mix
+          (~100MB); no reason to eagerly pull the whole file before the
+          intro's even been clicked, or on every reload while just testing. */}
+      <audio ref={audioRef} src="/ambient.mp3" loop preload="metadata" />
 
       <WelcomeBackdrop background={chrome?.background} />
 
       <AppSidebar activeId={openTileId} onSelect={setOpenTileId} />
 
       <div className={styles.shell}>
-        <div className={styles.headerRow}>
-          <DashboardHeader firstName={firstName} greeting={chrome?.greeting} date={chrome?.date} />
-        </div>
+        {introPhase === 'done' && (
+          <div className={styles.headerRow}>
+            <DashboardHeader firstName={firstName} greeting={chrome?.greeting} date={chrome?.date} />
+          </div>
+        )}
 
         {introPhase === 'done' && openTileId === null && (
           <>
@@ -158,7 +163,10 @@ export default function Dashboard({ firstName, userId }: DashboardProps) {
           }}
         >
           <div className={styles.introPrompt}>
-            <span className={styles.introMark}>GIZMO</span>
+            <span className={styles.introMark}>
+              gizmo v1.0
+              <span className={styles.introCaret} aria-hidden="true">▌</span>
+            </span>
             <span className={styles.introHint}>Click to enter</span>
           </div>
         </div>
