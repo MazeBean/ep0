@@ -38,7 +38,7 @@
   .stars{position:fixed;inset:0;z-index:0;pointer-events:none}
   .star{position:absolute;width:2px;height:2px;background:#cfd0d6;border-radius:50%;opacity:.4;animation:twinkle 8s ease-in-out infinite}
   @keyframes twinkle{0%,100%{opacity:.15}50%{opacity:.5}}
-  @media(prefers-reduced-motion:reduce){.star,.markOrb,.markGlow{animation:none!important}.card{transition:none}}
+  @media(prefers-reduced-motion:reduce){.star,.markOrb,.markGlow{animation:none!important}.card{transition:none}.card,.doseCard{animation:none!important;opacity:1!important}}
   .shell{position:relative;z-index:1;width:100%;max-width:none}
   /* Peak and the detailed Caffeine breakdown sit side by side on a wide PC
      viewport instead of each spanning the full width — every other section
@@ -64,6 +64,30 @@
     -webkit-backdrop-filter:blur(20px) saturate(120%);backdrop-filter:blur(20px) saturate(120%);
     overflow:hidden;transition:border-color .2s var(--ease),box-shadow .2s var(--ease)}
   .card:hover{border-color:var(--brand-line);box-shadow:0 0 0 1px var(--brand-line) inset}
+  /* Panel load-in — same recipe as the home dashboard's overview cards (a
+     slight overshoot + a brief mint border/glow flash before settling), just
+     without the ripple/ping rings that only make sense on that 6-card grid.
+     Each card's own inline animation-delay staggers them in render order. */
+  /* Two separate animations, not one: cardIn (forwards) owns opacity/transform
+     so the reveal sticks; cardFlash has no fill-mode, so once its one pass
+     ends the browser drops it and border-color/box-shadow revert to the
+     normal cascade — including :hover. A forwards-filled animation freezes
+     its last keyframe at "animation" priority (above normal author rules
+     regardless of specificity), so if cardFlash also used forwards its
+     frozen border-color would permanently block :hover from ever applying
+     again. The single animation-delay set inline per card still staggers
+     both animations — with two names it cycles to cover both (spec). */
+  .card,.doseCard{opacity:0;animation:cardIn .65s cubic-bezier(.16,1,.3,1) forwards,cardFlash .65s cubic-bezier(.16,1,.3,1)}
+  @keyframes cardIn{
+    0%{opacity:0;transform:translateY(14px) scale(.94)}
+    55%{opacity:1;transform:translateY(-2px) scale(1.015)}
+    100%{opacity:1;transform:translateY(0) scale(1)}
+  }
+  @keyframes cardFlash{
+    0%{border-color:var(--border);box-shadow:none}
+    55%{border-color:rgba(110,231,183,.55);box-shadow:0 0 0 1px rgba(110,231,183,.25),0 10px 26px -14px rgba(110,231,183,.4)}
+    100%{border-color:var(--border);box-shadow:none}
+  }
   .cardName{font-family:var(--font-mono);font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#fff;display:block;margin-bottom:10px}
 
   /* -- quick-log dose cards -- */
@@ -499,7 +523,7 @@ function peakCardHtml(){
   const offset=circumference*(1-clamp(nowE,0,100)/100);
   const segs=[['line','Line'],['bars','Bars'],['stack','Stack']]
     .map(m=>'<button type="button" class="segBtn'+(chartMode===m[0]?' active':'')+'" data-chart-mode="'+m[0]+'">'+m[1]+'</button>').join('');
-  return '<section class="card peakCard">'
+  return '<section class="card peakCard" style="animation-delay:350ms">'
     +'<div class="peakTop">'
     +'<div class="peakGauge"><svg viewBox="0 0 100 100">'
     +'<circle class="gaugeTrack" cx="50" cy="50" r="40"/>'
@@ -559,7 +583,7 @@ function sleepDebtHtml(){
       : ahead
         ? Math.abs(debt).toFixed(1)+'h ahead of your '+SLEEP_TARGET+'h/night target over the last 7 nights.'
         : 'Right on your '+SLEEP_TARGET+'h/night target over the last 7 nights.';
-  return '<section class="card"><span class="cardName">Sleep debt</span>'
+  return '<section class="card" style="animation-delay:490ms"><span class="cardName">Sleep debt</span>'
     +'<div class="decayRow"><div class="decayNow"><span class="n'+(owed?' warn':'')+'">'+num+'</span><span class="l">last 7 nights</span></div></div>'
     +'<p class="coach'+(owed?' warn':'')+'">'+note+'</p>'
     +'</section>';
@@ -569,7 +593,7 @@ function sleepDebtHtml(){
 function doseGridHtml(){
   const cards=PRESETS.map((p,i)=>{
     const badgeBg=hexToRgba(p.accent,.14);
-    return '<div class="doseCard" style="--dose-accent:'+p.accent+'">'
+    return '<div class="doseCard" style="--dose-accent:'+p.accent+';animation-delay:'+(70+i*70)+'ms">'
       +'<div class="doseIconBadge" style="background:'+badgeBg+'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">'+DOSE_ICONS[p.icon]+'</svg></div>'
       +'<div class="doseInfo"><span class="doseName">'+esc(p.name)+'</span><span class="doseMg">'+p.mg+' mg</span></div>'
       +timeChipHtml('doseTime'+i,'')
@@ -613,7 +637,7 @@ function caffeineHtml(){
   const rows=log.length
     ? '<div class="logList">'+log.map(l=>'<div class="logRow"><div><div class="nm">'+Math.round(l.mg)+' mg <span class="meta">'+(l.label?esc(l.label)+' · ':'')+clockOf(l.t)+'</span></div></div><button class="xBtn" data-del="'+l.id+'" title="Remove">×</button></div>').join('')+'</div>'
     : '<p class="empty">No caffeine logged yet today.</p>';
-  return '<section class="card"><h2 class="peakTitle" style="margin-bottom:10px">Caffeine</h2>'
+  return '<section class="card" style="animation-delay:420ms"><h2 class="peakTitle" style="margin-bottom:10px">Caffeine</h2>'
     +'<div class="caffHead"><span class="caffTotal'+(over?' over':'')+'">'+Math.round(total)+' mg</span><span class="caffCeil">of '+CAFF_CEIL+' mg limit</span></div>'
     +'<div class="caffBarTrack"><div class="caffBarFill'+(over?' over':'')+'" style="width:'+pct+'%"></div></div>'
     +'<p class="coach'+(c.warn?' warn':'')+'">'+c.txt+'</p>'
@@ -671,7 +695,7 @@ function stackHtml(){
       +'<span class="stackName">'+esc(s.name)+'</span></div>'
       +'<button class="xBtn" data-del-stack="'+s.id+'" title="Remove">×</button></div>';
   }).join('');
-  return '<section class="card"><span class="cardName">Daily stack</span>'
+  return '<section class="card" style="animation-delay:0ms"><span class="cardName">Daily stack</span>'
     +'<div class="stackList">'+rows+'</div>'
     +'<div class="stackAdd"><input class="fieldInput" id="stackName" type="text" placeholder="e.g. Vitamin D" autocomplete="off" />'
     +'<button class="btn-primary" id="stackAdd">Add</button></div>'

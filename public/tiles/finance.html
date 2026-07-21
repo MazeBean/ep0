@@ -52,7 +52,36 @@
   .star{position:absolute;width:2px;height:2px;background:#cfd0d6;border-radius:50%;opacity:.4;animation:twinkle 8s ease-in-out infinite}
   @keyframes twinkle{0%,100%{opacity:.15}50%{opacity:.5}}
   @media(prefers-reduced-motion:reduce){.star,.markOrb,.markGlow{animation:none!important}
-    .chartWrap,.donutWrap,.accountCard,.subRow,.ordCard,.wishRow,.addCard,.emptyState{transition:none}}
+    .chartWrap,.donutWrap,.accountCard,.subRow,.ordCard,.wishRow,.addCard,.emptyState{transition:none}
+    .chartWrap,.donutWrap,.accountCard,.addCard,.wishHero{animation:none!important;opacity:1!important}}
+  /* Panel load-in — same recipe as the home dashboard's overview cards (a
+     slight overshoot + a brief mint border/glow flash before settling), just
+     without the ripple/ping rings that only make sense on that 6-card grid.
+     Each panel's own inline animation-delay staggers them in render order.
+     Scoped to the structural panels (chart/donut/account/add/wishlist-hero),
+     not the variable-length list rows inside them (subRow/ordCard/wishRow),
+     same boundary as every other tile. */
+  /* Two separate animations, not one: cardIn (forwards) owns opacity/transform
+     so the reveal sticks; cardFlash has no fill-mode, so once its one pass
+     ends the browser drops it and border-color/box-shadow revert to the
+     normal cascade — including each panel's own resting box-shadow:
+     var(--card-shadow) and any :hover rule. A forwards-filled animation
+     freezes its last keyframe at "animation" priority (above normal author
+     rules regardless of specificity), so if cardFlash also used forwards its
+     frozen box-shadow:none would permanently hide the resting card-shadow.
+     The single animation-delay set inline per panel still staggers both
+     animations — with two names it cycles to cover both (spec). */
+  .chartWrap,.donutWrap,.accountCard,.addCard,.wishHero{opacity:0;animation:cardIn .65s cubic-bezier(.16,1,.3,1) forwards,cardFlash .65s cubic-bezier(.16,1,.3,1)}
+  @keyframes cardIn{
+    0%{opacity:0;transform:translateY(14px) scale(.94)}
+    55%{opacity:1;transform:translateY(-2px) scale(1.015)}
+    100%{opacity:1;transform:translateY(0) scale(1)}
+  }
+  @keyframes cardFlash{
+    0%{border-color:var(--border);box-shadow:none}
+    55%{border-color:rgba(110,231,183,.55);box-shadow:0 0 0 1px rgba(110,231,183,.25),0 10px 26px -14px rgba(110,231,183,.4)}
+    100%{border-color:var(--border);box-shadow:var(--card-shadow)}
+  }
   img { max-width:100%; height:auto; }
   @media (max-width:480px){ input,select,textarea{ font-size:16px !important; } }
 

@@ -21,33 +21,31 @@
   min-height: 168px;
   overflow: hidden;
   opacity: 0;
-  animation: cardIn 650ms var(--ease-premium) forwards;
+  /* Two separate animations, not one: cardIn (forwards) owns opacity/transform
+     so the reveal sticks; cardFlash has NO fill-mode, so once its one pass is
+     over the browser drops it entirely and border-color/box-shadow fall back
+     to the normal cascade — including :hover below. A forwards-filled
+     animation freezes its last keyframe at "animation" priority, which sits
+     above normal author rules regardless of specificity, so if cardFlash also
+     used forwards its frozen border-color would permanently block :hover
+     from ever taking effect again. animation-delay here is a single value on
+     purpose: with two animation-names it cycles to cover both (CSS Animations
+     spec), so every card's existing --ping-delay still staggers correctly. */
+  animation: cardIn 650ms var(--ease-premium) forwards, cardFlash 650ms var(--ease-premium);
   animation-delay: var(--ping-delay, 0ms);
   transition: border-color var(--duration) var(--ease);
 }
 
-/* A bit more than a fade: each card overshoots slightly on the way in and
-   flashes its border/glow mint for a moment (like the ping ring actually
-   just swept over it) before settling to its normal resting state. */
 @keyframes cardIn {
-  0% {
-    opacity: 0;
-    transform: translateY(14px) scale(0.94);
-    border-color: var(--border);
-    box-shadow: none;
-  }
-  55% {
-    opacity: 1;
-    transform: translateY(-2px) scale(1.015);
-    border-color: rgba(110, 231, 183, 0.55);
-    box-shadow: 0 0 0 1px rgba(110, 231, 183, 0.25), 0 10px 26px -14px rgba(110, 231, 183, 0.4);
-  }
-  100% {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-    border-color: var(--border);
-    box-shadow: none;
-  }
+  0% { opacity: 0; transform: translateY(14px) scale(0.94); }
+  55% { opacity: 1; transform: translateY(-2px) scale(1.015); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes cardFlash {
+  0% { border-color: var(--border); box-shadow: none; }
+  55% { border-color: rgba(110, 231, 183, 0.55); box-shadow: 0 0 0 1px rgba(110, 231, 183, 0.25), 0 10px 26px -14px rgba(110, 231, 183, 0.4); }
+  100% { border-color: var(--border); box-shadow: none; }
 }
 
 @media (prefers-reduced-motion: reduce) {

@@ -59,6 +59,31 @@
     -webkit-backdrop-filter:blur(20px) saturate(120%);backdrop-filter:blur(20px) saturate(120%);
     overflow:hidden;transition:border-color .2s var(--ease),box-shadow .2s var(--ease)}
   .card:hover{border-color:var(--brand-line);box-shadow:0 0 0 1px var(--brand-line) inset}
+  /* Panel load-in — same recipe as the home dashboard's overview cards (a
+     slight overshoot + a brief mint border/glow flash before settling), just
+     without the ripple/ping rings that only make sense on that 6-card grid.
+     Each card's own inline animation-delay staggers them in render order. */
+  /* Two separate animations, not one: cardIn (forwards) owns opacity/transform
+     so the reveal sticks; cardFlash has no fill-mode, so once its one pass
+     ends the browser drops it and border-color/box-shadow revert to the
+     normal cascade — including :hover. A forwards-filled animation freezes
+     its last keyframe at "animation" priority (above normal author rules
+     regardless of specificity), so if cardFlash also used forwards its
+     frozen border-color would permanently block :hover from ever applying
+     again. The single animation-delay set inline per card still staggers
+     both animations — with two names it cycles to cover both (spec). */
+  .card{opacity:0;animation:cardIn .65s cubic-bezier(.16,1,.3,1) forwards,cardFlash .65s cubic-bezier(.16,1,.3,1)}
+  @keyframes cardIn{
+    0%{opacity:0;transform:translateY(14px) scale(.94)}
+    55%{opacity:1;transform:translateY(-2px) scale(1.015)}
+    100%{opacity:1;transform:translateY(0) scale(1)}
+  }
+  @keyframes cardFlash{
+    0%{border-color:var(--border);box-shadow:none}
+    55%{border-color:rgba(110,231,183,.55);box-shadow:0 0 0 1px rgba(110,231,183,.25),0 10px 26px -14px rgba(110,231,183,.4)}
+    100%{border-color:var(--border);box-shadow:none}
+  }
+  @media(prefers-reduced-motion:reduce){.card{animation:none!important;opacity:1!important}}
   .cardName{font-family:var(--font-mono);font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#fff;display:block;margin-bottom:10px}
   /* Today's own column is capped narrow (see .fuelTopRow) so the calc row
      and the gauge stack instead of sitting side by side — a row layout here
@@ -288,7 +313,7 @@ function summaryHtml(){
     +macroBarRowHtml('Carbs',t.c,null,cPct,'white')
     +macroBarRowHtml('Fat',t.f,null,fPct,'white')
     +'</div>';
-  return '<section class="card"><span class="cardName">Today</span>'+head+bars+'</section>';
+  return '<section class="card" style="animation-delay:0ms"><span class="cardName">Today</span>'+head+bars+'</section>';
 }
 function mealPlanHtml(){
   const todayIdx=new Date().getDay();
@@ -300,7 +325,7 @@ function mealPlanHtml(){
     }).join('');
     return '<div class="mealRow"><span class="mealSlotLbl">'+slot.slice(0,1).toUpperCase()+'</span><div class="mealRowCells">'+cells+'</div></div>';
   }).join('');
-  return '<section class="card"><span class="cardName">Weekly meal plan</span><div class="mealTable">'
+  return '<section class="card" style="animation-delay:90ms"><span class="cardName">Weekly meal plan</span><div class="mealTable">'
     +'<div class="mealHeadRow"><span class="mealSlotLbl"></span><div class="mealRowCells">'+headCells+'</div></div>'
     +rows+'</div></section>';
 }
