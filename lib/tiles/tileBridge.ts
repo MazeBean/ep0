@@ -98,6 +98,37 @@ const SHIM = `<script>
   window.addEventListener('load', reportHeight);
   // Late reflows (webfonts, images, first async render) land after 'load'.
   [50, 200, 500, 1000, 2000].forEach(function (ms) { setTimeout(reportHeight, ms); });
+
+  // Touch-drag scrolling relayed to the host: a touch that starts inside this
+  // iframe never dispatches DOM events to the parent document at all (it's a
+  // separate browsing context), so the host's own scrollable div can't listen
+  // for it directly. This tile's own document is sized to fit its content
+  // exactly (no scrollable slack of its own — see the host's height report
+  // above), so it forwards raw touch deltas as 'scroll' messages instead and
+  // lets the HOST move its own scrollable wrapper. preventDefault stops this
+  // document from also attempting (and mishandling) its own touch-scroll.
+  //
+  // A tile with its own touch-drag control (e.g. Body's drag-to-log-feel
+  // handle) marks that element data-vitality-drag so a gesture starting on
+  // it is left alone entirely here — otherwise this would fight the tile's
+  // own drag with a simultaneous "scroll the page" interpretation of the
+  // same finger movement.
+  var lastTouchY = 0;
+  var touchExempt = false;
+  document.addEventListener('touchstart', function (e) {
+    if (e.touches.length !== 1) return;
+    var target = e.target;
+    touchExempt = !!(target && target.closest && target.closest('[data-vitality-drag]'));
+    lastTouchY = e.touches[0].clientY;
+  }, { passive: true });
+  document.addEventListener('touchmove', function (e) {
+    if (touchExempt || e.touches.length !== 1) return;
+    var y = e.touches[0].clientY;
+    var dy = lastTouchY - y;
+    lastTouchY = y;
+    parent.postMessage({ source: 'vitality-tile', type: 'scroll', dy: dy }, '*');
+    e.preventDefault();
+  }, { passive: false });
 })();
 </script>`
 

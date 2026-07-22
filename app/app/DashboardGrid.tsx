@@ -184,6 +184,29 @@ function OpenTileOverlay({
     ro.observe(top)
     return () => ro.disconnect()
   }, [])
+
+  // A touch that starts inside the sandboxed iframe never dispatches DOM
+  // events to this ancestor at all (it's a separate browsing context) — the
+  // iframe itself is also unreliable at handing a scroll gesture BACK to an
+  // ancestor once its own boundary claims one on mobile. So the tile's own
+  // bridge shim (tileBridge.ts) forwards raw touch deltas as 'scroll'
+  // postMessages instead, and this drives .openStage's scrollTop by hand.
+  const stageRef = useRef<HTMLDivElement>(null)
+  useEffect(() => {
+    const stage = stageRef.current
+    if (!stage) return
+    const onMessage = (e: MessageEvent) => {
+      if (e.source !== winRef.current) return
+      const msg = e.data
+      if (!msg || msg.source !== 'vitality-tile' || msg.type !== 'scroll') return
+      const max = stage.scrollHeight - stage.clientHeight
+      if (max <= 0) return
+      stage.scrollTop = Math.max(0, Math.min(max, stage.scrollTop + Number(msg.dy || 0)))
+    }
+    window.addEventListener('message', onMessage)
+    return () => window.removeEventListener('message', onMessage)
+  }, [])
+
   return (
     <div className={overlayClass} role="dialog" aria-modal="true" aria-label={slot.name}>
       <div className="openCard" ref={cardRef}>
@@ -193,7 +216,7 @@ function OpenTileOverlay({
           </button>
           <span className="openSlotName">{slot.name}</span>
         </div>
-        <div className="openStage" style={stageHeight != null ? { height: stageHeight } : undefined}>
+        <div className="openStage" ref={stageRef} style={stageHeight != null ? { height: stageHeight } : undefined}>
           {/* An iframe given an explicit height directly as a flex child makes
               the flex parent grow to match it instead of clipping/scrolling
               around it (a plain div with the same height does not) — this

@@ -28,7 +28,7 @@
   html,body{margin:0;height:100%;scrollbar-gutter:stable}
   body{background:radial-gradient(120% 60% at 50% 0%,#17171b 0%,#101013 42%,#0a0a0c 70%,#08080a 100%);
     color:var(--fg);font:15px/1.5 var(--font-display);display:flex;justify-content:center;padding:40px 20px;
-    position:relative;overflow-x:hidden;-webkit-font-smoothing:antialiased}
+    position:relative;overflow-x:hidden;overflow-y:hidden;-webkit-font-smoothing:antialiased}
   body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
     background:repeating-linear-gradient(0deg,rgba(255,255,255,.03) 0 1px,transparent 1px 3px);mix-blend-mode:overlay}
   /* Same slow drifting mint wash as the home dashboard's own background
@@ -516,7 +516,7 @@ function energyChartHtml(curve,peak,now,nowE){
       +'<circle cx="'+exOf(peak.t).toFixed(1)+'" cy="'+eyOf(peak.e).toFixed(1)+'" r="4" class="epeakd"/>'
       +'<circle cx="'+nowX.toFixed(1)+'" cy="'+eyOf(nowE).toFixed(1)+'" r="3.5" class="enowd"/>'
       +'<circle id="feelDot" cx="'+nowX.toFixed(1)+'" cy="'+feelY.toFixed(1)+'" r="5" class="feelDot" style="opacity:'+(feel?1:0)+'"/>'
-      +'<rect class="nowHandle" x="'+(nowX-10).toFixed(1)+'" y="'+ECY0+'" width="20" height="'+(ECY1-ECY0)+'"/>';
+      +'<rect class="nowHandle" data-vitality-drag x="'+(nowX-10).toFixed(1)+'" y="'+ECY0+'" width="20" height="'+(ECY1-ECY0)+'"/>';
     tooltip='<div class="logFeelTip" id="feelTip" style="left:'+((nowX/EW)*100).toFixed(1)+'%">'+(feel?('FEELS '+feel.v+' ↕'):'LOG FEEL ↓')+'</div>';
   }
   const grid=[6,12,18].map(h=>'<line x1="'+exOf(h)+'" y1="'+ECY0+'" x2="'+exOf(h)+'" y2="'+ECY1+'" class="grid"/>').join('');

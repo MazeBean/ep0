@@ -397,8 +397,14 @@
 /* Starts invisible over the already-opaque black stage above, and only
    cross-fades in once the tile has actually finished loading its data (see
    OpenTileOverlay's ready state) — nothing behind it to flash past either way. */
+/* touch-action:none — a full-bleed sandboxed iframe is unreliable at handing
+   touch-scroll gestures back to an ancestor once it's claimed one (Chromium
+   can latch a repeat touch onto the iframe's own scroll candidacy and never
+   release it), so the iframe is told to never attempt scrolling itself at
+   all; OpenTileOverlay's touch handlers drive .openStage's scrollTop by hand
+   instead (see DashboardGrid.tsx). */
 .veeTiles .openFrame{display:block;width:100%;height:100%;border:0;background:transparent;
-  opacity:0;transition:opacity .22s var(--vease)}
+  opacity:0;transition:opacity .22s var(--vease);touch-action:none}
 .veeTiles .openFrame.openFrameReady{opacity:1}
 @keyframes openFade{from{opacity:0}to{opacity:1}}
 @keyframes openRise{from{opacity:0;transform:translateY(14px) scale(.985)}to{opacity:1;transform:none}}
