@@ -10,7 +10,7 @@
      one-compartment half-life decay), and a daily med/supplement stack
      checklist. Sealed & bridge-backed. */
   :root{
-    --bg:#0a0a0c;--surface:rgba(255,255,255,.045);--border:rgba(255,255,255,.11);--brand:#6EE7B7;
+    --bg:#0a0a0c;--surface:rgba(255,255,255,.02);--border:rgba(255,255,255,.08);--brand:#6EE7B7;
     --brand-soft:rgba(110,231,183,.08);--brand-line:rgba(110,231,183,.3);
     --muted:#8a8a90;--muted-strong:#a8a8b0;--fg:#ededf0;--neg:#ff6b6b;--neg-line:rgba(255,107,107,.4);
     --warn:#e8b05f;--track:#17171b;--radius-md:12px;--radius-pill:999px;
@@ -31,6 +31,15 @@
     position:relative;overflow-x:hidden;-webkit-font-smoothing:antialiased}
   body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
     background:repeating-linear-gradient(0deg,rgba(255,255,255,.03) 0 1px,transparent 1px 3px);mix-blend-mode:overlay}
+  /* Same slow drifting mint wash as the home dashboard's own background
+     (dashboard.module.css's .page::before/canvasDrift), so this tile doesn't
+     feel like a flatter, separate world from the tab it opened out of. */
+  body::after{content:'';position:fixed;inset:-10% -5%;z-index:0;pointer-events:none;
+    background:radial-gradient(ellipse 50% 35% at 70% 20%,rgba(110,231,183,.06),transparent 65%),
+      radial-gradient(ellipse 40% 30% at 20% 80%,rgba(110,231,183,.04),transparent 70%);
+    animation:canvasDrift 60s ease-in-out infinite alternate}
+  @keyframes canvasDrift{from{transform:translate3d(0,0,0)}to{transform:translate3d(-2%,1%,0)}}
+  @media(prefers-reduced-motion:reduce){body::after{animation:none}}
   /* body's flex+justify-content:center makes its only child (main) shrink-wrap
      to content width instead of filling the row — main needs an explicit width
      so .shell's own width:100% has something real to resolve against. */
@@ -60,8 +69,10 @@
   .mark svg{width:20px;height:20px}
   .title{font-family:var(--font-serif);font-style:italic;font-size:40px;font-weight:600;line-height:1;letter-spacing:-.01em;margin:0}
   .subtitle{color:var(--muted);font-family:var(--font-mono);font-size:11px;letter-spacing:.12em;margin:4px 0 0}
+  /* Transparent, not frosted — same treatment as the home dashboard's own
+     overview cards: a near-invisible tint (--surface) with no backdrop blur,
+     so the starfield reads through crisp instead of behind a glass pane. */
   .card{position:relative;border:1px solid var(--border);border-radius:16px;background:var(--surface);padding:12px;margin-bottom:10px;
-    -webkit-backdrop-filter:blur(20px) saturate(120%);backdrop-filter:blur(20px) saturate(120%);
     overflow:hidden;transition:border-color .2s var(--ease),box-shadow .2s var(--ease)}
   .card:hover{border-color:var(--brand-line);box-shadow:0 0 0 1px var(--brand-line) inset}
   /* Panel load-in — same recipe as the home dashboard's overview cards (a
@@ -93,7 +104,7 @@
   /* -- quick-log dose cards -- */
   .doseGrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:10px}
   .doseCard{position:relative;border:1px solid var(--border);border-radius:14px;background:var(--surface);padding:12px;
-    display:flex;flex-direction:column;gap:8px;-webkit-backdrop-filter:blur(20px) saturate(120%);backdrop-filter:blur(20px) saturate(120%);
+    display:flex;flex-direction:column;gap:8px;
     transition:border-color .2s var(--ease),box-shadow .2s var(--ease)}
   .doseCard:hover{border-color:var(--dose-accent);box-shadow:0 0 0 1px var(--dose-accent) inset}
   .doseIconBadge{width:28px;height:28px;border-radius:9px;display:flex;align-items:center;justify-content:center;color:var(--dose-accent)}
