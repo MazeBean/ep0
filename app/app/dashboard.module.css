@@ -89,8 +89,13 @@
 .shell {
   position: relative;
   /* Lifts content above the fixed WelcomeBackdrop layers (aurora/mountains/
-     particles sit at z 0-2) so tiles and greeting stay in front. */
-  z-index: 5;
+     particles sit at z 0-2) so tiles and greeting stay in front. Also has to
+     clear .musicToggle's z-index:20 (a fixed, always-rendered button) — this
+     is a stacking CONTEXT (position + z-index together), so a tile's own
+     full-screen overlay further inside (veeTiles.css's z-index:80) was
+     capped at this element's z-index from the outside and rendered under
+     the music button instead of over it. */
+  z-index: 25;
   max-width: 1180px;
   margin: 0 auto;
   display: flex;

@@ -108,6 +108,10 @@
   .cardName{font-family:var(--font-serif);font-style:italic;font-weight:600;font-size:20px;letter-spacing:-.01em;color:var(--fg)}
   .count{font-family:var(--font-mono);font-size:10px;letter-spacing:.12em;color:var(--muted)}
   .row{display:flex;gap:10px;align-items:center;margin-bottom:10px;flex-wrap:wrap}
+  /* durRow's Add button has no label above it like its sibling .fields do,
+     so centering (the default) floats it above the actual input boxes —
+     align to the bottom instead so it lines up with the inputs themselves. */
+  .row.durRow{align-items:flex-end}
   .field{flex:1;min-width:90px}
   .fieldLbl{display:block;font-size:11px;color:var(--muted);margin-bottom:6px}
   input[type=text],input[type=number]{width:100%;background:var(--bg);border:1px solid var(--border);color:var(--fg);
