@@ -62,7 +62,7 @@
   @keyframes twinkle{0%,100%{opacity:.15}50%{opacity:.5}}
   @media(prefers-reduced-motion:reduce){.star,.markOrb,.markGlow{animation:none!important}
     .chartWrap,.donutWrap,.accountCard,.subRow,.ordCard,.wishRow,.addCard,.emptyState{transition:none}
-    .chartWrap,.donutWrap,.accountCard,.addCard,.wishHero{animation:none!important;opacity:1!important}}
+    #app.first-paint .chartWrap,#app.first-paint .donutWrap,#app.first-paint .accountCard,#app.first-paint .addCard,#app.first-paint .wishHero{animation:none!important;opacity:1!important}}
   /* Panel load-in — same recipe as the home dashboard's overview cards (a
      slight overshoot + a brief mint border/glow flash before settling), just
      without the ripple/ping rings that only make sense on that 6-card grid.
@@ -80,7 +80,7 @@
      frozen box-shadow:none would permanently hide the resting card-shadow.
      The single animation-delay set inline per panel still staggers both
      animations — with two names it cycles to cover both (spec). */
-  .chartWrap,.donutWrap,.accountCard,.addCard,.wishHero{opacity:0;animation:cardIn .65s cubic-bezier(.16,1,.3,1) forwards,cardFlash .65s cubic-bezier(.16,1,.3,1)}
+  #app.first-paint .chartWrap,#app.first-paint .donutWrap,#app.first-paint .accountCard,#app.first-paint .addCard,#app.first-paint .wishHero{opacity:0;animation:cardIn .65s cubic-bezier(.16,1,.3,1) forwards,cardFlash .65s cubic-bezier(.16,1,.3,1)}
   @keyframes cardIn{
     0%{opacity:0;transform:translateY(14px) scale(.94)}
     55%{opacity:1;transform:translateY(-2px) scale(1.015)}
@@ -119,7 +119,8 @@
 
   /* Section */
   .section { margin-bottom: var(--space-10); }
-  .sectionEyebrow { font-family: var(--font-display); font-weight: 700; font-size: var(--text-xl); letter-spacing: -0.02em; color: var(--fg); margin-bottom: var(--space-4); display:flex; align-items:baseline; justify-content:space-between; gap: var(--space-3); }
+  /* Matches Body tab's own "Peak"/"Caffeine" panel headings. */
+  .sectionEyebrow { font-family: var(--font-serif); font-style: italic; font-weight: 600; font-size: var(--text-xl); letter-spacing: -0.01em; color: var(--fg); margin-bottom: var(--space-4); display:flex; align-items:baseline; justify-content:space-between; gap: var(--space-3); }
   .sectionEyebrow > span:first-child { display:inline-flex; align-items:center; gap: 10px; }
   .sectionEyebrow > span:first-child::before { content:''; width: 7px; height: 18px; border-radius: 3px; background: var(--brand); box-shadow: 0 0 12px -2px var(--brand-glow); }
   .sectionCount { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.08em; color: var(--muted); }
@@ -146,7 +147,9 @@
   .chartWrap, .donutWrap { position: relative; padding: var(--space-5); background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); box-shadow: var(--card-shadow); }
   .chartHead { display:flex; justify-content:space-between; align-items:baseline; margin-bottom: var(--space-4); gap: var(--space-3); flex-wrap: wrap; }
   .chartHeadLeft { display:inline-flex; align-items:baseline; gap: var(--space-3); }
-  .chartLabel { font-family: var(--font-mono); font-size: 12px; letter-spacing: 0.06em; text-transform: uppercase; color: #fff; font-weight: 700; }
+  /* Matches Body tab's own "Peak"/"Caffeine" panel headings, so a panel
+     reads the same tone whether it's here or in another tile. */
+  .chartLabel { font-family: var(--font-serif); font-style: italic; font-size: 20px; letter-spacing: -0.01em; color: var(--fg); font-weight: 600; }
   .chartDelta { font-family: var(--font-mono); font-size: 11px; color: var(--muted); font-variant-numeric: tabular-nums; }
   .chartDelta.up { color: var(--pos); } .chartDelta.down { color: var(--neg); }
   .periodSeg { display:inline-flex; align-items:center; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-pill); padding: 2px; gap: 1px; }
@@ -179,7 +182,7 @@
   @media (max-width: 720px) { .accountsGrid { grid-template-columns: 1fr; } }
   .accountCard { display:flex; flex-direction:column; gap: var(--space-3); padding: var(--space-5); background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); box-shadow: var(--card-shadow); }
   .accountHead { display:flex; align-items:baseline; justify-content:space-between; }
-  .accountLabel { font-family: var(--font-display); font-weight: 700; font-size: var(--text-base); letter-spacing: -0.01em; color: var(--fg); }
+  .accountLabel { font-family: var(--font-serif); font-style: italic; font-weight: 600; font-size: var(--text-lg, 1.125rem); letter-spacing: -0.01em; color: var(--fg); }
   .accountTotal { font-family: var(--font-mono); font-size: 13px; font-weight: 600; font-variant-numeric: tabular-nums; }
   .accountTotalPct { font-size: 10px; font-weight: 400; letter-spacing: 0.02em; color: var(--muted); margin-left: 6px; font-variant-numeric: tabular-nums; }
   .accountList { display:flex; flex-direction:column; gap: 2px; }
@@ -999,7 +1002,14 @@ function viewHtml() {
   return wishViewHtml();
 }
 function render() {
-  document.getElementById('app').innerHTML = headerHtml() + tickerHtml() + viewHtml();
+  // Only the very first render (the tile's initial paint) should play the
+  // card entrance flourish — every render after that is a data edit, and
+  // re-flashing every card for a one-line change reads as the whole tab
+  // reloading. #app starts empty, so this is a free, correct first-paint check.
+  const app = document.getElementById('app');
+  const firstPaint = app.children.length === 0;
+  app.innerHTML = headerHtml() + tickerHtml() + viewHtml();
+  app.classList.toggle('first-paint', firstPaint);
   mountTicker();
   // Focus an inline-edit input if one just opened.
   if (ui.edit) {

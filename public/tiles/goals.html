@@ -90,7 +90,7 @@
      frozen border-color would permanently block :hover from ever applying
      again. The single animation-delay set inline per card still staggers
      both animations — with two names it cycles to cover both (spec). */
-  .card{opacity:0;animation:cardIn .65s cubic-bezier(.16,1,.3,1) forwards,cardFlash .65s cubic-bezier(.16,1,.3,1)}
+  #app.first-paint .card{opacity:0;animation:cardIn .65s cubic-bezier(.16,1,.3,1) forwards,cardFlash .65s cubic-bezier(.16,1,.3,1)}
   @keyframes cardIn{
     0%{opacity:0;transform:translateY(14px) scale(.94)}
     55%{opacity:1;transform:translateY(-2px) scale(1.015)}
@@ -101,9 +101,11 @@
     55%{border-color:rgba(110,231,183,.55);box-shadow:0 0 0 1px rgba(110,231,183,.25),0 10px 26px -14px rgba(110,231,183,.4)}
     100%{border-color:var(--border);box-shadow:none}
   }
-  @media(prefers-reduced-motion:reduce){.card{animation:none!important;opacity:1!important}}
+  @media(prefers-reduced-motion:reduce){#app.first-paint .card{animation:none!important;opacity:1!important}}
   .cardHead{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin-bottom:10px}
-  .cardName{font-family:var(--font-mono);font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#fff}
+  /* Matches Body tab's own "Peak"/"Caffeine" panel headings, so a panel
+     reads the same tone whether it's here or in another tile. */
+  .cardName{font-family:var(--font-serif);font-style:italic;font-weight:600;font-size:20px;letter-spacing:-.01em;color:var(--fg)}
   .count{font-family:var(--font-mono);font-size:10px;letter-spacing:.12em;color:var(--muted)}
   .row{display:flex;gap:10px;align-items:center;margin-bottom:10px;flex-wrap:wrap}
   .field{flex:1;min-width:90px}
@@ -255,10 +257,16 @@ function purposeHtml(){
     +'</div></section>';
 }
 function render(){
+  // Only the very first render (the tile's initial paint) should play the
+  // card entrance flourish — every render after that is a data edit, and
+  // re-flashing every card for a one-line change reads as the whole tab
+  // reloading. #app starts empty, so this is a free, correct first-paint check.
+  const firstPaint=$('app').children.length===0;
   $('app').innerHTML=headerHtml()+statsHtml()
     +sectionHtml('shortTerm','Short-term','shortInput','shortAdd')
     +sectionHtml('longTerm','Long-term','longInput','longAdd')
     +purposeHtml();
+  $('app').classList.toggle('first-paint',firstPaint);
 }
 
 /* Short-term goals get a days+weeks span from today; long-term ones get a

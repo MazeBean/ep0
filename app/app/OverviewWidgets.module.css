@@ -87,13 +87,16 @@
   gap: var(--space-3);
 }
 
+/* Matches the Body tab's own "Peak"/"Caffeine" panel headings (a real,
+   slightly warm heading instead of a small uppercase mono kicker), so a
+   panel reads the same whether it's here or inside its own tile. */
 .cardTitle {
-  font-family: var(--font-mono), ui-monospace, monospace;
-  font-weight: 700;
-  font-size: 0.75rem;
-  letter-spacing: 0.06em;
-  color: #fff;
-  text-transform: uppercase;
+  font-family: var(--font-serif), 'Times New Roman', Georgia, serif;
+  font-style: italic;
+  font-weight: 600;
+  font-size: 1.25rem;
+  letter-spacing: -0.01em;
+  color: var(--fg);
 }
 
 .cardTag {
