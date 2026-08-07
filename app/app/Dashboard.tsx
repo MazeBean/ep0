@@ -7,6 +7,7 @@ import WelcomeBackdrop from '@/components/WelcomeBackdrop'
 import DashboardGrid from './DashboardGrid'
 import AppSidebar from './AppSidebar'
 import OverviewWidgets from './OverviewWidgets'
+import AudioControls from './AudioControls'
 import '@/components/veeTiles.css'
 import { dashboardChrome, backgroundAccent, DEFAULT_CHROME, type DashboardChrome } from '@/lib/tiles/dashboardChrome'
 
@@ -16,25 +17,8 @@ interface DashboardProps {
 }
 
 const AMBIENT_MUTED_KEY = 'vitality:ambientMuted'
-
-function SpeakerIcon({ muted }: { muted: boolean }) {
-  const common = { viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', strokeWidth: 1.8, strokeLinecap: 'round' as const, strokeLinejoin: 'round' as const }
-  if (muted) {
-    return (
-      <svg {...common}>
-        <path d="M4 9v6h4l5 4V5L8 9H4Z" />
-        <path d="M16 9l5 6M21 9l-5 6" />
-      </svg>
-    )
-  }
-  return (
-    <svg {...common}>
-      <path d="M4 9v6h4l5 4V5L8 9H4Z" />
-      <path d="M16.5 8.5a5 5 0 0 1 0 7" />
-      <path d="M19 6a8.5 8.5 0 0 1 0 12" />
-    </svg>
-  )
-}
+const AMBIENT_VOLUME_KEY = 'vitality:ambientVolume'
+const DEFAULT_VOLUME = 0.7
 
 /**
  * The whole base app: one dashboard. The Vitality character lives in the header
@@ -58,6 +42,7 @@ export default function Dashboard({ firstName, userId }: DashboardProps) {
   // animation mount fresh here, same as they always have on first mount).
   const [introPhase, setIntroPhase] = useState<'shown' | 'leaving' | 'done'>('shown')
   const [muted, setMuted] = useState(false)
+  const [volume, setVolume] = useState(DEFAULT_VOLUME)
   const audioRef = useRef<HTMLAudioElement>(null)
 
   useEffect(() => {
@@ -66,11 +51,20 @@ export default function Dashboard({ firstName, userId }: DashboardProps) {
 
   useEffect(() => {
     setMuted(window.localStorage.getItem(AMBIENT_MUTED_KEY) === '1')
+    const storedVolume = window.localStorage.getItem(AMBIENT_VOLUME_KEY)
+    if (storedVolume != null) {
+      const v = Number(storedVolume)
+      if (Number.isFinite(v)) setVolume(Math.max(0, Math.min(1, v)))
+    }
   }, [])
 
   useEffect(() => {
     if (audioRef.current) audioRef.current.muted = muted
   }, [muted])
+
+  useEffect(() => {
+    if (audioRef.current) audioRef.current.volume = volume
+  }, [volume])
 
   const enterDashboard = () => {
     if (introPhase !== 'shown') return
@@ -88,6 +82,23 @@ export default function Dashboard({ firstName, userId }: DashboardProps) {
       window.localStorage.setItem(AMBIENT_MUTED_KEY, next ? '1' : '0')
       return next
     })
+  }
+
+  // Dragging the slider mirrors any other media player: moving it above 0
+  // un-mutes (so the level you just set is actually heard), and dragging it
+  // all the way down mutes — the mute button and this stay two independent
+  // controls, but each still nudges the other into a sane matching state.
+  const changeVolume = (v: number) => {
+    const clamped = Math.max(0, Math.min(1, v))
+    setVolume(clamped)
+    window.localStorage.setItem(AMBIENT_VOLUME_KEY, String(clamped))
+    if (clamped > 0 && muted) {
+      setMuted(false)
+      window.localStorage.setItem(AMBIENT_MUTED_KEY, '0')
+    } else if (clamped === 0 && !muted) {
+      setMuted(true)
+      window.localStorage.setItem(AMBIENT_MUTED_KEY, '1')
+    }
   }
 
   const wallAccent = chrome ? backgroundAccent(chrome.background) : '#6EE7B7'
@@ -132,20 +143,26 @@ export default function Dashboard({ firstName, userId }: DashboardProps) {
           openId={openTileId}
           onOpenIdChange={setOpenTileId}
           hidePosterGrid
+          // Threaded down to each open tile's own top bar so the SAME mute
+          // button + volume slider shows there too (see OpenTileOverlay) —
+          // only handed down once the intro's cleared, matching the fixed
+          // one below never appearing until then either.
+          audioControls={introPhase === 'done' ? { muted, volume, onToggleMute: toggleMuted, onVolumeChange: changeVolume } : undefined}
         />
       </div>
 
-      {introPhase === 'done' && (
-        <button
-          type="button"
+      {/* Only rendered on Home — an open tile gets its own copy inline in
+          its top bar (DashboardGrid's OpenTileOverlay) instead, since this
+          fixed position would otherwise float on top of that tile's own
+          header rather than sitting in it. */}
+      {introPhase === 'done' && openTileId === null && (
+        <AudioControls
+          muted={muted}
+          volume={volume}
+          onToggleMute={toggleMuted}
+          onVolumeChange={changeVolume}
           className={styles.musicToggle}
-          data-muted={muted}
-          onClick={toggleMuted}
-          title={muted ? 'Unmute ambient music' : 'Mute ambient music'}
-          aria-label={muted ? 'Unmute ambient music' : 'Mute ambient music'}
-        >
-          <SpeakerIcon muted={muted} />
-        </button>
+        />
       )}
 
       {introPhase !== 'done' && (

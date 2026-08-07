@@ -308,9 +308,43 @@
   white-space: nowrap;
 }
 
+.wheelFoot {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
 .wheelLabel {
   font-size: 0.8125rem;
   color: var(--muted-strong);
+}
+
+/* Instantly logs a synthetic entry that closes the gap to today's goal —
+   same one Fuel's own tile offers next to its matching wheel (fuel.html),
+   just mirrored here so you don't have to open it just to do this. */
+.fillBtn {
+  background: rgba(110, 231, 183, 0.1);
+  border: 1px solid rgba(110, 231, 183, 0.3);
+  color: var(--mint);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  border-radius: var(--radius-pill);
+  padding: 3px 9px;
+  cursor: pointer;
+  transition: background var(--duration) var(--ease), border-color var(--duration) var(--ease);
+}
+
+.fillBtn:hover {
+  background: rgba(110, 231, 183, 0.18);
+  border-color: var(--mint);
+}
+
+.fillBtn:disabled {
+  background: transparent;
+  border-color: var(--border);
+  color: var(--muted);
+  cursor: default;
 }
 
 /* ---- sparkline ---- */

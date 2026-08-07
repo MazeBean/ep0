@@ -456,6 +456,10 @@
   font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase;
   color:rgba(220,222,228,.78);padding:4px 2px;transition:color .18s var(--vease)}
 .veeTiles .openBack:hover{color:var(--mint)}
+/* Wraps the slot name AND (when the intro's cleared) the mute/volume
+   control on the right side of the bar, so openTop's space-between still
+   works with just two flex children overall. */
+.veeTiles .openTopRight{display:flex;align-items:center;gap:12px;min-width:0}
 .veeTiles .openSlotName{font-family:var(--mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;
   color:rgba(255,255,255,.38);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 @keyframes openPage{from{transform:translateY(10px)}to{transform:none}}
@@ -473,4 +477,20 @@
   white-space: nowrap;
   pointer-events: none;
   z-index: 6;
+}
+
+/* "+ New tile" and "See the vision" — fixed bottom-corner buttons (rest of
+   their look stays inline in DashboardGrid.tsx; only the responsive `bottom`
+   offset lives here, since inline styles can't respond to a media query).
+   Below 980px, AppSidebar becomes a fixed bottom tab bar (its own
+   max-width:980px in AppSidebar.module.css) — at `bottom:24px` these sat
+   right on top of its first couple of tabs, silently eating taps meant for
+   Home/Fuel. */
+.fixedCornerBtn {
+  bottom: 24px;
+}
+@media (max-width: 980px) {
+  .fixedCornerBtn {
+    bottom: calc(84px + env(safe-area-inset-bottom));
+  }
 }

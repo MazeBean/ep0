@@ -128,21 +128,35 @@
   .miniStepBtn:hover{border-color:var(--brand-line);background:var(--brand-soft)}
   .miniStepBtn:active{transform:scale(.9)}
   .goalStepVal{min-width:56px;text-align:center;font-size:16px;font-weight:600;font-variant-numeric:tabular-nums}
-  /* Calorie gauge: a counterclockwise-filling ring (see arcPathCCW in the
+  /* Wheel gauges: a counterclockwise-filling ring (see arcPathCCW in the
      script — a hand-built SVG arc, not a mirrored stroke-dasharray trick,
-     so the sweep direction is exact rather than guessed). */
+     so the sweep direction is exact rather than guessed). Calories and
+     Protein now share this same wheel, side by side (wheelsRow below),
+     matching the home dashboard's own pair instead of one big ring here
+     with a linear bar for protein underneath it. */
+  .wheelsRow{display:flex;justify-content:center;gap:22px;flex-wrap:wrap;margin-bottom:10px}
+  .wheelItem{display:flex;flex-direction:column;align-items:center;gap:8px}
   .calGaugeWrap{display:flex;justify-content:center;flex-shrink:0}
-  .calGaugeSvg{width:190px;height:190px}
-  .calGaugeTrack{fill:none;stroke:var(--track);stroke-width:12}
-  .calGaugeFill{fill:none;stroke:var(--brand);stroke-width:12;stroke-linecap:round;
+  .calGaugeSvg{width:150px;height:150px}
+  .calGaugeTrack{fill:none;stroke:var(--track);stroke-width:11}
+  .calGaugeFill{fill:none;stroke:var(--brand);stroke-width:11;stroke-linecap:round;
     filter:drop-shadow(0 0 6px rgba(110,231,183,.55))}
   .calGaugeFill.over{stroke:var(--neg);filter:none}
-  .calGaugeNum{font-family:var(--font-serif);font-style:italic;font-weight:600;font-size:32px;letter-spacing:-.01em;fill:var(--fg)}
-  .calGaugeLbl{font-family:var(--font-mono);font-size:10.5px;letter-spacing:.1em;fill:var(--muted)}
-  /* Macro bars: protein (gold) on top, carbs + fat (white) below. Carbs/fat
-     have no user-set per-gram goal, so their bars scale against a generic
-     40/30% calorie-split reference derived from the calorie goal — a rough
-     guide, not a personalized target. */
+  .calGaugeNum{font-family:var(--font-serif);font-style:italic;font-weight:600;font-size:26px;letter-spacing:-.01em;fill:var(--fg)}
+  .calGaugeLbl{font-family:var(--font-mono);font-size:9.5px;letter-spacing:.08em;fill:var(--muted)}
+  .wheelItemLabel{font-size:13px;color:var(--muted-strong)}
+  .wheelFoot{display:flex;align-items:center;gap:8px}
+  /* Instantly logs a synthetic entry that closes the gap to today's goal —
+     same shape as any other food log line, so it can be deleted like one. */
+  .fillBtn{background:var(--brand-soft);border:1px solid var(--brand-line);color:var(--brand);
+    font-size:11px;font-weight:600;letter-spacing:.02em;border-radius:var(--radius-pill);
+    padding:4px 10px;cursor:pointer;transition:background .15s var(--ease),border-color .15s var(--ease)}
+  .fillBtn:hover{background:rgba(110,231,183,.18);border-color:var(--brand)}
+  .fillBtn:disabled{background:transparent;border-color:var(--border);color:var(--muted);cursor:default}
+  /* Macro bars: carbs + fat below the wheels above. Neither has a user-set
+     per-gram goal, so their bars scale against a generic 40/30% calorie-split
+     reference derived from the calorie goal — a rough guide, not a
+     personalized target. */
   .macroBars{display:flex;flex-direction:column;gap:10px;margin-top:10px}
   .macroBarRow{display:flex;flex-direction:column;gap:6px}
   .macroBarHead{display:flex;align-items:baseline;justify-content:space-between;font-size:13px;color:var(--muted-strong)}
@@ -188,7 +202,8 @@
     .mealRowCells{grid-template-columns:repeat(7,minmax(64px,1fr))}
   }
   @media(max-width:640px){
-    .calGaugeSvg{width:172px;height:172px}
+    .calGaugeSvg{width:130px;height:130px}
+    .calGaugeNum{font-size:22px}
     .goalEdits{width:100%}
   }
 </style>
@@ -235,6 +250,26 @@ function goalProtein(){return store.goalProtein!=null?store.goalProtein:150;}
 function setGoalProtein(n){store.goalProtein=n;persist();}
 function stepGoalCal(delta){setGoalCal(Math.max(0,goalCal()+delta));render();}
 function stepGoalProtein(delta){setGoalProtein(Math.max(0,goalProtein()+delta));render();}
+/* "Instantly fill" a wheel: logs one synthetic entry that closes the exact
+   gap to today's goal, same way a real food would — so it shows up (and can
+   be deleted again) in "Logged today" like anything else, and the wheel just
+   reads the same totals() everything else already does. Each button only
+   touches its own macro (a calorie fill doesn't add fake protein grams, and
+   vice versa) rather than trying to simulate a real food's full profile. */
+function fillCalorieGoal(){
+  const remaining=Math.round(goalCal()-totals().cal);
+  if(remaining<=0)return;
+  const log=todaysLog();
+  log.push({name:'Quick fill',grams:0,cal:remaining,p:0,c:0,f:0});
+  setTodaysLog(log);render();
+}
+function fillProteinGoal(){
+  const remaining=Math.round(goalProtein()-totals().p);
+  if(remaining<=0)return;
+  const log=todaysLog();
+  log.push({name:'Quick fill',grams:0,cal:0,p:remaining,c:0,f:0});
+  setTodaysLog(log);render();
+}
 function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 const round=n=>Math.round(n);
 let query='',matches=[];
@@ -284,14 +319,23 @@ function arcPathCCW(cx,cy,r,pct){
   const largeArc=Math.abs(sweepDeg)>180?1:0;
   return 'M '+start.x.toFixed(2)+' '+start.y.toFixed(2)+' A '+r+' '+r+' 0 '+largeArc+' 0 '+end.x.toFixed(2)+' '+end.y.toFixed(2);
 }
-function calGaugeHtml(pct,eaten,goal,over){
-  const cx=86,cy=86,r=74,d=pct>0?arcPathCCW(cx,cy,r,pct):'';
-  return '<div class="calGaugeWrap"><svg viewBox="0 0 172 172" class="calGaugeSvg">'
+/* Generic wheel gauge — same counterclockwise-arc geometry as the old
+   calorie-only gauge, now parameterized so both Calories and Protein render
+   as matched wheels side by side (was a single big ring + a linear bar for
+   protein below it). Each wheel gets its own "instantly fill today's goal"
+   button underneath, mirroring the pair the home dashboard shows. */
+function wheelGaugeHtml(pct,num,sub,label,over,fillKey,canFill){
+  const cx=75,cy=75,r=64,d=pct>0?arcPathCCW(cx,cy,r,pct):'';
+  return '<div class="wheelItem"><div class="calGaugeWrap"><svg viewBox="0 0 150 150" class="calGaugeSvg">'
     +'<circle cx="'+cx+'" cy="'+cy+'" r="'+r+'" class="calGaugeTrack"/>'
     +(d?'<path d="'+d+'" class="calGaugeFill'+(over?' over':'')+'"/>':'')
-    +'<text x="'+cx+'" y="'+(cy-4)+'" text-anchor="middle" class="calGaugeNum">'+round(eaten)+'</text>'
-    +'<text x="'+cx+'" y="'+(cy+18)+'" text-anchor="middle" class="calGaugeLbl">of '+goal+' kcal</text>'
-    +'</svg></div>';
+    +'<text x="'+cx+'" y="'+(cy-4)+'" text-anchor="middle" class="calGaugeNum">'+num+'</text>'
+    +'<text x="'+cx+'" y="'+(cy+18)+'" text-anchor="middle" class="calGaugeLbl">'+sub+'</text>'
+    +'</svg></div>'
+    +'<div class="wheelFoot"><span class="wheelItemLabel">'+label+'</span>'
+    +'<button type="button" class="fillBtn" data-fill="'+fillKey+'"'+(canFill?'':' disabled')
+    +' title="Instantly fill today’s '+label.toLowerCase()+' goal">'+(canFill?'⚡ Fill':'Filled')+'</button></div>'
+    +'</div>';
 }
 function macroBarRowHtml(label,valueG,goalG,pct,colorClass){
   const valTxt=round(valueG)+'g'+(goalG!=null?' / '+goalG+'g':'');
@@ -302,7 +346,7 @@ function summaryHtml(){
   const t=totals(),goal=goalCal(),pGoal=goalProtein();
   const remaining=goal-t.cal,over=remaining<0;
   const calPct=goal>0?t.cal/goal:0;
-  const pPct=pGoal>0?(t.p/pGoal)*100:0;
+  const pPct=pGoal>0?t.p/pGoal:0;
   // Carbs/fat have no per-gram goal in this tile's data model, so their bars
   // scale against a generic 40%-carb / 30%-fat calorie-split reference
   // derived from the calorie goal — a rough guide, not a personalized target.
@@ -311,7 +355,10 @@ function summaryHtml(){
   const cPct=(t.c/carbsRef)*100;
   const fPct=(t.f/fatRef)*100;
   const cell=(cls,n,l)=>'<div class="calCell '+cls+'"><span class="n">'+round(n)+'</span><span class="l">'+l+'</span></div>';
-  const gauge=calGaugeHtml(calPct,t.cal,goal,over);
+  const wheels='<div class="wheelsRow">'
+    +wheelGaugeHtml(calPct,round(t.cal),'of '+goal+' kcal','Calories',over,'cal',remaining>0)
+    +wheelGaugeHtml(pPct,round(t.p)+'g',pGoal+'g target','Protein',t.p>pGoal,'protein',pGoal-t.p>0)
+    +'</div>';
   const stepper=(key,val,dir,label)=>'<button type="button" class="miniStepBtn" data-goal-step="'+key+'" data-dir="'+dir+'" aria-label="'+label+'">'+(dir<0?'−':'+')+'</button>';
   const head='<div class="calTopRow"><div class="calLeftCol"><div class="calMath">'+cell('',goal,'Goal')+'<span class="calOp">−</span>'+cell('',t.cal,'Food')+'<span class="calOp">=</span>'+cell('remain'+(over?' over':''),Math.abs(remaining),over?'Over':'Remaining')+'</div>'
     +'<div class="goalEdits">'
@@ -320,9 +367,8 @@ function summaryHtml(){
     +'<div class="goalEdit"><span class="calCell"><span class="l">Protein goal (g)</span></span><div class="goalStepper">'
     +stepper('protein',pGoal,-1,'Subtract 5g protein')+'<span class="goalStepVal">'+pGoal+'</span>'+stepper('protein',pGoal,1,'Add 5g protein')+'</div></div>'
     +'</div></div>'
-    +gauge+'</div>';
+    +wheels+'</div>';
   const bars='<div class="macroBars">'
-    +macroBarRowHtml('Protein',t.p,pGoal,pPct,'gold')
     +macroBarRowHtml('Carbs',t.c,null,cPct,'white')
     +macroBarRowHtml('Fat',t.f,null,fPct,'white')
     +'</div>';
@@ -371,7 +417,7 @@ function searchHtml(){return '<h2 class="sectionTitle">Add food</h2><div class="
 function logHtml(){
   const log=todaysLog();
   if(!log.length)return '<h2 class="sectionTitle">Logged today</h2><p class="empty">Nothing logged yet.</p>';
-  const rows=log.map((e,i)=>'<div class="logRow"><div><div class="foodName">'+esc(e.name)+' <span class="meta">'+e.grams+'g</span></div><div class="nums">'+round(e.cal)+' kcal · '+round(e.p)+'P / '+round(e.c)+'C / '+round(e.f)+'F</div></div><button class="xBtn" data-del="'+i+'" title="Remove">×</button></div>').join('');
+  const rows=log.map((e,i)=>'<div class="logRow"><div><div class="foodName">'+esc(e.name)+(e.grams?' <span class="meta">'+e.grams+'g</span>':'')+'</div><div class="nums">'+round(e.cal)+' kcal · '+round(e.p)+'P / '+round(e.c)+'C / '+round(e.f)+'F</div></div><button class="xBtn" data-del="'+i+'" title="Remove">×</button></div>').join('');
   return '<h2 class="sectionTitle">Logged today</h2><div class="logList">'+rows+'</div>';
 }
 function headerHtml(){
@@ -404,6 +450,12 @@ document.addEventListener('click',e=>{
     const dir=Number(gStep.getAttribute('data-dir'));
     if(gStep.getAttribute('data-goal-step')==='cal')stepGoalCal(50*dir);
     else stepGoalProtein(5*dir);
+    return;
+  }
+  const fill=e.target.closest('[data-fill]');
+  if(fill){
+    if(fill.getAttribute('data-fill')==='cal')fillCalorieGoal();
+    else fillProteinGoal();
     return;
   }
   const add=e.target.closest('[data-add]');

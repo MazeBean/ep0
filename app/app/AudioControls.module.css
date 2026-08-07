@@ -1,0 +1,104 @@
+.controls {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.muteBtn {
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--border-strong);
+  background: var(--card);
+  color: var(--mint);
+  cursor: pointer;
+  transition:
+    color 0.18s var(--ease),
+    border-color 0.18s var(--ease),
+    background 0.18s var(--ease);
+}
+
+.muteBtn:hover {
+  color: var(--mint-hover);
+  border-color: var(--mint);
+  background: var(--card-elevated);
+}
+
+.muteBtn[data-muted='true'] {
+  color: var(--muted);
+}
+
+.muteBtn svg {
+  width: 18px;
+  height: 18px;
+}
+
+/* A plain range input, retextured to match the mute button next to it —
+   the native thumb/track are the only parts worth overriding; everything
+   else (focus ring, click target) stays the browser's own behavior. */
+.volumeSlider {
+  width: 90px;
+  height: 4px;
+  -webkit-appearance: none;
+  appearance: none;
+  background: var(--border-strong);
+  border-radius: 999px;
+  outline: none;
+  cursor: pointer;
+}
+
+.volumeSlider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--mint);
+  cursor: pointer;
+  border: 2px solid #04140d;
+  transition: transform 0.15s var(--ease);
+}
+
+.volumeSlider::-webkit-slider-thumb:hover {
+  transform: scale(1.15);
+}
+
+.volumeSlider::-moz-range-thumb {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--mint);
+  cursor: pointer;
+  border: 2px solid #04140d;
+}
+
+.volumeSlider::-moz-range-track {
+  background: transparent;
+}
+
+/* Compact variant — sits inline in a tile's own (much slimmer) top bar
+   instead of floating fixed over the full page, so both the button and the
+   slider are dialed down a size to keep that bar from growing taller. */
+.compact .muteBtn {
+  width: 32px;
+  height: 32px;
+}
+
+.compact .muteBtn svg {
+  width: 15px;
+  height: 15px;
+}
+
+.compact .volumeSlider {
+  width: 64px;
+}
+
+@media (max-width: 480px) {
+  .compact .volumeSlider {
+    display: none;
+  }
+}

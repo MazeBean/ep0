@@ -8,6 +8,7 @@ import { initVeeTiles } from '@/components/veeTilesAnim'
 import { useTileHost } from '@/lib/tiles/useTileHost'
 import { withBridge } from '@/lib/tiles/tileBridge'
 import { syncEnabled, syncLoadTiles, syncSaveTile } from '@/lib/sync'
+import AudioControls from './AudioControls'
 import type { DashboardChrome } from '@/lib/tiles/dashboardChrome'
 
 /**
@@ -141,6 +142,7 @@ function OpenTileOverlay({
   dataReady,
   crossfade,
   height,
+  audioControls,
 }: {
   slot: { id: string; name: string; html: string }
   register: (w: Window | null, id: string) => void
@@ -153,6 +155,15 @@ function OpenTileOverlay({
    *  until the tile's first report lands, so the iframe just fills the
    *  stage in the meantime. */
   height?: number
+  /** Same mute button + volume slider Home shows fixed, top-right — rendered
+   *  inline in this tile's own top bar instead (see the .openTop markup
+   *  below). Undefined before the intro's cleared. */
+  audioControls?: {
+    muted: boolean
+    volume: number
+    onToggleMute: () => void
+    onVolumeChange: (v: number) => void
+  }
 }) {
   const winRef = useRef<Window | null>(null)
   const [fallback, setFallback] = useState(false)
@@ -214,7 +225,18 @@ function OpenTileOverlay({
           <button type="button" className="openBack" onClick={onClose}>
             <span aria-hidden="true">←</span> Dashboard
           </button>
-          <span className="openSlotName">{slot.name}</span>
+          <div className="openTopRight">
+            {audioControls && (
+              <AudioControls
+                muted={audioControls.muted}
+                volume={audioControls.volume}
+                onToggleMute={audioControls.onToggleMute}
+                onVolumeChange={audioControls.onVolumeChange}
+                compact
+              />
+            )}
+            <span className="openSlotName">{slot.name}</span>
+          </div>
         </div>
         <div className="openStage" ref={stageRef} style={stageHeight != null ? { height: stageHeight } : undefined}>
           {/* An iframe given an explicit height directly as a flex child makes
@@ -571,9 +593,19 @@ interface DashboardGridProps {
    *  "see the vision" empty state) would just duplicate it — suppress the
    *  visual board while keeping overlay/connector/new-tile handling intact. */
   hidePosterGrid?: boolean
+  /** Passed straight down into every OpenTileOverlay's own top bar, so the
+   *  same mute button + volume slider Home shows (fixed, top-right) also
+   *  appears there — undefined until the intro's cleared (Dashboard.tsx),
+   *  matching Home's copy never rendering before then either. */
+  audioControls?: {
+    muted: boolean
+    volume: number
+    onToggleMute: () => void
+    onVolumeChange: (v: number) => void
+  }
 }
 
-export default function DashboardGrid({ userId, openId, onOpenIdChange, hidePosterGrid }: DashboardGridProps) {
+export default function DashboardGrid({ userId, openId, onOpenIdChange, hidePosterGrid, audioControls }: DashboardGridProps) {
   const ref = useRef<HTMLDivElement>(null)
   const [mounted, setMounted] = useState(false)
   const [cols, setCols] = useState(4)
@@ -772,6 +804,7 @@ export default function DashboardGrid({ userId, openId, onOpenIdChange, hidePost
               dataReady={readyIds.has(entry.id)}
               crossfade={entry.crossfade}
               height={heights[entry.id]}
+              audioControls={audioControls}
             />
           ),
       )}
@@ -785,10 +818,10 @@ export default function DashboardGrid({ userId, openId, onOpenIdChange, hidePost
           type="button"
           onClick={() => setNewOpen(true)}
           aria-label="New tile"
+          className="fixedCornerBtn"
           style={{
             position: 'fixed',
             right: 24,
-            bottom: 24,
             zIndex: 50,
             background: 'var(--mint)',
             color: 'var(--mint-ink, #042a1c)',
@@ -817,10 +850,10 @@ export default function DashboardGrid({ userId, openId, onOpenIdChange, hidePost
           type="button"
           onClick={() => setShowWelcome(true)}
           aria-label="See the vision"
+          className="fixedCornerBtn"
           style={{
             position: 'fixed',
             left: 24,
-            bottom: 24,
             zIndex: 50,
             background: 'transparent',
             color: 'var(--muted)',

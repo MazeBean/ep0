@@ -80,7 +80,25 @@ function arcPathCCW(cx: number, cy: number, r: number, pct: number) {
   const largeArc = Math.abs(sweepDeg) > 180 ? 1 : 0
   return `M ${start.x.toFixed(2)} ${start.y.toFixed(2)} A ${r} ${r} 0 ${largeArc} 0 ${end.x.toFixed(2)} ${end.y.toFixed(2)}`
 }
-function WheelGauge({ pct, num, sub, label, over }: { pct: number; num: number; sub: string; label: string; over?: boolean }) {
+function WheelGauge({
+  pct,
+  num,
+  sub,
+  label,
+  over,
+  onFill,
+  canFill,
+}: {
+  pct: number
+  num: number
+  sub: string
+  label: string
+  over?: boolean
+  /** Same "instantly fill today's goal" action Fuel's own tile offers next
+   *  to this same wheel — omit to render the plain label with no button. */
+  onFill?: () => void
+  canFill?: boolean
+}) {
   const cx = 50, cy = 50, r = 42
   const clamped = clamp(pct, 0, 100) / 100
   const d = clamped > 0 ? arcPathCCW(cx, cy, r, clamped) : ''
@@ -94,7 +112,20 @@ function WheelGauge({ pct, num, sub, label, over }: { pct: number; num: number; 
         <span className={styles.wheelNum}>{num}</span>
         <span className={styles.wheelSub}>{sub}</span>
       </div>
-      <span className={styles.wheelLabel}>{label}</span>
+      <div className={styles.wheelFoot}>
+        <span className={styles.wheelLabel}>{label}</span>
+        {onFill && (
+          <button
+            type="button"
+            className={styles.fillBtn}
+            onClick={onFill}
+            disabled={!canFill}
+            title={`Instantly fill today’s ${label.toLowerCase()} goal`}
+          >
+            {canFill ? '⚡ Fill' : 'Filled'}
+          </button>
+        )}
+      </div>
     </div>
   )
 }
@@ -137,6 +168,11 @@ export default function OverviewWidgets({ userId }: { userId: string }) {
   // checkbox toggle here can write back through the same tileStore path
   // Body's own tile uses — keeps this card in sync without needing Body open.
   const [bodyStore, setBodyStore] = useState<Record<string, unknown> | null>(null)
+  // Same idea for Fuel: the "instantly fill" buttons need the full raw store
+  // (today's log array, not just the derived kcal/protein totals above) so
+  // they can push a synthetic entry the exact way fuel.html's own fill
+  // buttons do and write back through the same tileStore path.
+  const [fuelStore, setFuelStore] = useState<Record<string, unknown> | null>(null)
 
   useEffect(() => {
     let alive = true
@@ -149,13 +185,16 @@ export default function OverviewWidgets({ userId }: { userId: string }) {
         tileStore.loadData(userId, 'intake'),
       ])
 
-      const fuelStore = asRecord(fuelRaw)
-      const todaysLog = asArray<{ cal?: number; p?: number }>(fuelStore[fuelTodayKey()])
+      const fuelStoreRaw = asRecord(fuelRaw)
+      const todaysLog = asArray<{ cal?: number; p?: number }>(fuelStoreRaw[fuelTodayKey()])
       const fuel = {
         kcal: Math.round(todaysLog.reduce((s, e) => s + (Number(e.cal) || 0), 0)),
-        kcalGoal: typeof fuelStore.goalCal === 'number' ? fuelStore.goalCal : 2000,
+        // Matches Fuel's own default (goalCal() in fuel.html) — a mismatched
+        // fallback here made this wheel look "over goal" for anyone who'd
+        // never actually touched the calorie stepper on either side.
+        kcalGoal: typeof fuelStoreRaw.goalCal === 'number' ? fuelStoreRaw.goalCal : 3000,
         protein: Math.round(todaysLog.reduce((s, e) => s + (Number(e.p) || 0), 0)),
-        proteinGoal: typeof fuelStore.goalProtein === 'number' ? fuelStore.goalProtein : 150,
+        proteinGoal: typeof fuelStoreRaw.goalProtein === 'number' ? fuelStoreRaw.goalProtein : 150,
       }
 
       const workoutStore = asRecord(workoutRaw)
@@ -229,6 +268,7 @@ export default function OverviewWidgets({ userId }: { userId: string }) {
       if (alive) {
         setW({ fuel, workout, goals, finance, calendar, stack })
         setBodyStore(bodyStoreRaw)
+        setFuelStore(fuelStoreRaw)
       }
     })()
     return () => {
@@ -248,6 +288,28 @@ export default function OverviewWidgets({ userId }: { userId: string }) {
     await tileStore.saveData(userId, 'intake', updated)
   }
 
+  /* "Instantly fill" a wheel: logs one synthetic entry that closes the exact
+     gap to today's goal, the same way fuel.html's own fill buttons do (and
+     into the exact same today-keyed log array), so Fuel — opened separately —
+     shows the identical result and either side can delete the entry again. */
+  async function fillFuelGoal(kind: 'cal' | 'protein') {
+    if (!fuelStore || !w?.fuel) return
+    const key = fuelTodayKey()
+    const remaining = kind === 'cal' ? w.fuel.kcalGoal - w.fuel.kcal : w.fuel.proteinGoal - w.fuel.protein
+    if (remaining <= 0) return
+    const rounded = Math.round(remaining)
+    const log = asArray<{ name?: string; grams?: number; cal?: number; p?: number; c?: number; f?: number }>(fuelStore[key])
+    const entry = kind === 'cal' ? { name: 'Quick fill', grams: 0, cal: rounded, p: 0, c: 0, f: 0 } : { name: 'Quick fill', grams: 0, cal: 0, p: rounded, c: 0, f: 0 }
+    const updated = { ...fuelStore, [key]: [...log, entry] }
+    setFuelStore(updated)
+    setW((prev) =>
+      prev && prev.fuel
+        ? { ...prev, fuel: kind === 'cal' ? { ...prev.fuel, kcal: prev.fuel.kcal + rounded } : { ...prev.fuel, protein: prev.fuel.protein + rounded } }
+        : prev,
+    )
+    await tileStore.saveData(userId, 'fuel', updated)
+  }
+
   if (!w) return null
 
   return (
@@ -265,12 +327,16 @@ export default function OverviewWidgets({ userId }: { userId: string }) {
               sub={`of ${w.fuel.kcalGoal} kcal`}
               label="Calories"
               over={w.fuel.kcal > w.fuel.kcalGoal}
+              onFill={() => fillFuelGoal('cal')}
+              canFill={w.fuel.kcal < w.fuel.kcalGoal}
             />
             <WheelGauge
               pct={(w.fuel.protein / (w.fuel.proteinGoal || 1)) * 100}
               num={w.fuel.protein}
               sub={`of ${w.fuel.proteinGoal}g`}
               label="Protein"
+              onFill={() => fillFuelGoal('protein')}
+              canFill={w.fuel.protein < w.fuel.proteinGoal}
             />
           </div>
         ) : (

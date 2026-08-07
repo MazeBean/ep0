@@ -216,42 +216,19 @@
   .introHint { animation: none; }
 }
 
-/* Persistent mute toggle for the ambient track, once the intro's dismissed —
-   same corner the old profile avatar used to sit in. */
+/* Persistent mute + volume control for the ambient track, once the intro's
+   dismissed — same corner the old profile avatar used to sit in. The
+   button/slider's own look lives in AudioControls.module.css; this just
+   pins that shared component to the corner on Home (an open tile gets its
+   own copy inline in its top bar instead — see DashboardGrid.tsx).
+   z-index has to clear .shell's own 25 (a stacking context — see its
+   comment) or the greeting header, also inside .shell, renders on top of
+   this instead of under it. */
 .musicToggle {
   position: fixed;
   top: calc(var(--space-6) + env(safe-area-inset-top));
   right: var(--space-6);
-  z-index: 20;
-  width: 40px;
-  height: 40px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: var(--radius-pill);
-  border: 1px solid var(--border-strong);
-  background: var(--card);
-  color: var(--mint);
-  cursor: pointer;
-  transition:
-    color var(--duration) var(--ease),
-    border-color var(--duration) var(--ease),
-    background var(--duration) var(--ease);
-}
-
-.musicToggle:hover {
-  color: var(--mint-hover);
-  border-color: var(--mint);
-  background: var(--card-elevated);
-}
-
-.musicToggle[data-muted='true'] {
-  color: var(--muted);
-}
-
-.musicToggle svg {
-  width: 18px;
-  height: 18px;
+  z-index: 30;
 }
 
 /* ───────── Editorial greeting (parent /app dashboard) ───────── */
