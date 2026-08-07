@@ -271,6 +271,11 @@
   stroke: var(--mint);
   stroke-width: 11;
   stroke-linecap: round;
+  /* The arc's own d attribute is driven by hand, frame by frame, while a
+     fill/undo animates (see animateWheel in OverviewWidgets.tsx) — a smooth
+     CSS transition on d isn't reliably supported. This just eases the
+     mint/red color swap at the over-goal threshold. */
+  transition: stroke 0.2s var(--ease);
 }
 
 .wheelFillOver {
@@ -345,6 +350,21 @@
   border-color: var(--border);
   color: var(--muted);
   cursor: default;
+  opacity: 0.7;
+}
+
+/* Reverses the fill instead of adding another — a cooler, muted tone so it
+   doesn't read as "log another one" (matches fuel.html's own undoBtn). */
+.undoBtn {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: var(--border);
+  color: var(--muted-strong);
+}
+
+.undoBtn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: var(--muted-strong);
+  color: var(--fg);
 }
 
 /* ---- sparkline ---- */

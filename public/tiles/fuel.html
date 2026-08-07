@@ -139,20 +139,28 @@
   .calGaugeWrap{display:flex;justify-content:center;flex-shrink:0}
   .calGaugeSvg{width:150px;height:150px}
   .calGaugeTrack{fill:none;stroke:var(--track);stroke-width:11}
+  /* stroke transitions (not the arc's own d, which animateWheel drives by
+     hand frame-by-frame — a smooth CSS transition on d isn't reliable across
+     browsers) so the over/under color still eases instead of snapping. */
   .calGaugeFill{fill:none;stroke:var(--brand);stroke-width:11;stroke-linecap:round;
-    filter:drop-shadow(0 0 6px rgba(110,231,183,.55))}
+    filter:drop-shadow(0 0 6px rgba(110,231,183,.55));transition:stroke .2s var(--ease)}
   .calGaugeFill.over{stroke:var(--neg);filter:none}
   .calGaugeNum{font-family:var(--font-serif);font-style:italic;font-weight:600;font-size:26px;letter-spacing:-.01em;fill:var(--fg)}
   .calGaugeLbl{font-family:var(--font-mono);font-size:9.5px;letter-spacing:.08em;fill:var(--muted)}
   .wheelItemLabel{font-size:13px;color:var(--muted-strong)}
   .wheelFoot{display:flex;align-items:center;gap:8px}
   /* Instantly logs a synthetic entry that closes the gap to today's goal —
-     same shape as any other food log line, so it can be deleted like one. */
+     same shape as any other food log line, so it can be deleted like one.
+     Clicking it again (undoBtn) removes exactly that entry, restoring
+     whatever the total was before — a cooler, muted tone so it doesn't read
+     as "log another one". */
   .fillBtn{background:var(--brand-soft);border:1px solid var(--brand-line);color:var(--brand);
     font-size:11px;font-weight:600;letter-spacing:.02em;border-radius:var(--radius-pill);
-    padding:4px 10px;cursor:pointer;transition:background .15s var(--ease),border-color .15s var(--ease)}
+    padding:4px 10px;cursor:pointer;transition:background .15s var(--ease),border-color .15s var(--ease),color .15s var(--ease),opacity .15s var(--ease)}
   .fillBtn:hover{background:rgba(110,231,183,.18);border-color:var(--brand)}
-  .fillBtn:disabled{background:transparent;border-color:var(--border);color:var(--muted);cursor:default}
+  .fillBtn:disabled{background:transparent;border-color:var(--border);color:var(--muted);cursor:default;opacity:.7}
+  .fillBtn.undoBtn{background:rgba(255,255,255,.06);border-color:var(--border);color:var(--muted-strong)}
+  .fillBtn.undoBtn:hover{background:rgba(255,255,255,.1);border-color:var(--muted-strong);color:var(--fg)}
   /* Macro bars: carbs + fat below the wheels above. Neither has a user-set
      per-gram goal, so their bars scale against a generic 40/30% calorie-split
      reference derived from the calorie goal — a rough guide, not a
@@ -255,20 +263,59 @@ function stepGoalProtein(delta){setGoalProtein(Math.max(0,goalProtein()+delta));
    be deleted again) in "Logged today" like anything else, and the wheel just
    reads the same totals() everything else already does. Each button only
    touches its own macro (a calorie fill doesn't add fake protein grams, and
-   vice versa) rather than trying to simulate a real food's full profile. */
-function fillCalorieGoal(){
-  const remaining=Math.round(goalCal()-totals().cal);
-  if(remaining<=0)return;
-  const log=todaysLog();
-  log.push({name:'Quick fill',grams:0,cal:remaining,p:0,c:0,f:0});
-  setTodaysLog(log);render();
+   vice versa) rather than trying to simulate a real food's full profile.
+   The entry carries a quickFill tag naming which wheel added it, so the same
+   button can find and remove EXACTLY that entry again — clicking a second
+   time reverses it, restoring whatever the total was before the fill,
+   however it got there (untouched by any other food logged in between). */
+function quickFillEntry(kind){return todaysLog().find(function(e){return e.quickFill===kind;});}
+function isFilled(kind){return !!quickFillEntry(kind);}
+
+let animatingWheel={};
+/* Drives the wheel's arc + center number from one value straight to another
+   over a short ease-out, then hands off to onDone (which makes the real data
+   change and does a normal full render()) — the animation only ever touches
+   the wheel's own path/text nodes directly, so it stays smooth regardless of
+   how much markup a full render() would otherwise have to rebuild. */
+function animateWheel(kind,fromPct,toPct,fromNum,toNum,onDone){
+  if(animatingWheel[kind])return;
+  if(REDUCED){onDone();return;}
+  const pathEl=$('wheelPath-'+kind),numEl=$('wheelNum-'+kind),btnEl=document.querySelector('[data-fill="'+kind+'"]');
+  if(btnEl)btnEl.disabled=true;
+  animatingWheel[kind]=true;
+  const cx=75,cy=75,r=64,dur=650,t0=performance.now(),suffix=kind==='protein'?'g':'';
+  function frame(now){
+    const t=Math.min(1,(now-t0)/dur),eased=1-Math.pow(1-t,3);
+    const pct=fromPct+(toPct-fromPct)*eased,num=Math.round(fromNum+(toNum-fromNum)*eased);
+    if(pathEl)pathEl.setAttribute('d',arcPathCCW(cx,cy,r,pct));
+    if(numEl)numEl.textContent=num+suffix;
+    if(t<1)requestAnimationFrame(frame);
+    else{animatingWheel[kind]=false;onDone();}
+  }
+  requestAnimationFrame(frame);
 }
-function fillProteinGoal(){
-  const remaining=Math.round(goalProtein()-totals().p);
-  if(remaining<=0)return;
-  const log=todaysLog();
-  log.push({name:'Quick fill',grams:0,cal:0,p:remaining,c:0,f:0});
-  setTodaysLog(log);render();
+function toggleFillGoal(kind){
+  if(animatingWheel[kind])return;
+  const entry=quickFillEntry(kind);
+  const t=totals(),goal=kind==='cal'?goalCal():goalProtein();
+  const fromVal=kind==='cal'?t.cal:t.p,fromPct=goal>0?fromVal/goal:0;
+  if(entry){
+    const amt=kind==='cal'?entry.cal:entry.p,toVal=fromVal-amt,toPct=goal>0?toVal/goal:0;
+    animateWheel(kind,fromPct,toPct,fromVal,toVal,function(){
+      setTodaysLog(todaysLog().filter(function(e){return e.quickFill!==kind;}));
+      render();
+    });
+  }else{
+    const remaining=Math.round(goal-fromVal);
+    if(remaining<=0)return;
+    animateWheel(kind,fromPct,goal>0?1:0,fromVal,goal,function(){
+      const log=todaysLog();
+      log.push(kind==='cal'
+        ?{name:'Quick fill',grams:0,cal:remaining,p:0,c:0,f:0,quickFill:'cal'}
+        :{name:'Quick fill',grams:0,cal:0,p:remaining,c:0,f:0,quickFill:'protein'});
+      setTodaysLog(log);render();
+    });
+  }
 }
 function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 const round=n=>Math.round(n);
@@ -323,18 +370,28 @@ function arcPathCCW(cx,cy,r,pct){
    calorie-only gauge, now parameterized so both Calories and Protein render
    as matched wheels side by side (was a single big ring + a linear bar for
    protein below it). Each wheel gets its own "instantly fill today's goal"
-   button underneath, mirroring the pair the home dashboard shows. */
-function wheelGaugeHtml(pct,num,sub,label,over,fillKey,canFill){
-  const cx=75,cy=75,r=64,d=pct>0?arcPathCCW(cx,cy,r,pct):'';
+   button underneath, mirroring the pair the home dashboard shows.
+   The path/number carry stable ids (wheelPath-/wheelNum-<fillKey>) so
+   animateWheel can drive them directly frame by frame — the path is always
+   rendered, even at pct 0, so there's something in the DOM to animate FROM
+   on the very first fill (arcPathCCW(...,0) is a valid, invisible
+   zero-length arc, not an error). filled means a quickFill entry from this
+   same button is already logged, so the button reverses it instead of
+   adding another; atGoal (real food already at/over goal, nothing of ours
+   to undo) is the only case the button goes inert. */
+function wheelGaugeHtml(pct,num,numSuffix,sub,label,over,fillKey,filled,atGoal){
+  const cx=75,cy=75,r=64,d=arcPathCCW(cx,cy,r,pct);
+  const btnLabel=filled?'↺ Undo':(atGoal?'Filled':'⚡ Fill');
+  const btnTitle=filled?'Undo the instant fill':'Instantly fill today’s '+label.toLowerCase()+' goal';
   return '<div class="wheelItem"><div class="calGaugeWrap"><svg viewBox="0 0 150 150" class="calGaugeSvg">'
     +'<circle cx="'+cx+'" cy="'+cy+'" r="'+r+'" class="calGaugeTrack"/>'
-    +(d?'<path d="'+d+'" class="calGaugeFill'+(over?' over':'')+'"/>':'')
-    +'<text x="'+cx+'" y="'+(cy-4)+'" text-anchor="middle" class="calGaugeNum">'+num+'</text>'
+    +'<path id="wheelPath-'+fillKey+'" d="'+d+'" class="calGaugeFill'+(over?' over':'')+'"/>'
+    +'<text id="wheelNum-'+fillKey+'" x="'+cx+'" y="'+(cy-4)+'" text-anchor="middle" class="calGaugeNum">'+num+(numSuffix||'')+'</text>'
     +'<text x="'+cx+'" y="'+(cy+18)+'" text-anchor="middle" class="calGaugeLbl">'+sub+'</text>'
     +'</svg></div>'
     +'<div class="wheelFoot"><span class="wheelItemLabel">'+label+'</span>'
-    +'<button type="button" class="fillBtn" data-fill="'+fillKey+'"'+(canFill?'':' disabled')
-    +' title="Instantly fill today’s '+label.toLowerCase()+' goal">'+(canFill?'⚡ Fill':'Filled')+'</button></div>'
+    +'<button type="button" class="fillBtn'+(filled?' undoBtn':'')+'" data-fill="'+fillKey+'"'+(!filled&&atGoal?' disabled':'')
+    +' title="'+btnTitle+'">'+btnLabel+'</button></div>'
     +'</div>';
 }
 function macroBarRowHtml(label,valueG,goalG,pct,colorClass){
@@ -356,8 +413,8 @@ function summaryHtml(){
   const fPct=(t.f/fatRef)*100;
   const cell=(cls,n,l)=>'<div class="calCell '+cls+'"><span class="n">'+round(n)+'</span><span class="l">'+l+'</span></div>';
   const wheels='<div class="wheelsRow">'
-    +wheelGaugeHtml(calPct,round(t.cal),'of '+goal+' kcal','Calories',over,'cal',remaining>0)
-    +wheelGaugeHtml(pPct,round(t.p)+'g',pGoal+'g target','Protein',t.p>pGoal,'protein',pGoal-t.p>0)
+    +wheelGaugeHtml(calPct,round(t.cal),'','of '+goal+' kcal','Calories',over,'cal',isFilled('cal'),remaining<=0)
+    +wheelGaugeHtml(pPct,round(t.p),'g',pGoal+'g target','Protein',t.p>pGoal,'protein',isFilled('protein'),pGoal-t.p<=0)
     +'</div>';
   const stepper=(key,val,dir,label)=>'<button type="button" class="miniStepBtn" data-goal-step="'+key+'" data-dir="'+dir+'" aria-label="'+label+'">'+(dir<0?'−':'+')+'</button>';
   const head='<div class="calTopRow"><div class="calLeftCol"><div class="calMath">'+cell('',goal,'Goal')+'<span class="calOp">−</span>'+cell('',t.cal,'Food')+'<span class="calOp">=</span>'+cell('remain'+(over?' over':''),Math.abs(remaining),over?'Over':'Remaining')+'</div>'
@@ -454,8 +511,7 @@ document.addEventListener('click',e=>{
   }
   const fill=e.target.closest('[data-fill]');
   if(fill){
-    if(fill.getAttribute('data-fill')==='cal')fillCalorieGoal();
-    else fillProteinGoal();
+    toggleFillGoal(fill.getAttribute('data-fill'));
     return;
   }
   const add=e.target.closest('[data-add]');

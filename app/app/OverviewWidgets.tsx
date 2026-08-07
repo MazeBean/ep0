@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import styles from './OverviewWidgets.module.css'
 import { tileStore } from '@/lib/tiles/tileStore'
 
@@ -87,7 +87,8 @@ function WheelGauge({
   label,
   over,
   onFill,
-  canFill,
+  filled,
+  atGoal,
 }: {
   pct: number
   num: number
@@ -97,16 +98,24 @@ function WheelGauge({
   /** Same "instantly fill today's goal" action Fuel's own tile offers next
    *  to this same wheel — omit to render the plain label with no button. */
   onFill?: () => void
-  canFill?: boolean
+  /** A quickFill entry from this button is already logged — the button
+   *  reverses it instead of adding another (see toggleFillGoal). */
+  filled?: boolean
+  /** Real food already at/over goal with nothing of ours to undo — the only
+   *  case the button goes inert. */
+  atGoal?: boolean
 }) {
   const cx = 50, cy = 50, r = 42
   const clamped = clamp(pct, 0, 100) / 100
-  const d = clamped > 0 ? arcPathCCW(cx, cy, r, clamped) : ''
+  // Always drawn, even at 0 (a valid, invisible zero-length arc) — pct
+  // arrives already mid-animation while a fill/undo is in flight (see
+  // toggleFillGoal), so there's no "should this exist yet" gap to paper over.
+  const d = arcPathCCW(cx, cy, r, clamped)
   return (
     <div className={styles.wheelWrap}>
       <svg viewBox="0 0 100 100" className={styles.wheelSvg}>
         <circle cx={cx} cy={cy} r={r} className={styles.wheelTrack} />
-        {d && <path d={d} className={over ? `${styles.wheelFill} ${styles.wheelFillOver}` : styles.wheelFill} />}
+        <path d={d} className={over ? `${styles.wheelFill} ${styles.wheelFillOver}` : styles.wheelFill} />
       </svg>
       <div className={styles.wheelCenter}>
         <span className={styles.wheelNum}>{num}</span>
@@ -117,12 +126,12 @@ function WheelGauge({
         {onFill && (
           <button
             type="button"
-            className={styles.fillBtn}
+            className={`${styles.fillBtn}${filled ? ` ${styles.undoBtn}` : ''}`}
             onClick={onFill}
-            disabled={!canFill}
-            title={`Instantly fill today’s ${label.toLowerCase()} goal`}
+            disabled={!filled && atGoal}
+            title={filled ? 'Undo the instant fill' : `Instantly fill today’s ${label.toLowerCase()} goal`}
           >
-            {canFill ? '⚡ Fill' : 'Filled'}
+            {filled ? '↺ Undo' : atGoal ? 'Filled' : '⚡ Fill'}
           </button>
         )}
       </div>
@@ -173,6 +182,10 @@ export default function OverviewWidgets({ userId }: { userId: string }) {
   // they can push a synthetic entry the exact way fuel.html's own fill
   // buttons do and write back through the same tileStore path.
   const [fuelStore, setFuelStore] = useState<Record<string, unknown> | null>(null)
+  // Mid-animation override for a wheel's arc/number — set while a fill/undo
+  // is playing (see animateWheel), cleared once it lands on the real value.
+  const [wheelAnim, setWheelAnim] = useState<{ cal?: { pct: number; num: number }; protein?: { pct: number; num: number } }>({})
+  const animatingRef = useRef<{ cal?: boolean; protein?: boolean }>({})
 
   useEffect(() => {
     let alive = true
@@ -288,26 +301,84 @@ export default function OverviewWidgets({ userId }: { userId: string }) {
     await tileStore.saveData(userId, 'intake', updated)
   }
 
+  type FuelLogEntry = { name?: string; grams?: number; cal?: number; p?: number; c?: number; f?: number; quickFill?: string }
+  function fuelQuickFillEntry(kind: 'cal' | 'protein'): FuelLogEntry | undefined {
+    if (!fuelStore) return undefined
+    return asArray<FuelLogEntry>(fuelStore[fuelTodayKey()]).find((e) => e.quickFill === kind)
+  }
+
+  /* Drives a wheel's arc + center number from one value straight to another
+     over a short ease-out (matches fuel.html's own animateWheel — same
+     duration/easing so the two feel identical), then hands off to onDone
+     to make the real data change. A ref (not state) guards re-entrancy so a
+     rapid second click can't start a race with the running rAF loop. */
+  function animateWheel(kind: 'cal' | 'protein', fromPct: number, toPct: number, fromNum: number, toNum: number, onDone: () => void) {
+    if (animatingRef.current[kind]) return
+    const reduced = typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    if (reduced) {
+      onDone()
+      return
+    }
+    animatingRef.current[kind] = true
+    const dur = 650
+    const t0 = performance.now()
+    function frame(now: number) {
+      const t = Math.min(1, (now - t0) / dur)
+      const eased = 1 - Math.pow(1 - t, 3)
+      setWheelAnim((prev) => ({ ...prev, [kind]: { pct: fromPct + (toPct - fromPct) * eased, num: Math.round(fromNum + (toNum - fromNum) * eased) } }))
+      if (t < 1) {
+        requestAnimationFrame(frame)
+      } else {
+        animatingRef.current[kind] = false
+        setWheelAnim((prev) => {
+          const next = { ...prev }
+          delete next[kind]
+          return next
+        })
+        onDone()
+      }
+    }
+    requestAnimationFrame(frame)
+  }
+
   /* "Instantly fill" a wheel: logs one synthetic entry that closes the exact
      gap to today's goal, the same way fuel.html's own fill buttons do (and
-     into the exact same today-keyed log array), so Fuel — opened separately —
-     shows the identical result and either side can delete the entry again. */
-  async function fillFuelGoal(kind: 'cal' | 'protein') {
-    if (!fuelStore || !w?.fuel) return
+     into the exact same today-keyed log array, tagged quickFill so it can be
+     found again), so Fuel — opened separately — shows the identical result.
+     Clicking a filled wheel's button again removes exactly that entry,
+     restoring whatever the total was before, regardless of anything else
+     logged in between. */
+  async function toggleFillGoal(kind: 'cal' | 'protein') {
+    if (!fuelStore || !w?.fuel || animatingRef.current[kind]) return
     const key = fuelTodayKey()
-    const remaining = kind === 'cal' ? w.fuel.kcalGoal - w.fuel.kcal : w.fuel.proteinGoal - w.fuel.protein
-    if (remaining <= 0) return
-    const rounded = Math.round(remaining)
-    const log = asArray<{ name?: string; grams?: number; cal?: number; p?: number; c?: number; f?: number }>(fuelStore[key])
-    const entry = kind === 'cal' ? { name: 'Quick fill', grams: 0, cal: rounded, p: 0, c: 0, f: 0 } : { name: 'Quick fill', grams: 0, cal: 0, p: rounded, c: 0, f: 0 }
-    const updated = { ...fuelStore, [key]: [...log, entry] }
-    setFuelStore(updated)
-    setW((prev) =>
-      prev && prev.fuel
-        ? { ...prev, fuel: kind === 'cal' ? { ...prev.fuel, kcal: prev.fuel.kcal + rounded } : { ...prev.fuel, protein: prev.fuel.protein + rounded } }
-        : prev,
-    )
-    await tileStore.saveData(userId, 'fuel', updated)
+    const log = asArray<FuelLogEntry>(fuelStore[key])
+    const entry = log.find((e) => e.quickFill === kind)
+    const goal = kind === 'cal' ? w.fuel.kcalGoal : w.fuel.proteinGoal
+    const fromVal = kind === 'cal' ? w.fuel.kcal : w.fuel.protein
+    const fromPct = goal > 0 ? (fromVal / goal) * 100 : 0
+
+    if (entry) {
+      const amt = kind === 'cal' ? entry.cal || 0 : entry.p || 0
+      const toVal = fromVal - amt
+      const toPct = goal > 0 ? (toVal / goal) * 100 : 0
+      animateWheel(kind, fromPct, toPct, fromVal, toVal, async () => {
+        const updated = { ...fuelStore, [key]: log.filter((e) => e.quickFill !== kind) }
+        setFuelStore(updated)
+        setW((prev) => (prev && prev.fuel ? { ...prev, fuel: kind === 'cal' ? { ...prev.fuel, kcal: toVal } : { ...prev.fuel, protein: toVal } } : prev))
+        await tileStore.saveData(userId, 'fuel', updated)
+      })
+    } else {
+      const remaining = Math.round(goal - fromVal)
+      if (remaining <= 0) return
+      animateWheel(kind, fromPct, goal > 0 ? 100 : 0, fromVal, goal, async () => {
+        const newEntry: FuelLogEntry =
+          kind === 'cal' ? { name: 'Quick fill', grams: 0, cal: remaining, p: 0, c: 0, f: 0, quickFill: 'cal' } : { name: 'Quick fill', grams: 0, cal: 0, p: remaining, c: 0, f: 0, quickFill: 'protein' }
+        const updated = { ...fuelStore, [key]: [...log, newEntry] }
+        setFuelStore(updated)
+        setW((prev) => (prev && prev.fuel ? { ...prev, fuel: kind === 'cal' ? { ...prev.fuel, kcal: goal } : { ...prev.fuel, protein: goal } } : prev))
+        await tileStore.saveData(userId, 'fuel', updated)
+      })
+    }
   }
 
   if (!w) return null
@@ -322,21 +393,23 @@ export default function OverviewWidgets({ userId }: { userId: string }) {
         {w.fuel ? (
           <div className={styles.wheels}>
             <WheelGauge
-              pct={(w.fuel.kcal / (w.fuel.kcalGoal || 1)) * 100}
-              num={w.fuel.kcal}
+              pct={wheelAnim.cal ? wheelAnim.cal.pct : (w.fuel.kcal / (w.fuel.kcalGoal || 1)) * 100}
+              num={wheelAnim.cal ? wheelAnim.cal.num : w.fuel.kcal}
               sub={`of ${w.fuel.kcalGoal} kcal`}
               label="Calories"
-              over={w.fuel.kcal > w.fuel.kcalGoal}
-              onFill={() => fillFuelGoal('cal')}
-              canFill={w.fuel.kcal < w.fuel.kcalGoal}
+              over={(wheelAnim.cal ? wheelAnim.cal.num : w.fuel.kcal) > w.fuel.kcalGoal}
+              onFill={() => toggleFillGoal('cal')}
+              filled={!!fuelQuickFillEntry('cal')}
+              atGoal={w.fuel.kcal >= w.fuel.kcalGoal}
             />
             <WheelGauge
-              pct={(w.fuel.protein / (w.fuel.proteinGoal || 1)) * 100}
-              num={w.fuel.protein}
+              pct={wheelAnim.protein ? wheelAnim.protein.pct : (w.fuel.protein / (w.fuel.proteinGoal || 1)) * 100}
+              num={wheelAnim.protein ? wheelAnim.protein.num : w.fuel.protein}
               sub={`of ${w.fuel.proteinGoal}g`}
               label="Protein"
-              onFill={() => fillFuelGoal('protein')}
-              canFill={w.fuel.protein < w.fuel.proteinGoal}
+              onFill={() => toggleFillGoal('protein')}
+              filled={!!fuelQuickFillEntry('protein')}
+              atGoal={w.fuel.protein >= w.fuel.proteinGoal}
             />
           </div>
         ) : (
