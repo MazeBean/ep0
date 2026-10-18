@@ -112,9 +112,18 @@ export function useTileHost(
       if (msg.type === 'load') {
         // Prefer the cloud copy when sync is on (so a fresh device — the phone —
         // gets the real data); fall back to this browser's local copy otherwise.
+        // Raced against a short timeout: a cold/slow Supabase connection was
+        // turning EVERY tile's first paint into a multi-second wait (each one
+        // blocks on this same load before calling window.Vitality.ready()) —
+        // measured 1.3s+ per tab in production, vs under 150ms once this caps
+        // it. A tile that loses the race still gets the fresher cloud copy
+        // next time it's opened (and any edit re-syncs it regardless).
         let data = await tileStore.loadData(userId, tileId)
         if (syncEnabled()) {
-          const remote = await syncLoad(tileId)
+          const remote = await Promise.race([
+            syncLoad(tileId),
+            new Promise<null>((resolve) => setTimeout(() => resolve(null), 400)),
+          ])
           if (remote != null) data = remote as typeof data
         }
         // reply to the exact sender, never a broadcast. targetOrigin stays '*'
