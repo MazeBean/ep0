@@ -308,25 +308,32 @@ function notConnectedHtml(){
     +'(Todoist → Settings → Integrations → Developer for your token), then reload.</p>'
     +'</section>';
 }
-// Only the very first render that shows REAL content should play the card
-// entrance flourish — every render after that is a data edit (add/complete/
-// delete a task), and re-flashing every card for a one-line change reads as
-// the whole tab reloading. Unlike the other tiles, this one renders TWICE on
-// load (an immediate synchronous pass while status is still 'loading', then
-// again once refresh() resolves the real Todoist list) — so "is #app already
-// populated" would wrongly treat that second, meaningful render as a later
-// edit and skip its animation. Track it explicitly instead: the flourish
-// plays on the first render once status has actually settled either way.
-let painted=false;
+// Only the very first render should play the card entrance flourish — every
+// render after that is a data edit (add/complete/delete a task) or the
+// Todoist list arriving, and re-flashing every card then reads as the whole
+// tab reloading.
+//
+// window.Vitality.ready() also fires from here now, on that same first
+// render, rather than waiting for refresh()'s Todoist round-trip to land —
+// that's a real network call to a third-party API and was consistently the
+// slowest tab to open (a couple hundred ms, sometimes much more) while every
+// other tile's own window.Vitality.load() is a same-document postMessage
+// and reveals near-instantly. The stats/week-grid/form layout is already
+// stable on this first render (status 'loading' renders the same structure
+// 'ok' does, just with zero counts) — tasks hydrate into it in place once
+// refresh() resolves, instead of the whole tab waiting on that round-trip
+// before showing anything at all.
+let painted=false,reportedReady=false;
 function render(){
-  const firstPaint=!painted&&status!=='loading';
+  const firstPaint=!painted;
   if(status==='unavailable'){
     $('app').innerHTML=headerHtml()+notConnectedHtml();
   } else {
     $('app').innerHTML=headerHtml()+statsHtml()+weekGridHtml()+'<div class="taskRow">'+formHtml()+bucketsHtml()+'</div>';
   }
-  if(status!=='loading')painted=true;
+  painted=true;
   $('app').classList.toggle('first-paint',firstPaint);
+  if(!reportedReady){reportedReady=true;window.Vitality.ready();}
 }
 
 async function refresh(){
@@ -338,7 +345,6 @@ async function refresh(){
     status='unavailable';
   }
   render();
-  window.Vitality.ready();
 }
 
 async function addTask(){
