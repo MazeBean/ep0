@@ -1,13 +1,16 @@
 'use client'
 
 import styles from './AppSidebar.module.css'
-import { CORE_TILES, type CoreTileId } from '@/lib/tiles/coreTiles'
+import { CORE_TILES, HIDDEN_TILES, type CoreTileId } from '@/lib/tiles/coreTiles'
 
 /** The 6 real, functional tiles get a permanent nav slot. Vee (locked
  *  centrepiece, no sealed content of its own) and Library (its own
  *  full-screen manager) stay off this list — this is a nav, not a mirror
- *  of every grid cell. */
-const NAV_TILES: CoreTileId[] = ['fuel', 'workout', 'goals', 'todoist', 'finance', 'intake']
+ *  of every grid cell. Filtered against HIDDEN_TILES below, so pulling a
+ *  tile from the nav never means deleting it from this list. */
+const NAV_TILES: CoreTileId[] = ['fuel', 'workout', 'goals', 'todoist', 'finance', 'intake'].filter(
+  (id) => !HIDDEN_TILES.includes(id as CoreTileId),
+) as CoreTileId[]
 
 const HOME_GLYPH = (
   <svg viewBox="-12 -12 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">

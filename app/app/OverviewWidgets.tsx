@@ -3,6 +3,22 @@
 import { useEffect, useRef, useState } from 'react'
 import styles from './OverviewWidgets.module.css'
 import { tileStore } from '@/lib/tiles/tileStore'
+import { HIDDEN_TILES } from '@/lib/tiles/coreTiles'
+
+const DAY_ABBR = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
+
+/** This calendar week's 7 dates, Sunday first — display only; an assignment
+ *  is keyed by weekday (0-6) below, not by date, so a split set up once
+ *  ("push Mon, legs Wed, rest Sun") keeps repeating every week instead of
+ *  needing to be re-filled in. */
+function thisWeekDates(): Date[] {
+  const now = new Date()
+  const sunday = new Date(now.getFullYear(), now.getMonth(), now.getDate() - now.getDay())
+  return Array.from({ length: 7 }, (_, i) => new Date(sunday.getFullYear(), sunday.getMonth(), sunday.getDate() + i))
+}
+function isSameDay(a: Date, b: Date): boolean {
+  return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate()
+}
 
 function asRecord(v: unknown): Record<string, unknown> {
   return v && typeof v === 'object' && !Array.isArray(v) ? (v as Record<string, unknown>) : {}
@@ -36,6 +52,7 @@ interface Widgets {
   goals: { shortDone: number; shortTotal: number; longDone: number; longTotal: number } | null
   calendar: { dueToday: number; overdue: number; connected: boolean } | null
   stack: { items: StackItem[]; checked: string[] } | null
+  training: { days: (string | null)[]; names: string[] } | null
 }
 
 function RadialGauge({ pct, label, sub }: { pct: number; label: string; sub: string }) {
@@ -157,6 +174,57 @@ function Sparkline({ points }: { points: { t: number; v: number }[] }) {
   )
 }
 
+/* Weekly training planner: a Sun-Sat strip of day pills, each a native
+   <select> doubling as both the "pick a workout" button and the populated
+   label once one's chosen — simplest control that gives a real click-a-list
+   UX for free. `names` comes from Workout's own saved sessions (store.sessions
+   in workout.html), so the list is always whatever's actually been built and
+   named there. */
+function WeekPlanner({
+  days,
+  names,
+  onAssign,
+}: {
+  days: (string | null)[]
+  names: string[]
+  onAssign: (dayIdx: number, value: string | null) => void
+}) {
+  const dates = thisWeekDates()
+  const today = new Date()
+  return (
+    <div className={styles.weekGrid}>
+      {dates.map((date, i) => {
+        const assigned = days[i] ?? null
+        const isRest = assigned === 'Rest day'
+        const isKnown = assigned == null || isRest || names.includes(assigned)
+        return (
+          <div key={i} className={`${styles.dayCol}${isSameDay(date, today) ? ` ${styles.dayColToday}` : ''}`}>
+            <span className={styles.dayAbbrev}>{DAY_ABBR[i]}</span>
+            <span className={styles.dayNum}>{date.getDate()}</span>
+            <select
+              className={`${styles.daySelect}${isRest ? ` ${styles.daySelectRest}` : assigned ? ` ${styles.daySelectSet}` : ''}`}
+              value={assigned ?? ''}
+              onChange={(e) => onAssign(i, e.target.value || null)}
+            >
+              <option value="">Set day</option>
+              <option value="Rest day">Rest day</option>
+              {names.map((name) => (
+                <option key={name} value={name}>
+                  {name}
+                </option>
+              ))}
+              {/* A previously-assigned workout that's since been renamed or
+                  deleted in Workout — keeps showing what's actually saved
+                  instead of silently reverting to "Set day". */}
+              {!isKnown && assigned && <option value={assigned}>{assigned} (removed)</option>}
+            </select>
+          </div>
+        )
+      })}
+    </div>
+  )
+}
+
 function Bar({ label, pct, value }: { label: string; pct: number; value: string }) {
   return (
     <div className={styles.barRow}>
@@ -194,6 +262,9 @@ export default function OverviewWidgets({
   // they can push a synthetic entry the exact way fuel.html's own fill
   // buttons do and write back through the same tileStore path.
   const [fuelStore, setFuelStore] = useState<Record<string, unknown> | null>(null)
+  // The Training planner's own raw store (its one field, `days`) — same
+  // round-trip-without-refetch pattern as bodyStore/fuelStore above.
+  const [trainingStore, setTrainingStore] = useState<Record<string, unknown> | null>(null)
   // Mid-animation override for a wheel's arc/number — set while a fill/undo
   // is playing (see animateWheel), cleared once it lands on the real value.
   const [wheelAnim, setWheelAnim] = useState<{ cal?: { pct: number; num: number }; protein?: { pct: number; num: number } }>({})
@@ -202,12 +273,13 @@ export default function OverviewWidgets({
   useEffect(() => {
     let alive = true
     ;(async () => {
-      const [fuelRaw, workoutRaw, goalsRaw, financeRaw, bodyRaw] = await Promise.all([
+      const [fuelRaw, workoutRaw, goalsRaw, financeRaw, bodyRaw, trainingRaw] = await Promise.all([
         tileStore.loadData(userId, 'fuel'),
         tileStore.loadData(userId, 'workout'),
         tileStore.loadData(userId, 'goals'),
         tileStore.loadData(userId, 'finance'),
         tileStore.loadData(userId, 'intake'),
+        tileStore.loadData(userId, 'training'),
       ])
 
       const fuelStoreRaw = asRecord(fuelRaw)
@@ -243,6 +315,18 @@ export default function OverviewWidgets({
       const prsThisMonth = entries.filter((e) => e.id && prIds.has(e.id) && e.ts >= monthStart).length
       const workout = { prsThisMonth, sessionsThisWeek }
 
+      // Named sessions built in Workout (workout.html's store.sessions) — the
+      // list Training's day pickers offer, so it's always whatever's
+      // actually been built there, never a separate copy to keep in sync.
+      const sessionNames = asArray<{ id?: string; name?: string }>(workoutStore.sessions)
+        .map((s) => (typeof s.name === 'string' ? s.name.trim() : ''))
+        .filter(Boolean)
+
+      const trainingStoreRaw = asRecord(trainingRaw)
+      const trainingDaysRaw = asArray<string | null>(trainingStoreRaw.days)
+      const trainingDays = Array.from({ length: 7 }, (_, i) => (typeof trainingDaysRaw[i] === 'string' ? trainingDaysRaw[i] : null))
+      const training = { days: trainingDays, names: sessionNames }
+
       const goalsStore = asRecord(goalsRaw)
       const shortTerm = asArray<{ done?: boolean }>(goalsStore.shortTerm)
       const longTerm = asArray<{ done?: boolean }>(goalsStore.longTerm)
@@ -260,9 +344,11 @@ export default function OverviewWidgets({
       const finance = { netWorth, history }
 
       let calendar: Widgets['calendar'] = { dueToday: 0, overdue: 0, connected: false }
+      // Calendar's own card is hidden (see HIDDEN_TILES) — no point spending
+      // a network round-trip on a card that won't render.
       try {
-        const res = await fetch('/api/todoist/tasks', { cache: 'no-store' })
-        if (res.ok) {
+        const res = HIDDEN_TILES.includes('todoist') ? null : await fetch('/api/todoist/tasks', { cache: 'no-store' })
+        if (res?.ok) {
           const body = await res.json()
           const tasks = Array.isArray(body) ? body : Array.isArray(body?.results) ? body.results : []
           const today = new Date()
@@ -291,9 +377,10 @@ export default function OverviewWidgets({
       const stack = { items: stackItems, checked: stackChecked }
 
       if (alive) {
-        setW({ fuel, workout, goals, finance, calendar, stack })
+        setW({ fuel, workout, goals, finance, calendar, stack, training })
         setBodyStore(bodyStoreRaw)
         setFuelStore(fuelStoreRaw)
+        setTrainingStore(trainingStoreRaw)
       }
     })()
     return () => {
@@ -311,6 +398,20 @@ export default function OverviewWidgets({
     setBodyStore(updated)
     setW((prev) => (prev ? { ...prev, stack: prev.stack ? { ...prev.stack, checked: next } : prev.stack } : prev))
     await tileStore.saveData(userId, 'intake', updated)
+  }
+
+  /** Assigns (or clears, via null) one weekday's training slot. Writes
+   *  through the same tileStore path every other card here uses, under a
+   *  new 'training' tile id — Training has no sealed tile of its own, it's
+   *  entirely this homepage card, so this is its one and only data store. */
+  async function assignDay(dayIdx: number, value: string | null) {
+    const base = trainingStore ?? {}
+    const daysRaw = asArray<string | null>(base.days)
+    const nextDays = Array.from({ length: 7 }, (_, i) => (i === dayIdx ? value : typeof daysRaw[i] === 'string' ? daysRaw[i] : null))
+    const updated = { ...base, days: nextDays }
+    setTrainingStore(updated)
+    setW((prev) => (prev && prev.training ? { ...prev, training: { ...prev.training, days: nextDays } } : prev))
+    await tileStore.saveData(userId, 'training', updated)
   }
 
   type FuelLogEntry = { name?: string; grams?: number; cal?: number; p?: number; c?: number; f?: number; quickFill?: string }
@@ -397,37 +498,42 @@ export default function OverviewWidgets({
 
   return (
     <div className={styles.grid} style={hidden ? { display: 'none' } : undefined}>
-      <div className={styles.card} style={{ ['--ping-delay' as string]: '60ms' }}>
-        <div className={styles.cardHead}>
-          <span className={styles.cardTitle}>Today&rsquo;s intake</span>
-          <span className={styles.cardTag}>Fuel</span>
-        </div>
-        {w.fuel ? (
-          <div className={styles.wheels}>
-            <WheelGauge
-              pct={wheelAnim.cal ? wheelAnim.cal.pct : (w.fuel.kcal / (w.fuel.kcalGoal || 1)) * 100}
-              num={wheelAnim.cal ? wheelAnim.cal.num : w.fuel.kcal}
-              sub={`of ${w.fuel.kcalGoal} kcal`}
-              label="Calories"
-              over={(wheelAnim.cal ? wheelAnim.cal.num : w.fuel.kcal) > w.fuel.kcalGoal}
-              onFill={() => toggleFillGoal('cal')}
-              filled={!!fuelQuickFillEntry('cal')}
-              atGoal={w.fuel.kcal >= w.fuel.kcalGoal}
-            />
-            <WheelGauge
-              pct={wheelAnim.protein ? wheelAnim.protein.pct : (w.fuel.protein / (w.fuel.proteinGoal || 1)) * 100}
-              num={wheelAnim.protein ? wheelAnim.protein.num : w.fuel.protein}
-              sub={`of ${w.fuel.proteinGoal}g`}
-              label="Protein"
-              onFill={() => toggleFillGoal('protein')}
-              filled={!!fuelQuickFillEntry('protein')}
-              atGoal={w.fuel.protein >= w.fuel.proteinGoal}
-            />
+      {/* Fuel, Calendar, and Body's cards are pulled per HIDDEN_TILES below —
+          removing an id there (see lib/tiles/coreTiles.tsx) brings each
+          straight back here, no other change needed. */}
+      {!HIDDEN_TILES.includes('fuel') && (
+        <div className={styles.card} style={{ ['--ping-delay' as string]: '60ms' }}>
+          <div className={styles.cardHead}>
+            <span className={styles.cardTitle}>Today&rsquo;s intake</span>
+            <span className={styles.cardTag}>Fuel</span>
           </div>
-        ) : (
-          <p className={styles.emptyNote}>Log a meal in Fuel to see today&rsquo;s numbers.</p>
-        )}
-      </div>
+          {w.fuel ? (
+            <div className={styles.wheels}>
+              <WheelGauge
+                pct={wheelAnim.cal ? wheelAnim.cal.pct : (w.fuel.kcal / (w.fuel.kcalGoal || 1)) * 100}
+                num={wheelAnim.cal ? wheelAnim.cal.num : w.fuel.kcal}
+                sub={`of ${w.fuel.kcalGoal} kcal`}
+                label="Calories"
+                over={(wheelAnim.cal ? wheelAnim.cal.num : w.fuel.kcal) > w.fuel.kcalGoal}
+                onFill={() => toggleFillGoal('cal')}
+                filled={!!fuelQuickFillEntry('cal')}
+                atGoal={w.fuel.kcal >= w.fuel.kcalGoal}
+              />
+              <WheelGauge
+                pct={wheelAnim.protein ? wheelAnim.protein.pct : (w.fuel.protein / (w.fuel.proteinGoal || 1)) * 100}
+                num={wheelAnim.protein ? wheelAnim.protein.num : w.fuel.protein}
+                sub={`of ${w.fuel.proteinGoal}g`}
+                label="Protein"
+                onFill={() => toggleFillGoal('protein')}
+                filled={!!fuelQuickFillEntry('protein')}
+                atGoal={w.fuel.protein >= w.fuel.proteinGoal}
+              />
+            </div>
+          ) : (
+            <p className={styles.emptyNote}>Log a meal in Fuel to see today&rsquo;s numbers.</p>
+          )}
+        </div>
+      )}
 
       <div className={styles.card} style={{ ['--ping-delay' as string]: '200ms' }}>
         <div className={styles.cardHead}>
@@ -442,20 +548,22 @@ export default function OverviewWidgets({
         )}
       </div>
 
-      <div className={styles.card} style={{ ['--ping-delay' as string]: '260ms' }}>
-        <div className={styles.cardHead}>
-          <span className={styles.cardTitle}>This week</span>
-          <span className={styles.cardTag}>Calendar</span>
+      {!HIDDEN_TILES.includes('todoist') && (
+        <div className={styles.card} style={{ ['--ping-delay' as string]: '260ms' }}>
+          <div className={styles.cardHead}>
+            <span className={styles.cardTitle}>This week</span>
+            <span className={styles.cardTag}>Calendar</span>
+          </div>
+          {w.calendar?.connected ? (
+            <>
+              <span className={styles.bigNum}>{w.calendar.dueToday}</span>
+              <span className={styles.smallLabel}>Due today{w.calendar.overdue ? ` · ${w.calendar.overdue} overdue` : ''}</span>
+            </>
+          ) : (
+            <p className={styles.emptyNote}>Connect Todoist to see this here.</p>
+          )}
         </div>
-        {w.calendar?.connected ? (
-          <>
-            <span className={styles.bigNum}>{w.calendar.dueToday}</span>
-            <span className={styles.smallLabel}>Due today{w.calendar.overdue ? ` · ${w.calendar.overdue} overdue` : ''}</span>
-          </>
-        ) : (
-          <p className={styles.emptyNote}>Connect Todoist to see this here.</p>
-        )}
-      </div>
+      )}
 
       <div className={styles.card} style={{ ['--ping-delay' as string]: '380ms' }}>
         <div className={styles.cardHead}>
@@ -478,9 +586,7 @@ export default function OverviewWidgets({
         )}
       </div>
 
-      {/* Pinned to the narrow column via .consistencyCard, right after Goals
-          progress — see that class for why explicit placement is needed. */}
-      <div className={`${styles.card} ${styles.consistencyCard}`} style={{ ['--ping-delay' as string]: '560ms' }}>
+      <div className={styles.card} style={{ ['--ping-delay' as string]: '560ms' }}>
         <div className={styles.cardHead}>
           <span className={styles.cardTitle}>Consistency</span>
           <span className={styles.cardTag}>Workout</span>
@@ -488,35 +594,50 @@ export default function OverviewWidgets({
         {w.workout && <RadialGauge pct={(w.workout.sessionsThisWeek / 7) * 100} label={`${w.workout.prsThisMonth} PRs this mo.`} sub="/ wk" />}
       </div>
 
-      <div className={`${styles.card} ${styles.stackCard}`} style={{ ['--ping-delay' as string]: '440ms' }}>
-        <div className={styles.cardHead}>
-          <span className={styles.cardTitle}>Daily stack</span>
-          <span className={styles.cardTag}>Body</span>
-        </div>
-        {w.stack && w.stack.items.length ? (
-          <div className={styles.stackList}>
-            {w.stack.items.map((item) => {
-              const done = w.stack!.checked.includes(item.id)
-              return (
-                <div key={item.id} className={styles.stackRow}>
-                  <button
-                    type="button"
-                    className={`${styles.stackCheckBtn}${done ? ` ${styles.stackCheckBtnDone}` : ''}`}
-                    aria-label={done ? `Mark ${item.name} not taken today` : `Mark ${item.name} taken today`}
-                    onClick={() => toggleStackItem(item.id)}
-                  >
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M4 12l5 5L20 6" />
-                    </svg>
-                  </button>
-                  <span className={`${styles.stackItemName}${done ? ` ${styles.stackItemNameDone}` : ''}`}>{item.name}</span>
-                </div>
-              )
-            })}
+      {!HIDDEN_TILES.includes('intake') && (
+        <div className={styles.card} style={{ ['--ping-delay' as string]: '440ms' }}>
+          <div className={styles.cardHead}>
+            <span className={styles.cardTitle}>Daily stack</span>
+            <span className={styles.cardTag}>Body</span>
           </div>
-        ) : (
-          <p className={styles.emptyNote}>Open Body to add your daily stack.</p>
-        )}
+          {w.stack && w.stack.items.length ? (
+            <div className={styles.stackList}>
+              {w.stack.items.map((item) => {
+                const done = w.stack!.checked.includes(item.id)
+                return (
+                  <div key={item.id} className={styles.stackRow}>
+                    <button
+                      type="button"
+                      className={`${styles.stackCheckBtn}${done ? ` ${styles.stackCheckBtnDone}` : ''}`}
+                      aria-label={done ? `Mark ${item.name} not taken today` : `Mark ${item.name} taken today`}
+                      onClick={() => toggleStackItem(item.id)}
+                    >
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M4 12l5 5L20 6" />
+                      </svg>
+                    </button>
+                    <span className={`${styles.stackItemName}${done ? ` ${styles.stackItemNameDone}` : ''}`}>{item.name}</span>
+                  </div>
+                )
+              })}
+            </div>
+          ) : (
+            <p className={styles.emptyNote}>Open Body to add your daily stack.</p>
+          )}
+        </div>
+      )}
+
+      {/* Reference tile: pulls its day-picker options from Workout's own
+          named sessions (see sessionNames above) and writes assignments
+          straight through tileStore under a new 'training' id — no sealed
+          tile of its own, this card is the whole thing. Spans both columns
+          (see .trainingCard) since 7 day-pills need the full card width. */}
+      <div className={`${styles.card} ${styles.trainingCard}`} style={{ ['--ping-delay' as string]: '620ms' }}>
+        <div className={styles.cardHead}>
+          <span className={styles.cardTitle}>Training</span>
+          <span className={styles.cardTag}>Workout</span>
+        </div>
+        {w.training && <WeekPlanner days={w.training.days} names={w.training.names} onAssign={assignDay} />}
       </div>
     </div>
   )

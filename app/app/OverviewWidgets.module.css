@@ -56,28 +56,11 @@
   border-color: rgba(110, 231, 183, 0.24);
 }
 
-/* Consistency and Daily stack are meant to sit side by side in the third
-   row. The four cards before them (Fuel, Finance, Calendar, Goals) fill
-   rows 1-2 exactly (2 columns x 2 rows), so that row is row 3 — pinned
-   explicitly on both cards since auto-placement doesn't reliably land
-   the trailing Daily stack card in the same row as Consistency's
-   explicit column (it can drop to a row of its own instead). */
-.consistencyCard {
-  grid-column: 2;
-  grid-row: 3;
-}
-
-.stackCard {
-  grid-column: 1;
-  grid-row: 3;
-}
-
-@media (max-width: 980px) {
-  .consistencyCard,
-  .stackCard {
-    grid-column: auto;
-    grid-row: auto;
-  }
+/* Training's 7 day-pills need more room than either half of the 2-column
+   grid gives — spans both so auto-placement just drops it into its own
+   full-width row below whatever compact cards land above it. */
+.trainingCard {
+  grid-column: 1 / -1;
 }
 
 .cardHead {
@@ -437,6 +420,96 @@
 .stackItemNameDone {
   color: var(--muted);
   text-decoration: line-through;
+}
+
+/* ---- training week planner (Sun-Sat day pills) ---- */
+.weekGrid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: var(--space-2);
+}
+
+.dayCol {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: var(--space-2) 2px;
+  border-radius: var(--radius-md);
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.dayColToday {
+  background: rgba(110, 231, 183, 0.08);
+  box-shadow: inset 0 0 0 1px rgba(110, 231, 183, 0.25);
+}
+
+.dayAbbrev {
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 0.625rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.dayNum {
+  font-family: var(--font-serif), 'Times New Roman', Georgia, serif;
+  font-style: italic;
+  font-weight: 600;
+  font-size: 1rem;
+  color: var(--fg);
+  font-variant-numeric: tabular-nums;
+}
+
+.daySelect {
+  width: 100%;
+  margin-top: 4px;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  text-align: center;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  padding: 6px 2px;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--muted-strong);
+  cursor: pointer;
+  transition: background var(--duration) var(--ease), border-color var(--duration) var(--ease), color var(--duration) var(--ease);
+}
+
+.daySelect:hover {
+  border-color: var(--mint);
+}
+
+/* A workout is assigned — mint, matches every other "active" accent on
+   this page (bars, wheels, the stack checkmarks). */
+.daySelectSet {
+  background: rgba(110, 231, 183, 0.1);
+  border-color: rgba(110, 231, 183, 0.3);
+  color: var(--mint);
+}
+
+/* Rest days get their own quieter tone instead of the mint "active" accent
+   — a rest day is a deliberate choice, not an empty slot, but it isn't a
+   workout either. */
+.daySelectRest {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: var(--border);
+  color: var(--muted-strong);
+}
+
+@media (max-width: 680px) {
+  .weekGrid {
+    gap: 4px;
+  }
+  .dayAbbrev {
+    font-size: 0.5625rem;
+  }
+  .daySelect {
+    font-size: 0.5625rem;
+    padding: 5px 1px;
+  }
 }
 
 @media (max-width: 980px) {

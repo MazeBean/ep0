@@ -220,7 +220,7 @@ export default function Dashboard({ firstName, userId }: DashboardProps) {
         >
           <div className={styles.introPrompt}>
             <span className={styles.introMark}>
-              gizmo v1.0
+              gizmo v1.1
               <span className={styles.introCaret} aria-hidden="true">▌</span>
             </span>
             <span className={styles.introHint}>Click to enter</span>

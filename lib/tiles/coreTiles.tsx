@@ -319,6 +319,15 @@ export const LIBRARY_TILE = {
   ),
 }
 
+/**
+ * Tiles temporarily pulled from the nav + home overview — still fully
+ * functional underneath (their CORE_TILES entries above, public/tiles files,
+ * and saved data are all untouched). AppSidebar filters its nav list against
+ * this, and OverviewWidgets gates each one's home-overview card against it,
+ * so removing an id here brings it back to BOTH places at once.
+ */
+export const HIDDEN_TILES: CoreTileId[] = ['fuel', 'todoist', 'intake']
+
 /** Is this id the special locked Library tile? */
 export const isLibraryId = (id: string) => id === LIBRARY_TILE.id
 
