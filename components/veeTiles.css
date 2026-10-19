@@ -429,6 +429,25 @@
   .veeTiles .openOverlay.openFull{left:216px}
 }
 
+/* Below that cutoff AppSidebar becomes a bottom tab bar instead (same
+   980px cutoff, see AppSidebar.module.css) and sits at z-index:26 — above
+   .shell's 25 so it isn't hidden under Home's own content (see that file's
+   comment). But .shell's 25 is also what this overlay gets capped to from
+   outside (a stacking context, see .shell's comment in dashboard.module.css),
+   so once the tab bar out-ranked .shell it started painting over this
+   overlay's bottom edge too, and touches landing in that strip were
+   swallowed by the tab bar before ever reaching .openStage's touch-forwarded
+   scroll handling below — read as "scrolling doesn't work" on mobile.
+   Shrinking the overlay's own height to stop short of the tab bar (the same
+   room-leaving approach the left-sidebar rule above uses, rather than
+   fighting it over z-index) keeps the two regions from overlapping at all. */
+@media (max-width:980px){
+  .veeTiles .openOverlay.openFull{
+    height:calc(100vh - 76px - env(safe-area-inset-bottom));
+    height:calc(100dvh - 76px - env(safe-area-inset-bottom));
+  }
+}
+
 /* Switching FROM one tile straight to another (not through Home): the
    previous tile stays mounted underneath (see DashboardGrid's stack) and
    this ENTERING one dissolves in over it once its data is ready — panel

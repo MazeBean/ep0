@@ -66,6 +66,32 @@ export default function Dashboard({ firstName, userId }: DashboardProps) {
     if (audioRef.current) audioRef.current.volume = volume
   }, [volume])
 
+  // Without this, the ambient track keeps going (and keeps exposing an
+  // OS-level lock-screen "Now Playing" card for it, same as a real music
+  // app) once the phone locks or the tab/app is backgrounded — a plain
+  // <audio> element has no idea it's supposed to be "part of the app being
+  // open". Pausing on hidden and resuming on return (only past the intro
+  // gesture, so this never tries to autoplay before one has happened) makes
+  // sound track the app's own foreground/background state instead.
+  useEffect(() => {
+    const handleVisibility = () => {
+      if (document.hidden) {
+        audioRef.current?.pause()
+      } else if (introPhase === 'done') {
+        audioRef.current?.play().catch(() => {})
+      }
+    }
+    // iOS Safari doesn't reliably fire visibilitychange on every app-switch
+    // away; pagehide covers the cases it misses, plus tab close/navigation.
+    const handlePageHide = () => audioRef.current?.pause()
+    document.addEventListener('visibilitychange', handleVisibility)
+    window.addEventListener('pagehide', handlePageHide)
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibility)
+      window.removeEventListener('pagehide', handlePageHide)
+    }
+  }, [introPhase])
+
   const enterDashboard = () => {
     if (introPhase !== 'shown') return
     setIntroPhase('leaving')
