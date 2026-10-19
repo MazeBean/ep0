@@ -690,6 +690,13 @@ export default function DashboardGrid({ userId, openId, onOpenIdChange, hidePost
   //   1. static files committed to public/tiles/<id>.html (the /tile + Patreon path)
   //   2. live tiles in Supabase, built from Claude via the MCP connector — these
   //      override a static file for the same slot and appear without a redeploy.
+  // The static fetches are same-origin and fast; Supabase (when configured) is a
+  // real network round-trip that can be slow on a cold connection. Reveal the
+  // board on the static set as soon as THAT resolves — every tab was previously
+  // staying blank (and every tab click doing nothing) until the Supabase check
+  // also finished, which on a slow connection was multiple extra seconds before
+  // the user could open anything at all. Any MCP-built override still applies,
+  // just as a silent update once it lands instead of gating the first paint.
   useEffect(() => {
     let alive = true
     ;(async () => {
@@ -709,14 +716,23 @@ export default function DashboardGrid({ userId, openId, onOpenIdChange, hidePost
       const map: FilledMap = {}
       for (const p of pairs) if (p) map[p[0]] = p[1]
 
-      if (syncEnabled()) {
-        const remote = await syncLoadTiles()
-        for (const id of SLOT_ORDER) if (remote[id]) map[id] = remote[id].html
-      }
-
       if (alive) {
         setFilled(map)
         setLoaded(true)
+      }
+
+      if (syncEnabled()) {
+        const remote = await syncLoadTiles()
+        if (!alive) return
+        const overridden: FilledMap = { ...map }
+        let changed = false
+        for (const id of SLOT_ORDER) {
+          if (remote[id]) {
+            overridden[id] = remote[id].html
+            changed = true
+          }
+        }
+        if (changed) setFilled(overridden)
       }
     })()
     return () => {

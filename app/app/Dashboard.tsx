@@ -121,7 +121,7 @@ export default function Dashboard({ firstName, userId }: DashboardProps) {
           </div>
         )}
 
-        {introPhase === 'done' && openTileId === null && (
+        {introPhase === 'done' && (
           <>
             {/* Radar-ping boot: three rings expand from near the first card,
                 the visual cue that "wakes up" the overview grid — see the
@@ -129,13 +129,26 @@ export default function Dashboard({ firstName, userId }: DashboardProps) {
                 half (each card lights up as the ring reaches it). Gated on
                 the intro screen so it plays once, right as the blur clears,
                 not immediately on page load underneath it. Purely
-                decorative, so it's inert to pointer/assistive tech. */}
+                decorative, so it's inert to pointer/assistive tech.
+                No longer re-gated on openTileId===null: now that
+                OverviewWidgets stays mounted (below) instead of remounting
+                every Home revisit, its cards don't re-flash either — these
+                would otherwise sweep on their own with nothing underneath
+                reacting. The animation ends on its own (forwards fill-mode,
+                huge + invisible) so leaving these mounted afterward is inert. */}
             <span className={styles.pingRing} aria-hidden="true" />
             <span className={styles.pingRing} aria-hidden="true" />
             <span className={styles.pingRing} aria-hidden="true" />
-            <OverviewWidgets userId={userId} />
           </>
         )}
+
+        {/* Stays mounted (just hidden) behind an open tile instead of
+            unmounting — it used to live inside the same block as the ping
+            rings above and fully remount every time you returned to Home,
+            re-fetching all 5 tiles' data from scratch (including a Supabase
+            round-trip each) right as the next tab click was likely coming,
+            contending with and slowing down that tab's own load. */}
+        {introPhase === 'done' && <OverviewWidgets userId={userId} hidden={openTileId !== null} />}
 
         <DashboardGrid
           userId={userId}

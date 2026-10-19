@@ -171,7 +171,19 @@ function Bar({ label, pct, value }: { label: string; pct: number; value: string 
   )
 }
 
-export default function OverviewWidgets({ userId }: { userId: string }) {
+export default function OverviewWidgets({
+  userId,
+  // True while an open tile covers the whole page. Stays mounted (not
+  // display:none-less unmounted) regardless — this component used to live
+  // behind a conditional that unmounted it every time a tile opened, so
+  // returning to Home re-ran its data-fetch effect from scratch (5 tiles,
+  // each a Supabase round-trip when sync is on) every single time. hidden
+  // keeps it inert instead of tearing all that down and rebuilding it.
+  hidden,
+}: {
+  userId: string
+  hidden?: boolean
+}) {
   const [w, setW] = useState<Widgets | null>(null)
   // Full raw Body store (not just the derived stack summary above) so a
   // checkbox toggle here can write back through the same tileStore path
@@ -384,7 +396,7 @@ export default function OverviewWidgets({ userId }: { userId: string }) {
   if (!w) return null
 
   return (
-    <div className={styles.grid}>
+    <div className={styles.grid} style={hidden ? { display: 'none' } : undefined}>
       <div className={styles.card} style={{ ['--ping-delay' as string]: '60ms' }}>
         <div className={styles.cardHead}>
           <span className={styles.cardTitle}>Today&rsquo;s intake</span>
