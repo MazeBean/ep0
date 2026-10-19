@@ -234,22 +234,7 @@ function deleteTile(userId: string, id: string) {
 
 const MAX_TILE_DATA = 512 * 1024 // ~512KB per tile, protects the shared localStorage budget
 
-/** Persist a tile's data. Returns whether the write actually landed so callers
- *  never tell the user "Saved" for a payload that was silently dropped (oversized
- *  or quota-blocked). When a Supabase project is configured (env vars present) the
- *  write goes there so it syncs across devices; otherwise it stays in localStorage. */
-async function saveData(userId: string, id: string, data: TileData): Promise<boolean> {
-  const db = supa()
-  if (db) {
-    try {
-      const { error } = await db
-        .from('tile_data')
-        .upsert({ tile_id: `${userId}:${id}`, data, updated_at: new Date().toISOString() })
-      return !error
-    } catch {
-      return false
-    }
-  }
+function saveLocal(userId: string, id: string, data: TileData): boolean {
   if (!hasStorage()) return false
   try {
     const json = JSON.stringify(data)
@@ -262,21 +247,65 @@ async function saveData(userId: string, id: string, data: TileData): Promise<boo
   }
 }
 
+/** Persist a tile's data. Returns whether the write actually landed so callers
+ *  never tell the user "Saved" for a payload that was silently dropped (oversized
+ *  or quota-blocked). When a Supabase project is configured (env vars present) the
+ *  write goes there so it syncs across devices — ALSO mirrored to localStorage
+ *  (write-through, not instead-of) so loadData has something fresh to fall back
+ *  to if a later read times out against a cold/slow connection, rather than
+ *  falling back to whatever was there before sync was ever turned on. */
+async function saveData(userId: string, id: string, data: TileData): Promise<boolean> {
+  const db = supa()
+  if (db) {
+    saveLocal(userId, id, data)
+    try {
+      const { error } = await db
+        .from('tile_data')
+        .upsert({ tile_id: `${userId}:${id}`, data, updated_at: new Date().toISOString() })
+      return !error
+    } catch {
+      return false
+    }
+  }
+  return saveLocal(userId, id, data)
+}
+
+/** A query that never resolves within budgetMs resolves to the timeout
+ *  sentinel instead — used to keep a Supabase round-trip from blocking a
+ *  tile's own open/reveal when the connection is cold or slow. The real
+ *  query keeps running in the background; its result (if it eventually
+ *  lands) is simply not waited on. */
+const LOAD_TIMEOUT_MS = 400
+const TIMED_OUT = Symbol('timed-out')
+function withTimeout<T>(p: PromiseLike<T>, ms: number): Promise<T | typeof TIMED_OUT> {
+  return Promise.race([p, new Promise<typeof TIMED_OUT>((resolve) => setTimeout(() => resolve(TIMED_OUT), ms))])
+}
+
 async function loadData(userId: string, id: string): Promise<TileData> {
   const db = supa()
   if (db) {
     try {
-      const { data, error } = await db
-        .from('tile_data')
-        .select('data')
-        .eq('tile_id', `${userId}:${id}`)
-        .maybeSingle()
+      // Unbounded, this was turning every tile's first paint (and Home's own
+      // 5-tile fetch) into a multi-second wait on a cold/slow Supabase
+      // connection — every caller here awaits this before revealing
+      // anything. Falls back to the local copy instead of hanging; the next
+      // open (or any save) reconciles with the cloud copy regardless.
+      const res = await withTimeout(
+        db.from('tile_data').select('data').eq('tile_id', `${userId}:${id}`).maybeSingle(),
+        LOAD_TIMEOUT_MS,
+      )
+      if (res === TIMED_OUT) return loadLocal(userId, id)
+      const { data, error } = res
       if (error || !data) return []
       return (data.data as TileData) ?? []
     } catch {
       return []
     }
   }
+  return loadLocal(userId, id)
+}
+
+function loadLocal(userId: string, id: string): TileData {
   if (!hasStorage()) return []
   try {
     const raw = window.localStorage.getItem(dataKey(userId, id))

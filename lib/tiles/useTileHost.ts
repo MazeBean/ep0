@@ -2,7 +2,6 @@
 
 import { useCallback, useEffect, useRef } from 'react'
 import { tileStore } from './tileStore'
-import { syncEnabled, syncSave, syncLoad } from '@/lib/sync'
 
 /**
  * useTileHost is the host side of the Vitality bridge, fixed for MANY tiles.
@@ -101,31 +100,25 @@ export function useTileHost(
         }
         // ack success so a tile's `await window.Vitality.save(...)` resolves truthfully
         src.postMessage({ source: 'vitality-host', type: 'save:ok', id: msg.id }, '*')
-        // then mirror to the owner's Supabase (if configured) so the same data shows
-        // up on their other devices. Fire-and-forget — never blocks the tile.
-        if (syncEnabled()) void syncSave(tileId, msg.data, new Date().toISOString())
+        // tileStore.saveData already mirrored this to the owner's Supabase (if
+        // configured) above — a second, separate syncSave() used to run here
+        // too, but it wrote a DIFFERENT, unnamespaced key in the same table
+        // that nothing ever actually read back; pure dead weight, removed.
         const count = Array.isArray(msg.data) ? msg.data.length : 0
         activity.current?.({ tileId, type: 'save', count })
         return
       }
 
       if (msg.type === 'load') {
-        // Prefer the cloud copy when sync is on (so a fresh device — the phone —
-        // gets the real data); fall back to this browser's local copy otherwise.
-        // Raced against a short timeout: a cold/slow Supabase connection was
-        // turning EVERY tile's first paint into a multi-second wait (each one
-        // blocks on this same load before calling window.Vitality.ready()) —
-        // measured 1.3s+ per tab in production, vs under 150ms once this caps
-        // it. A tile that loses the race still gets the fresher cloud copy
-        // next time it's opened (and any edit re-syncs it regardless).
-        let data = await tileStore.loadData(userId, tileId)
-        if (syncEnabled()) {
-          const remote = await Promise.race([
-            syncLoad(tileId),
-            new Promise<null>((resolve) => setTimeout(() => resolve(null), 400)),
-          ])
-          if (remote != null) data = remote as typeof data
-        }
+        // tileStore.loadData already prefers the cloud copy when sync is on
+        // (so a fresh device — the phone — gets the real data), raced
+        // against its own short timeout so a cold/slow Supabase connection
+        // can't turn every tile's first paint into a multi-second wait (each
+        // one blocks on this before calling window.Vitality.ready() — this
+        // measured 1.3s+ per tab in production). A second, separate syncLoad()
+        // used to also run here, querying a different unnamespaced key that
+        // nothing ever wrote to — pure dead weight, removed.
+        const data = await tileStore.loadData(userId, tileId)
         // reply to the exact sender, never a broadcast. targetOrigin stays '*'
         // because a sealed srcDoc tile has an opaque (null) origin; the sender
         // is already verified via the registered e.source, and the payload is
