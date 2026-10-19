@@ -275,30 +275,6 @@
   color: var(--border-strong);
 }
 
-.heroWeatherIcon {
-  display: inline-flex;
-  width: 18px;
-  height: 18px;
-  color: var(--muted);
-  flex-shrink: 0;
-}
-
-.heroWeatherIcon svg {
-  width: 100%;
-  height: 100%;
-}
-
-/* Weather-condition icon is colored per-kind inline (sun/rain/snow/etc. all
-   read differently) — humidity and sunset get their own fixed accent so the
-   whole line reads as distinct at-a-glance stats, not a wall of same-color text. */
-.heroIconHumidity {
-  color: #22d3ee;
-}
-
-.heroIconSunset {
-  color: #fb923c;
-}
-
 .greeting {
   font-family: var(--font-fira), ui-monospace, monospace;
   font-weight: 600;

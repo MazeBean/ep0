@@ -317,7 +317,11 @@ function today(){
   return d;
 }
 const PRESETS=[
-  {name:'Coffee',mg:95,accent:'#6EE7B7',icon:'coffee'},
+  // A 10oz Keurig brew with Strong selected: ~118mg is the usual estimate for
+  // a 10oz K-Cup at the normal setting, and Strong slows the flow for more
+  // contact time — commonly cited as roughly 10-15% more extraction, not a
+  // bigger pod — so ~118 * 1.15 rounds to 135mg here.
+  {name:'Coffee',mg:135,accent:'#6EE7B7',icon:'coffee'},
   {name:'Diet Coke',mg:46,accent:'#7fa8e0',icon:'soda'},
   {name:'Energy drink',mg:160,accent:'#f0a63c',icon:'bolt'},
   {name:'Tea',mg:40,accent:'#9fd88a',icon:'tea'}

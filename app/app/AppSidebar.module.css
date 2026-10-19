@@ -11,7 +11,12 @@
   top: 0;
   left: 0;
   bottom: 0;
-  z-index: 20;
+  /* Has to clear .shell's own z-index:25 (dashboard.module.css — a stacking
+     context, see its comment) or .shell's own content renders on top of this
+     sidebar instead of under it: on mobile, where this becomes a bottom tab
+     bar, that showed as Home's card text bleeding through a see-through bar
+     and taps landing on whatever was actually on top instead of a nav button. */
+  z-index: 26;
   width: 216px;
   display: flex;
   flex-direction: column;
