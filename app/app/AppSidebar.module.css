@@ -143,6 +143,16 @@
     padding: var(--space-2) var(--space-2) calc(var(--space-2) + env(safe-area-inset-bottom));
     border-right: none;
     border-top: 1px solid var(--border);
+    /* Promotes this bar to its own compositor layer, separate from whatever
+       scrolls underneath it (Home's page scroll, or an open tile's
+       -webkit-overflow-scrolling:touch stage). Mobile Safari has a known
+       class of bug where a fixed element sharing a layer with an active
+       touch-scroll repaints as a blank rect mid- or post-scroll; this is
+       the standard fix. Can't be verified from here (needs real iOS/Android
+       hardware, not this Chromium test environment) — a hypothesis
+       matching the reported symptom, not a confirmed root cause. */
+    transform: translateZ(0);
+    will-change: transform;
   }
 
   .brand {

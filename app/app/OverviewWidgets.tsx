@@ -405,12 +405,23 @@ export default function OverviewWidgets({
    *  new 'training' tile id — Training has no sealed tile of its own, it's
    *  entirely this homepage card, so this is its one and only data store. */
   async function assignDay(dayIdx: number, value: string | null) {
-    const base = trainingStore ?? {}
-    const daysRaw = asArray<string | null>(base.days)
-    const nextDays = Array.from({ length: 7 }, (_, i) => (i === dayIdx ? value : typeof daysRaw[i] === 'string' ? daysRaw[i] : null))
-    const updated = { ...base, days: nextDays }
-    setTrainingStore(updated)
-    setW((prev) => (prev && prev.training ? { ...prev, training: { ...prev.training, days: nextDays } } : prev))
+    // Derives from the functional-update `prev`, not the trainingStore
+    // closed over at render time — tapping two days in quick succession
+    // (before the first write's re-render lands) used to read the same
+    // stale base twice, so the second write silently clobbered the first.
+    let updated: Record<string, unknown> = {}
+    setTrainingStore((prev) => {
+      const base = prev ?? {}
+      const daysRaw = asArray<string | null>(base.days)
+      const nextDays = Array.from({ length: 7 }, (_, i) => (i === dayIdx ? value : typeof daysRaw[i] === 'string' ? daysRaw[i] : null))
+      updated = { ...base, days: nextDays }
+      return updated
+    })
+    setW((prev) => {
+      if (!prev || !prev.training) return prev
+      const nextDays = prev.training.days.map((d, i) => (i === dayIdx ? value : d))
+      return { ...prev, training: { ...prev.training, days: nextDays } }
+    })
     await tileStore.saveData(userId, 'training', updated)
   }
 

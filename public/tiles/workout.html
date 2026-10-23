@@ -261,17 +261,23 @@
    one object with `sessions`, `logs` and `bodyweight` arrays. */
 const CATEGORIES=['Chest','Back','Shoulders','Arms','Legs','Core'];
 const EXERCISE_CATALOG={
-  Chest:['Barbell bench','Incline barbell bench','Flat DB press','Incline DB press','Machine chest press','Weighted dips','Cable chest fly','Pec deck'],
+  Chest:['Barbell bench','Smith machine bench press','Incline barbell bench','Smith machine incline bench press','Flat DB press','Incline DB press','Machine chest press','Weighted dips','Cable chest fly','Pec deck'],
   Back:['Weighted pull-ups','Pull-ups','Barbell row','Pendlay row','T-bar row','Seated cable row','Chest-supported DB row','Single-arm DB row','Lat pulldown'],
-  Shoulders:['Standing barbell OHP','Seated DB shoulder press','Machine shoulder press','Push press','DB lateral raise','Cable lateral raise','Rear delt cable fly','Reverse pec deck','Cable face pull'],
+  Shoulders:['Standing barbell OHP','Smith machine shoulder press','Seated DB shoulder press','Machine shoulder press','Push press','DB lateral raise','Cable lateral raise','Rear delt cable fly','Reverse pec deck','Cable face pull'],
   Arms:['Close-grip bench','Tricep rope pushdown','Overhead cable tri ext','Skullcrushers','Barbell curl','Hammer curl','Cable curl','Incline DB curl','Preacher curl'],
-  Legs:['Barbell back squat','Front squat','Hack squat','Leg press','Romanian deadlift','Conventional deadlift','Bulgarian split squat','DB split squat','Walking lunge','Leg extension','Seated leg curl','Lying leg curl','Barbell hip thrust','Calf raise'],
+  Legs:['Barbell back squat','Smith machine squat','Front squat','Hack squat','Leg press','Romanian deadlift','Conventional deadlift','Bulgarian split squat','DB split squat','Walking lunge','Leg extension','Seated leg curl','Lying leg curl','Barbell hip thrust','Calf raise'],
   Core:['Cable crunch','Hanging leg raise','Toes-to-bar','Ab wheel rollout','Weighted sit-up','Decline sit-up','Russian twist','Plank']
 };
 function categoryOf(exercise){
   for(const cat of CATEGORIES)if(EXERCISE_CATALOG[cat].includes(exercise))return cat;
   return 'Other';
 }
+/* Exercises logged as a rep count instead of an added weight — bodyweight
+   pull-ups with nothing hanging off them. 'Weighted pull-ups' stays lb;
+   that's specifically the added-weight variant, a different catalog entry. */
+const REPS_EXERCISES=new Set(['Pull-ups']);
+function unitFor(exercise){return REPS_EXERCISES.has(exercise)?'reps':'lb';}
+function fmtAmt(exercise,amount){return amount+' '+unitFor(exercise);}
 
 let store={sessions:[],logs:[],bodyweight:[]};
 let view={mode:'home'}; // {mode:'home'} | {mode:'build'} | {mode:'run',sessionId}
@@ -431,7 +437,7 @@ function chartHtml(exercise){
   const fmt=ts=>new Date(ts).toLocaleDateString(undefined,{month:'short',day:'numeric'});
   const labels='<text x="'+CX0+'" y="'+(CY1+15)+'" class="axl">'+fmt(first.ts)+'</text>'
     +'<text x="'+CX1+'" y="'+(CY1+15)+'" class="axl" text-anchor="end">'+fmt(last.ts)+'</text>';
-  return '<svg viewBox="0 0 '+CW+' '+(CY1+22)+'" class="chart" role="img" aria-label="Weight progress for '+esc(exercise)+'">'
+  return '<svg viewBox="0 0 '+CW+' '+(CY1+22)+'" class="chart" role="img" aria-label="Progress for '+esc(exercise)+'">'
     +'<defs><linearGradient id="wfill" x1="0" y1="0" x2="0" y2="1">'
     +'<stop offset="0" stop-color="#7fa8e0" stop-opacity=".24"/><stop offset="1" stop-color="#7fa8e0" stop-opacity="0"/></linearGradient></defs>'
     +grid+'<path d="'+area+'" fill="url(#wfill)" class="area"/><path d="'+eline+'" class="eline"/>'+dots+labels+'</svg>';
@@ -559,12 +565,12 @@ function runViewHtml(){
       if(done){
         const isPR=!!prMarks[done.id];
         return '<div class="runRow done"><div class="runRowMain"><span class="runExName">'+esc(ex)+'</span></div>'
-          +'<span class="runExWeight">'+done.weight+' lb'+(isPR?' <span class="prTag">PR</span>':'')+'</span>'
+          +'<span class="runExWeight">'+fmtAmt(ex,done.weight)+(isPR?' <span class="prTag">PR</span>':'')+'</span>'
           +'<button type="button" class="iconBtn" data-edit-run="'+esc(ex)+'" title="Edit">✎</button></div>';
       }
       const draft=runDraftWeights[ex]!=null?runDraftWeights[ex]:'';
       return '<div class="runRow"><div class="runRowMain"><span class="runExName">'+esc(ex)+'</span></div>'
-        +'<input class="fieldInput runWeightInput" type="number" inputmode="decimal" placeholder="lb" data-weight-for="'+esc(ex)+'" value="'+esc(draft)+'" />'
+        +'<input class="fieldInput runWeightInput" type="number" inputmode="decimal" placeholder="'+unitFor(ex)+'" data-weight-for="'+esc(ex)+'" value="'+esc(draft)+'" />'
         +'<button type="button" class="btn-primary runCompleteBtn" data-complete-run="'+esc(ex)+'">Done</button></div>';
     }).join('');
     return '<div class="runCategory"><div class="runCategoryName">'+cat+'</div>'+rows+'</div>';
@@ -595,7 +601,7 @@ function historyListHtml(exercise){
   if(!list.length)return '<p class="empty">No past weights logged for this exercise yet.</p>';
   return '<div class="log">'+list.map(e=>
     '<div class="entry"><div class="entryLeft">'
-    +'<div class="entryStats">'+e.weight+' lb</div>'
+    +'<div class="entryStats">'+fmtAmt(exercise,e.weight)+'</div>'
     +'<span class="entryMeta">'+new Date(e.ts).toLocaleDateString(undefined,{month:'short',day:'numeric',year:'numeric'})+'</span></div>'
     +'<button class="xBtn" data-del="'+e.id+'" title="Remove">×</button></div>'
   ).join('')+'</div>';
@@ -626,7 +632,7 @@ function historyInner(){
   return dayLogs.map(l=>{
     const rows=l.entries.slice().sort((a,b)=>a.ts-b.ts).map(e=>{
       const isPR=!!prMarks[e.id];
-      return '<div class="logExRow"><span>'+esc(e.exercise)+'</span><span class="logExWeight">'+e.weight+' lb'+(isPR?' <span class="prTag">PR</span>':'')+'</span></div>';
+      return '<div class="logExRow"><span>'+esc(e.exercise)+'</span><span class="logExWeight">'+fmtAmt(e.exercise,e.weight)+(isPR?' <span class="prTag">PR</span>':'')+'</span></div>';
     }).join('');
     return '<div class="entry"><div class="entryLeft" style="flex:1">'
       +'<div class="entryTop"><span class="exBadge">'+esc(l.sessionName)+'</span></div>'
@@ -651,7 +657,7 @@ function prToastHtml(){
   return '<div class="prToast" role="status">'
     +'<span class="t-success-check" data-state="in" aria-hidden="true">'
     +'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12l5 5L20 6"/></svg>'
-    +'</span><div class="prToastText"><strong>New PR!</strong> '+esc(prToast.exercise)+' at '+prToast.weight+' lb</div></div>';
+    +'</span><div class="prToastText"><strong>New PR!</strong> '+esc(prToast.exercise)+' at '+fmtAmt(prToast.exercise,prToast.weight)+'</div></div>';
 }
 function showPRToast(exercise,weight){
   prToast={exercise,weight};
@@ -696,10 +702,10 @@ function downloadLog(){
       const d=new Date(e.ts);
       const date=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
       const time=String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');
-      rows.push([date,time,'"'+l.sessionName.replace(/"/g,'""')+'"','"'+e.exercise.replace(/"/g,'""')+'"',e.weight].join(','));
+      rows.push([date,time,'"'+l.sessionName.replace(/"/g,'""')+'"','"'+e.exercise.replace(/"/g,'""')+'"',e.weight,unitFor(e.exercise)].join(','));
     }
   }
-  const csv='date,time,session,exercise,weight_lb\n'+rows.join('\n');
+  const csv='date,time,session,exercise,amount,unit\n'+rows.join('\n');
   const today=new Date();
   const fname='workout-log-'+today.getFullYear()+'-'+String(today.getMonth()+1).padStart(2,'0')+'-'+String(today.getDate()).padStart(2,'0')+'.csv';
   window.Vitality.download(fname,csv,'text/csv');

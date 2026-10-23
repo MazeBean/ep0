@@ -388,7 +388,12 @@
    height exactly, with no grow/shrink math for a large sibling stylesheet
    to confuse. min-height:0 stays as a fallback for the brief instant before
    the height is measured. */
-.veeTiles .openStage{flex:none;min-height:0;position:relative;overflow-y:auto;-webkit-overflow-scrolling:touch;background:#000}
+/* transform:translateZ(0) gives this its own compositor layer — paired
+   with the same hint on .sidebar (AppSidebar.module.css), the standard
+   mitigation for mobile Safari's known blank-rect repaint bug where a
+   -webkit-overflow-scrolling:touch element and a fixed sibling share a
+   layer during/after a touch-scroll. */
+.veeTiles .openStage{flex:none;min-height:0;position:relative;overflow-y:auto;-webkit-overflow-scrolling:touch;background:#000;transform:translateZ(0)}
 /* A plain div carrying the tile's reported height — giving the IFRAME
    itself an explicit height here instead made .openStage grow to match it
    rather than clipping/scrolling around it (a plain div with the same
